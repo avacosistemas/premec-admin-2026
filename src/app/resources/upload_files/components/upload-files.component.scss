@@ -1,0 +1,28 @@
+.drop-zone {
+    @apply w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer transition-all duration-300 ease-in-out;
+    @apply flex flex-col items-center justify-center h-48;
+
+    &.is-dragging {
+        @apply border-primary bg-primary/10;
+        
+        * {
+            @apply transform scale-105;
+        }
+    }
+}
+
+.file-preview-card {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md;
+    
+    .mat-icon-button {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+
+        .mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+    }
+}

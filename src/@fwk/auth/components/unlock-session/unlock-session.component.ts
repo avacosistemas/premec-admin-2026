@@ -1,0 +1,111 @@
+import { NgIf } from '@angular/common';
+import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { fuseAnimations } from '@fuse/animations';
+import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
+import { AuthService } from '@fwk/auth/auth.service';
+import { UserService } from '@fwk/auth/user.service';
+import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+
+interface UnlockSessionForm {
+    name: FormControl<string>;
+    password: FormControl<string>;
+}
+
+@Component({
+    selector     : 'auth-unlock-session',
+    templateUrl  : './unlock-session.component.html',
+    encapsulation: ViewEncapsulation.None,
+    animations   : fuseAnimations,
+    standalone   : true,
+    imports      : [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe],
+})
+export class AuthUnlockSessionComponent implements OnInit
+{
+    @ViewChild('unlockSessionNgForm') unlockSessionNgForm: NgForm;
+
+    alert: { type: FuseAlertType; message: string } = {
+        type   : 'success',
+        message: '',
+    };
+    name: string;
+    showAlert: boolean = false;
+    unlockSessionForm: FormGroup<UnlockSessionForm>;
+    private _email: string;
+    private _translatePipe = new TranslatePipe(inject(I18nService));
+
+    constructor(
+        private _activatedRoute: ActivatedRoute,
+        private _authService: AuthService,
+        private _formBuilder: FormBuilder, 
+        private _router: Router,
+        private _userService: UserService,
+    )
+    {
+    }
+
+    ngOnInit(): void
+    {
+        this._userService.user$.subscribe((user) =>
+        {
+            this.name = user.name;
+            this._email = user.email;
+        });
+
+        this.unlockSessionForm = this._formBuilder.group({
+            name    : [
+                {
+                    value   : this.name,
+                    disabled: true,
+                },
+            ],
+            password: ['', Validators.required],
+        });
+    }
+
+    unlock(): void
+    {
+        if ( this.unlockSessionForm.invalid )
+        {
+            return;
+        }
+
+        this.unlockSessionForm.disable();
+        this.showAlert = false;
+
+        this._authService.unlockSession({
+            email   : this._email ?? '',
+            password: this.unlockSessionForm.get('password').value,
+        }).subscribe(
+            () =>
+            {
+                const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+                this._router.navigateByUrl(redirectURL);
+            },
+            (response) =>
+            {
+                this.unlockSessionForm.enable();
+                this.unlockSessionNgForm.resetForm({
+                    name: {
+                        value   : this.name,
+                        disabled: true,
+                    },
+                });
+
+                this.alert = {
+                    type   : 'error',
+                    message: this._translatePipe.transform('unlock_session_invalid_password'),
+                };
+
+                this.showAlert = true;
+            },
+        );
+    }
+}

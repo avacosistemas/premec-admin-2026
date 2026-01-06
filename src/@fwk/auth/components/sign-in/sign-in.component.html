@@ -3,10 +3,7 @@
     <div class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none sm:bg-card">
         <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
 
-            <div class="w-16 flex items-center gap-2">
-                <img src="https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png" class="h-10" alt="Logo PREMEC">
-                <h1 class="text-xl font-bold">PREMEC</h1>
-            </div>
+            <fwk-logo [showName]="true" containerClass="w-16"></fwk-logo>
 
             <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">{{ 'sign_in_title' | translate }}</div>
 
@@ -21,7 +18,7 @@
             </fuse-alert>
 
             <form
-                class="mt-8 flex flex-col gap-4"
+                class="mt-8 flex flex-col gap-3"
                 [formGroup]="signInForm"
                 #signInNgForm="ngForm">
 
@@ -65,8 +62,16 @@
                     </mat-error>
                 </mat-form-field>
 
+                <div class="flex items-center justify-between -ml-2">
+                    <mat-checkbox
+                        [color]="'primary'"
+                        [formControlName]="'rememberMe'">
+                        {{ 'remember_me_label' | translate }}
+                    </mat-checkbox>
+                </div>
+
                 <button
-                    class="fuse-mat-button-large w-full mt-3"
+                    class="fuse-mat-button-large w-full"
                     mat-flat-button
                     color="accent"
                     [disabled]="signInForm.disabled || signInForm.invalid"
@@ -77,7 +82,8 @@
                     <mat-progress-spinner
                         *ngIf="signInForm.disabled"
                         [diameter]="24"
-                        [mode]="'indeterminate'"></mat-progress-spinner>
+                        [mode]="'indeterminate'">
+                    </mat-progress-spinner>
                 </button>
             </form>
         </div>
@@ -101,8 +107,8 @@
         
         <div class="z-10 relative w-full max-w-2xl">
             <div class="text-7xl font-bold leading-none text-gray-100">
-                <div>{{ 'sign_in_welcome_title_1' | translate }}</div>
-                <div>{{ 'sign_in_welcome_title_2' | translate }}</div>
+                <div>{{ fwkConfig.welcomeTitleLine1 }}</div> 
+                <div>{{ fwkConfig.welcomeTitleLine2 }}</div>
             </div>
             <div class="mt-6 text-lg tracking-tight leading-6 text-gray-400">
                 {{ 'sign_in_welcome_subtitle' | translate }}

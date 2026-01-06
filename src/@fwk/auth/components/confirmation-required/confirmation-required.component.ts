@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 @Component({
     selector     : 'auth-confirmation-required',
@@ -9,7 +10,7 @@ import { TranslatePipe } from '@fwk/pipe/translate.pipe';
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations,
     standalone   : true,
-    imports      : [RouterLink, TranslatePipe],
+    imports      : [RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthConfirmationRequiredComponent
 {

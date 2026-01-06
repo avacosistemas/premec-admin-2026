@@ -12,6 +12,7 @@ import { AuthService } from '@fwk/auth/auth.service';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { finalize } from 'rxjs';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 interface ForgotPasswordForm {
     email: FormControl<string>;
@@ -23,7 +24,7 @@ interface ForgotPasswordForm {
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
     standalone: true,
-    imports: [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule, RouterLink, TranslatePipe],
+    imports: [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthForgotPasswordComponent implements OnInit {
     @ViewChild('forgotPasswordNgForm') forgotPasswordNgForm: NgForm;
@@ -34,7 +35,7 @@ export class AuthForgotPasswordComponent implements OnInit {
     };
     forgotPasswordForm: FormGroup<ForgotPasswordForm>;
     showAlert: boolean = false;
-    private _translatePipe = new TranslatePipe(inject(I18nService));
+    private _i18nService = inject(I18nService);
 
     constructor(
         private _authService: AuthService,
@@ -68,13 +69,13 @@ export class AuthForgotPasswordComponent implements OnInit {
                 (response) => {
                     this.alert = {
                         type: 'success',
-                        message: this._translatePipe.transform('forgot_password_success_message'),
+                        message: this._i18nService.translate('forgot_password_success_message'),
                     };
                 },
                 (response) => {
                     this.alert = {
                         type: 'error',
-                        message: this._translatePipe.transform('forgot_password_error_message'),
+                        message: this._i18nService.translate('forgot_password_error_message'),
                     };
                 },
             );

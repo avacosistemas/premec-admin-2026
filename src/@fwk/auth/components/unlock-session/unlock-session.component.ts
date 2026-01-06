@@ -13,6 +13,7 @@ import { AuthService } from '@fwk/auth/auth.service';
 import { UserService } from '@fwk/auth/user.service';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 interface UnlockSessionForm {
     name: FormControl<string>;
@@ -25,7 +26,7 @@ interface UnlockSessionForm {
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations,
     standalone   : true,
-    imports      : [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe],
+    imports      : [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthUnlockSessionComponent implements OnInit
 {
@@ -39,7 +40,7 @@ export class AuthUnlockSessionComponent implements OnInit
     showAlert: boolean = false;
     unlockSessionForm: FormGroup<UnlockSessionForm>;
     private _email: string;
-    private _translatePipe = new TranslatePipe(inject(I18nService));
+    private _i18nService = inject(I18nService);
 
     constructor(
         private _activatedRoute: ActivatedRoute,
@@ -101,7 +102,7 @@ export class AuthUnlockSessionComponent implements OnInit
 
                 this.alert = {
                     type   : 'error',
-                    message: this._translatePipe.transform('unlock_session_invalid_password'),
+                    message: this._i18nService.translate('unlock_session_invalid_password'),
                 };
 
                 this.showAlert = true;

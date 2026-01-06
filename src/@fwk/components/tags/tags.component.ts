@@ -61,7 +61,7 @@ export class TagsComponent implements ControlValueAccessor {
     onTouch: () => void = () => {};
 
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-    private _translatePipe = new TranslatePipe(inject(I18nService));
+    private _i18nService = inject(I18nService);
     private _cdr = inject(ChangeDetectorRef);
 
     constructor(private snackBar: MatSnackBar) {}
@@ -124,13 +124,13 @@ export class TagsComponent implements ControlValueAccessor {
         if (this.isDisabled) return;
         const formattedText = `%${item}%`;
         navigator.clipboard.writeText(formattedText).then(() => {
-            this.snackBar.open(this._translatePipe.transform('tags_copied_message', formattedText), this._translatePipe.transform('action_close'), {
+            this.snackBar.open(this._i18nService.translate('tags_copied_message', formattedText), this._i18nService.translate('action_close'), {
                 duration: 2000,
                 horizontalPosition: 'center',
                 verticalPosition: 'bottom',
             });
         }).catch(() => {
-            this.snackBar.open(this._translatePipe.transform('tags_copy_error'), this._translatePipe.transform('action_close'), {
+            this.snackBar.open(this._i18nService.translate('tags_copy_error'), this._i18nService.translate('action_close'), {
                 duration: 3000,
             });
         });

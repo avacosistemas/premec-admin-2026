@@ -6,20 +6,17 @@
 
     <ng-container fuseVerticalNavigationContentHeader>
         <div [routerLink]="'/'" class="flex items-center cursor-pointer justify-center h-20">
-            <img class="w-8" src="https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png" alt="Logo image">
+            <fwk-logo size="small" imgClass="w-8"></fwk-logo>
         </div>
     </ng-container>
-    
+
     <ng-container fuseVerticalNavigationContentFooter>
         <div class="flex flex-col items-center justify-center w-full p-4 space-y-2">
-            <button *ngIf="isDevMode" 
-                    mat-icon-button
-                    [routerLink]="'/dev-tools'"
-                    color="accent" 
-                    matTooltip="Herramientas de Desarrollo">
+            <button *ngIf="isDevMode" mat-icon-button [routerLink]="'/dev-tools'" color="accent"
+                matTooltip="Herramientas de Desarrollo">
                 <mat-icon [svgIcon]="'heroicons_outline:wrench-screwdriver'"></mat-icon>
             </button>
-            
+
             <button class="hidden md:inline-flex" mat-icon-button (click)="toggleNavigationAppearance()">
                 <mat-icon [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
             </button>

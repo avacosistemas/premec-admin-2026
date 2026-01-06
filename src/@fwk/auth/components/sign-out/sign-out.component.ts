@@ -5,13 +5,14 @@ import { AuthService } from '@fwk/auth/auth.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { finalize, Subject, switchMap, takeUntil, takeWhile, tap, timer } from 'rxjs';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 @Component({
     selector: 'auth-sign-out',
     templateUrl: './sign-out.component.html',
     encapsulation: ViewEncapsulation.None,
     standalone: true,
-    imports: [NgIf, RouterLink, I18nPluralPipe, TranslatePipe],
+    imports: [NgIf, RouterLink, I18nPluralPipe, TranslatePipe, LogoComponent],
 })
 export class AuthSignOutComponent implements OnInit, OnDestroy {
     countdown: number = 3;
@@ -24,7 +25,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
 
     private _authService = inject(AuthService);
     private _router = inject(Router);
-    private _translatePipe = new TranslatePipe(inject(I18nService));
+    private _i18nService = inject(I18nService);
 
     constructor() { }
 
@@ -51,7 +52,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
     }
 
     private updateCountdownMessage(): void {
-        const baseMessage = this._translatePipe.transform('sign_out_redirect_countdown');
+        const baseMessage = this._i18nService.translate('sign_out_redirect_countdown');
         this.countdownMessage = baseMessage.replace('{{countdown}}', this.countdown.toString());
     }
 }

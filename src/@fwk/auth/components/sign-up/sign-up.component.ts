@@ -13,6 +13,7 @@ import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from '@fwk/auth/auth.service';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 interface SignUpForm {
     name: FormControl<string>;
@@ -28,7 +29,7 @@ interface SignUpForm {
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations,
     standalone   : true,
-    imports      : [RouterLink, NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe],
+    imports      : [RouterLink, NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe, LogoComponent],
 })
 export class AuthSignUpComponent implements OnInit
 {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
@@ -16,6 +16,7 @@ import { FuseLoadingBarComponent } from '@fuse/components/loading-bar';
 import { environment } from 'environments/environment';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SearchButtonComponent } from '../../../common/search-button/search-button.component';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 @Component({
     selector: 'dense-layout',
@@ -25,7 +26,7 @@ import { SearchButtonComponent } from '../../../common/search-button/search-butt
     imports: [
         CommonModule,
         RouterOutlet,
-        RouterLink, 
+        RouterLink,
         FuseLoadingBarComponent,
         FuseVerticalNavigationComponent,
         MatButtonModule,
@@ -34,21 +35,23 @@ import { SearchButtonComponent } from '../../../common/search-button/search-butt
         UserComponent,
         MatTooltipModule,
         SearchButtonComponent,
+        LogoComponent
     ],
 })
 export class DenseLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
     navigation: Navigation;
     navigationAppearance: 'default' | 'dense' = 'default';
-    user$: Observable<User>; 
-    isDevMode: boolean = !environment.production; 
+    user$: Observable<User>;
+    isDevMode: boolean = !environment.production;
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _router: Router,
         private _navigationService: NavigationService,
-        private _userService: UserService, 
+        private _userService: UserService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService,
     ) {
@@ -61,7 +64,7 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
                 this.navigation = navigation;
             });
 
-        this.user$ = this._userService.user$; 
+        this.user$ = this._userService.user$;
 
         this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))

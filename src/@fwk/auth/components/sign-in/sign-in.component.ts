@@ -13,6 +13,10 @@ import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from '@fwk/auth/auth.service';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { FWK_CONFIG } from '@fwk/model/fwk-config';
+import { inject } from '@angular/core';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
+import { LocalStorageService } from '@fwk/services/local-storage/local-storage.service';
 
 interface SignInForm {
     username: FormControl<string>;
@@ -21,19 +25,23 @@ interface SignInForm {
 }
 
 @Component({
-    selector     : 'auth-sign-in',
-    templateUrl  : './sign-in.component.html',
+    selector: 'auth-sign-in',
+    templateUrl: './sign-in.component.html',
     encapsulation: ViewEncapsulation.None,
-    animations   : fuseAnimations,
-    standalone   : true,
-    imports      : [RouterLink, FuseAlertComponent, NgIf, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe],
+    animations: fuseAnimations,
+    standalone: true,
+    imports: [RouterLink, FuseAlertComponent, NgIf, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe, LogoComponent],
 })
-export class AuthSignInComponent implements OnInit
-{
+export class AuthSignInComponent implements OnInit {
     @ViewChild('signInNgForm') signInNgForm: NgForm;
 
+    public fwkConfig = inject(FWK_CONFIG);
+
+    private _localStorageService = inject(LocalStorageService);
+    private readonly REMEMBER_KEY = 'remembered_user';
+
     alert: { type: FuseAlertType; message: string } = {
-        type   : 'success',
+        type: 'success',
         message: '',
     };
     signInForm: FormGroup<SignInForm>;
@@ -45,36 +53,41 @@ export class AuthSignInComponent implements OnInit
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _i18nService: I18nService,
-    ) {}
+    ) { }
 
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
+        const savedUsername = localStorage.getItem(this.REMEMBER_KEY);
+
         this.signInForm = this._formBuilder.group({
             username: ['', [Validators.required]],
             password: ['', Validators.required],
-            rememberMe: [false], 
+            rememberMe: [!!savedUsername],
         });
     }
 
-    signIn(): void
-    {
-        if ( this.signInForm.invalid )
-        {
-            return;
-        }
+    signIn(): void {
+        if (this.signInForm.invalid) return;
+
+        const { username, rememberMe } = this.signInForm.getRawValue();
 
         this.signInForm.disable();
         this.showAlert = false;
 
         this._authService.signIn(this.signInForm.getRawValue()).subscribe(
             () => {
+                if (rememberMe) {
+                    localStorage.setItem(this.REMEMBER_KEY, username);
+                } else {
+                    localStorage.removeItem(this.REMEMBER_KEY);
+                }
+
                 const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
                 this._router.navigateByUrl(redirectURL);
             },
             (error) => {
                 this.signInForm.enable();
                 this.alert = {
-                    type   : 'error',
+                    type: 'error',
                     message: this._i18nService.getDictionary('fwk')?.translate?.('sign_in_error_message') ?? 'sign_in_error_message'
                 };
                 this.showAlert = true;

@@ -13,6 +13,7 @@ import { Scheme } from '@fuse/services/config';
 import { provideFwkAuth, provideAppAuth } from '@fwk/auth/auth.provider';
 import { provideFwkCore } from '@fwk/providers/core.provider';
 import { provideAppNavigation } from '@fwk/navigation/navigation.provider';
+import { provideFwkBranding } from '@fwk/providers/config.provider';
 
 registerLocaleData(localeEs, 'es');
 
@@ -37,6 +38,14 @@ export const appConfig: ApplicationConfig = {
             withRouterConfig({ onSameUrlNavigation: 'reload' })
         ),
         importProvidersFrom(MatDialogModule),
+
+        provideFwkBranding({
+            appName: 'PREMEC',
+            appLogo: 'https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png',
+            appLogoSmall: 'https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png',
+            welcomeTitleLine1: 'Administrador de',
+            welcomeTitleLine2: 'Contenidos PREMEC'
+        }),
 
         provideFwkCore(),
         provideFwkAuth(),

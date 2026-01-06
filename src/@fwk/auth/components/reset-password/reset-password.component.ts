@@ -14,6 +14,7 @@ import { AuthService } from '@fwk/auth/auth.service';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+import { LogoComponent } from '@fwk/components/logo/logo.component';
 
 interface ResetPasswordForm {
     password: FormControl<string>;
@@ -26,7 +27,7 @@ interface ResetPasswordForm {
     encapsulation: ViewEncapsulation.None,
     animations: fuseAnimations,
     standalone: true,
-    imports: [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe],
+    imports: [NgIf, FuseAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthResetPasswordComponent implements OnInit {
     @ViewChild('resetPasswordNgForm') resetPasswordNgForm: NgForm;
@@ -37,7 +38,7 @@ export class AuthResetPasswordComponent implements OnInit {
     };
     resetPasswordForm: FormGroup<ResetPasswordForm>;
     showAlert: boolean = false;
-    private _translatePipe = new TranslatePipe(inject(I18nService));
+    private _i18nService = inject(I18nService);
 
     constructor(
         private _authService: AuthService,
@@ -76,13 +77,13 @@ export class AuthResetPasswordComponent implements OnInit {
                 (response) => {
                     this.alert = {
                         type: 'success',
-                        message: this._translatePipe.transform('reset_password_success_message'),
+                        message: this._i18nService.translate('reset_password_success_message'),
                     };
                 },
                 (response) => {
                     this.alert = {
                         type: 'error',
-                        message: this._translatePipe.transform('reset_password_error_message'),
+                        message: this._i18nService.translate('reset_password_error_message'),
                     };
                 },
             );

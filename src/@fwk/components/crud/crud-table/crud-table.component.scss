@@ -46,7 +46,7 @@
 :host ::ng-deep {
     --table-border: var(--fuse-border);
     --row-hover-bg: var(--fuse-primary-100);
-    --header-bg: #f9fafb;
+    --header-bg: #f8fafc;
 
     &:host-context(.dark) {
         --table-border: var(--fuse-border-dark, rgba(255, 255, 255, 0.12));

@@ -41,8 +41,8 @@ export const appConfig: ApplicationConfig = {
 
         provideFwkBranding({
             appName: 'PREMEC',
-            appLogo: 'https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png',
-            appLogoSmall: 'https://premecsa.com.ar/wp-content/uploads/2018/05/logo-pestan%CC%83a-01.png',
+            appLogo: 'assets/images/logo/logo_premec.png',
+            appLogoSmall: 'assets/images/logo/logo_premec.png',
             welcomeTitleLine1: 'Administrador de',
             welcomeTitleLine2: 'Contenidos PREMEC'
         }),

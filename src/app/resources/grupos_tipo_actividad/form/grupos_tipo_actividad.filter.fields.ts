@@ -1,0 +1,32 @@
+import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
+
+export const GRUPOS_TIPO_ACTIVIDAD_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
+  {
+    key: 'tipo',
+    labelKey: 'grupos_tipo_actividad_create_form_fields_def_field_tipoactividad',
+    label: 'Tipo de Actividad',
+    controlType: 'select',
+    options: {
+      handlerSourceData: false,
+      elementLabel: 'label',
+      elementValue: 'value',
+      fromData: [ 
+        {value: '', label: 'Todos' },
+        {value: 'R', label: 'Reparación' },
+        {value: 'C', label: 'Checklist' },
+        {value: 'P', label: 'Piezas a Reparar' },
+        {value: 'M', label: 'Mantenimiento Maquinaria' },
+        {value: 'EE', label: 'Entrega Maquina Electrica' },
+        {value: 'EC', label: 'Entrega Maquina Combustion' },
+        {value: 'EP', label: 'Entrega Plataforma' }
+      ]
+    }
+  },
+  {
+    key: 'titulo',
+    labelKey: 'grupos_tipo_actividad_create_form_fields_def_field_titulo',
+    label: 'Titulo del Grupo',
+    type: 'text',
+    controlType: 'textbox'
+  }
+];

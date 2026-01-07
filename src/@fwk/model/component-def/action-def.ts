@@ -19,6 +19,12 @@ export class ActionDef {
   actionName?: string;
   title?: string;
   icon?: string;
+
+  color?: 'primary' | 'accent' | 'warn';
+  appearance?: 'stroked' | 'flat' | 'basic' | 'icon';
+  hidden?: boolean;
+  disabled?: boolean;
+
   form?: DynamicField<any>[];
   formDef?: FormDef;
   actionType?: string;

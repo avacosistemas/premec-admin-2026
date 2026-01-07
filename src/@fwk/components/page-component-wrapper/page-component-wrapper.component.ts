@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { PageComponentDef } from '@fwk/model/component-def/page-component-def';
 import { ActionDef } from '@fwk/model/component-def/action-def';
@@ -39,7 +39,7 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
 
     private destroy$ = new Subject<void>();
     private componentInstance: CustomPageComponent | null = null;
-
+    public componentSubscription: Subscription | null = null;
     private route = inject(ActivatedRoute);
     private cdr = inject(ChangeDetectorRef);
     private authService = inject(AuthService);
@@ -82,7 +82,6 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
 
     private loadDynamicComponent(): void {
         if (!this.definition || !this.definition.component || !this.contentContainer) {
-            console.error("No se puede cargar el componente dinámico: falta definición, componente o contenedor.");
             return;
         }
 
@@ -91,13 +90,25 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
             injector: this.injector
         });
 
-        if (componentRef.instance && typeof componentRef.instance.onAction === 'function') {
+        if (componentRef.instance) {
             this.componentInstance = componentRef.instance;
-        } else {
-            console.warn(`El componente ${this.definition.component.name} no parece implementar la interfaz 'CustomPageComponent' con el método 'onAction'. Las acciones del header podrían no funcionar.`);
+            if (this.componentInstance.actionStateChange) {
+                this.componentSubscription = this.componentInstance.actionStateChange
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe((update) => {
+                        this.updateActionState(update.key, update.changes);
+                    });
+            }
         }
-
         this.cdr.detectChanges();
+    }
+
+    private updateActionState(key: string, changes: Partial<ActionDef>): void {
+        const action = this.definition.actions?.find(a => a.actionNameKey === key);
+        if (action) {
+            Object.assign(action, changes);
+            this.cdr.markForCheck();
+        }
     }
 
     ngOnDestroy(): void {
@@ -106,11 +117,10 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
     }
 
     getVisibleActions(): ActionDef[] {
-        if (!this.definition.actions) {
-            return [];
-        }
+        if (!this.definition.actions) return [];
+
         return this.definition.actions.filter(action =>
-            this.authService.hasPermission(action.actionSecurity)
+            this.authService.hasPermission(action.actionSecurity) && !action.hidden
         );
     }
 

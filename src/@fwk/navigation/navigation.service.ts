@@ -49,14 +49,13 @@ export class NavigationService {
 
     private sortNavigationItems = (a: FuseNavigationItem, b: FuseNavigationItem): number => {
         const typeWeights = {
-            'collapsable': 1,
-            'group': 1,
-            'basic': 2,
-            'default': 3
+            'basic': 1,
+            'collapsable': 2,
+            'group': 3
         };
 
-        const aWeight = typeWeights[a.type] || typeWeights['default'];
-        const bWeight = typeWeights[b.type] || typeWeights['default'];
+        const aWeight = typeWeights[a.type] || 10;
+        const bWeight = typeWeights[b.type] || 10;
 
         if (aWeight !== bWeight) {
             return aWeight - bWeight;
@@ -116,45 +115,38 @@ export class NavigationService {
                 let parentMenu = collapsibleMenus.get(rootGroupId);
 
                 if (!parentMenu) {
-                    console.warn(`[NavigationService] El grupo raíz '${rootGroupId}' no fue encontrado en NAVIGATION_GROUPS_MAP para el item '${navDef.id}'.`);
+                    console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado.`);
                     return;
                 }
 
                 for (let i = 1; i < groupParts.length; i++) {
-                    const part = groupParts[i];
                     const subGroupId = groupParts.slice(0, i + 1).join('.');
-
                     let subGroup = parentMenu.children?.find(child => child.id === subGroupId);
-
                     if (!subGroup) {
                         subGroup = {
                             id: subGroupId,
-                            title: part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '),
+                            title: groupParts[i].charAt(0).toUpperCase() + groupParts[i].slice(1),
                             type: 'collapsable',
                             children: []
                         };
                         parentMenu.children?.push(subGroup);
-                        parentMenu.children?.sort(this.sortNavigationItems);
                     }
                     parentMenu = subGroup;
                 }
-
                 parentMenu.children?.push(navItem);
 
+            } else {
+                menuGeneralGroup.children?.push(navItem);
             }
         });
 
         collapsibleMenus.forEach(menu => {
-            if (menu.children && menu.children.length > 1) {
-                menu.children.sort(this.sortNavigationItems);
-            }
-
             if (menu.children && menu.children.length > 0) {
                 menuGeneralGroup.children?.push(menu);
             }
         });
 
-        if (menuGeneralGroup.children && menuGeneralGroup.children.length > 1) {
+        if (menuGeneralGroup.children) {
             menuGeneralGroup.children.sort(this.sortNavigationItems);
         }
 

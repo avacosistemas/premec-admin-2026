@@ -2,215 +2,106 @@ import { WelcomeSection } from './welcome.types';
 
 export const WELCOME_DATA: WelcomeSection[] = [
     {
-        title: 'Gestión de Contenidos',
+        title: 'Gestión de RRHH',
         items: [
             {
-                title: 'Contenidos',
-                description: 'Administra artículos, noticias y páginas institucionales.',
+                title: 'Recibos',
+                description: 'Consulta y descarga de recibos de sueldo.',
+                icon: 'heroicons_outline:currency-dollar',
+                route: '/recibos',
+                color: 'green',
+                permission: 'RECIBOS_SECURITY_READ'
+            },
+            {
+                title: 'Procesar Recibos',
+                description: 'Carga y procesamiento masivo de recibos.',
+                icon: 'heroicons_outline:document-arrow-up',
+                route: '/recibos-procesamiento',
+                color: 'teal',
+                permission: 'RECIBOS_PROCESAMIENTO_READ'
+            },
+            {
+                title: 'Cierre de Mes',
+                description: 'Gestión y control del cierre mensual.',
+                icon: 'heroicons_outline:calendar-days',
+                route: '/cierre-mes',
+                color: 'blue',
+                permission: 'CIERRE_MES_READ'
+            },
+            {
+                title: 'Procesar Fichados',
+                description: 'Importación y análisis de fichadas.',
+                icon: 'heroicons_outline:clock',
+                route: '/fichado-procesamiento',
+                color: 'indigo',
+                permission: 'FICHADO_PROCESAMIENTO_READ'
+            },
+            {
+                title: 'Novedades Contador',
+                description: 'Reporte de novedades para liquidación.',
+                icon: 'heroicons_outline:calculator',
+                route: '/novedades-contador',
+                color: 'purple',
+                permission: 'NOVEDADES_CONTADOR_READ'
+            }
+        ]
+    },
+    {
+        title: 'Gestión de Actividades',
+        items: [
+            {
+                title: 'Grupos de Actividad',
+                description: 'Configuración de grupos por tipo de actividad.',
+                icon: 'heroicons_outline:list-bullet',
+                route: '/gruposTipoActividad',
+                color: 'orange',
+                permission: 'GRUPOS_TIPO_ACTIVIDAD_READ'
+            },
+            {
+                title: 'Reporte Horas Máquina',
+                description: 'Informe detallado de horas máquina.',
                 icon: 'heroicons_outline:document-text',
-                route: '/contenido',
-                color: 'primary'
+                route: '/reporteHorasMaquina',
+                color: 'cyan',
+                permission: 'REPORTE_HORAS_MAQUINA_READ'
             },
             {
-                title: 'Revistas Digitales',
-                description: 'Gestión de ediciones de revistas y sus artículos.',
-                icon: 'heroicons_outline:book-open',
-                route: '/Revistas',
-                color: 'primary'
-            },
-            {
-                title: 'Noticias Carrousel',
-                description: 'Configura las noticias destacadas del home.',
-                icon: 'heroicons_outline:document',
-                route: '/noticiaCarrousel',
-                color: 'indigo'
-            },
-            {
-                title: 'Secciones',
-                description: 'Estructura del sitio y agrupación de contenidos.',
-                icon: 'heroicons_outline:squares-2x2',
-                route: '/seccion',
-                color: 'indigo'
-            },
-            {
-                title: 'Banners',
-                description: 'Publicidad y banners rotativos.',
-                icon: 'heroicons_outline:photo',
-                route: '/banner',
-                color: 'purple'
-            },
-            {
-                title: 'Modal Home',
-                description: 'Ventanas emergentes para avisos importantes.',
-                icon: 'heroicons_outline:window',
-                route: '/modalHome',
-                color: 'purple'
+                title: 'Generar QR',
+                description: 'Generación de códigos QR de servicio.',
+                icon: 'heroicons_outline:qr-code',
+                route: '/generar-qr',
+                color: 'slate',
+                permission: 'GENERAR_QR_READ'
             }
         ]
     },
     {
-        title: 'Matrículas y Personas',
+        title: 'Seguridad y Usuarios',
         items: [
             {
-                title: 'Búsqueda de Contactos',
-                description: 'Gestión centralizada de personas y matriculados.',
-                icon: 'heroicons_outline:identification',
-                route: '/identificacionBusqueda',
-                color: 'teal'
-            },
-            {
-                title: 'Prematriculación',
-                description: 'Bandeja de entrada de trámites de prematriculación.',
-                icon: 'heroicons_outline:clipboard-document-check', // Icono sugerido
-                route: '/prematriculacion',
-                color: 'teal'
-            },
-            {
-                title: 'Solicitudes de Fotos',
-                description: 'Aprobación de nuevas fotos de perfil.',
-                icon: 'heroicons_outline:camera', // Icono basado en el contexto
-                route: '/contactImageTemp',
-                color: 'cyan'
-            },
-            {
-                title: 'Certificados',
-                description: 'Historial y emisión de certificados.',
-                icon: 'heroicons_outline:document-check', // Icono sugerido
-                route: '/CertificadoMatriculado',
-                color: 'cyan'
-            }
-        ]
-    },
-    {
-        title: 'Comunicación',
-        items: [
-            {
-                title: 'Campañas de Mailing',
-                description: 'Envíos masivos y seguimiento.',
-                icon: 'heroicons_outline:at-symbol',
-                route: '/mailing',
-                color: 'sky'
-            },
-            {
-                title: 'Boletines',
-                description: 'Armado y distribución de newsletters.',
-                icon: 'heroicons_outline:envelope',
-                route: '/boletin',
-                color: 'sky'
-            },
-            {
-                title: 'Listas de Contactos',
-                description: 'Segmentación de audiencias.',
+                title: 'Usuarios',
+                description: 'Administración de usuarios del sistema.',
                 icon: 'heroicons_outline:users',
-                route: '/ContactList',
-                color: 'blue'
+                route: '/users',
+                color: 'rose',
+                permission: 'USUARIOS_READ'
             },
             {
-                title: 'Plantillas de Mensajes',
-                description: 'Configuración de templates de email del sistema.',
-                icon: 'heroicons_outline:envelope-open',
-                route: '/messageTemplate',
-                color: 'blue'
-            }
-        ]
-    },
-    {
-        title: 'Ventas y Finanzas',
-        items: [
-            {
-                title: 'Operaciones',
-                description: 'Listado general de ventas y transacciones.',
-                icon: 'heroicons_outline:ticket',
-                route: '/ventas',
-                color: 'green'
-            },
-            {
-                title: 'Productos',
-                description: 'Catálogo de productos a la venta.',
-                icon: 'heroicons_outline:archive-box',
-                route: '/Producto',
-                color: 'green'
-            },
-            {
-                title: 'Cuotas Generales',
-                description: 'Configuración de valores y periodos.',
-                icon: 'heroicons_outline:receipt-percent',
-                route: '/cuotasGeneral',
-                color: 'emerald'
-            },
-            {
-                title: 'Categorías Venta',
-                description: 'Clasificación de productos.',
-                icon: 'heroicons_outline:squares-2x2',
-                route: '/Categoria',
-                color: 'emerald'
-            }
-        ]
-    },
-    {
-        title: 'Interacción y Herramientas',
-        items: [
-            {
-                title: 'Formularios',
-                description: 'Creador de formularios dinámicos.',
-                icon: 'heroicons_outline:clipboard-document-list',
-                route: '/formulario',
-                color: 'orange'
-            },
-            {
-                title: 'Inscriptos (Respuestas)',
-                description: 'Ver inscriptos y respuestas de formularios.',
-                icon: 'heroicons_outline:user-group', // Icono sugerido
-                route: '/formResponse',
-                color: 'orange'
-            },
-            {
-                title: 'Carga Masiva',
-                description: 'Herramienta para importación de archivos.',
-                icon: 'heroicons_outline:cloud-arrow-up',
-                route: '/upload-files',
-                color: 'amber'
-            },
-            {
-                title: 'Banco de Imágenes',
-                description: 'Repositorio central de imágenes.',
-                icon: 'heroicons_outline:photo',
-                route: '/imagen',
-                color: 'amber'
-            }
-        ]
-    },
-    {
-        title: 'Análisis y Sistema',
-        items: [
-            {
-                title: 'Estadísticas',
-                description: 'Panel general de métricas (Matrículas, Contenidos).',
-                icon: 'heroicons_outline:chart-pie',
-                route: '/estadisticasMatriculas',
-                color: 'rose'
-            },
-            {
-                title: 'Usuarios Admin',
-                description: 'Gestión de usuarios del sistema.',
+                title: 'Grupos de Seguridad',
+                description: 'Definición de roles y grupos.',
                 icon: 'heroicons_outline:user-group',
-                route: '/userAdmin',
-                color: 'slate'
+                route: '/seguridadgrupo',
+                color: 'red',
+                permission: 'SEGURIDAD_GRUPO_READ'
             },
             {
-                title: 'Roles y Permisos',
-                description: 'Configuración de seguridad y accesos.',
-                icon: 'heroicons_outline:lock-closed',
+                title: 'Permisos',
+                description: 'Catálogo de permisos del sistema.',
+                icon: 'heroicons_outline:key',
                 route: '/permiso',
-                color: 'slate'
+                color: 'pink',
+                permission: 'PERMISOS_READ'
             },
-            {
-                title: 'Cuentas de Correo',
-                description: 'Configuración de remitentes SMTP.',
-                icon: 'heroicons_outline:at-symbol',
-                route: '/emailAccount',
-                color: 'slate'
-            }
         ]
     }
 ];

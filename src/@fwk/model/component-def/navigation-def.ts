@@ -10,4 +10,5 @@
     icon?: string;
     group?: string; 
     showInMenu?: boolean;
+    order?: number;
 }

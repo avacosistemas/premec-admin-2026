@@ -12,8 +12,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { map, Observable } from 'rxjs';
 
 import { NotificationService } from '@fwk/services/notification/notification.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
@@ -40,6 +43,8 @@ import { CierreMesService } from '../cierre-mes.service';
         MatPaginatorModule,
         MatSlideToggleModule,
         MatProgressBarModule,
+        MatExpansionModule,
+        MatTooltipModule,
         TranslatePipe
     ],
     templateUrl: './cierre-mes.component.html',
@@ -78,6 +83,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
     isMobile: boolean = false;
 
+    panelOpenState = true;
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
     ngOnInit(): void {
@@ -100,6 +106,10 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
             .subscribe(({ matchingAliases }) => {
                 this.isMobile = !matchingAliases.includes('md');
             });
+
+        if (this.isMobile) {
+            this.panelOpenState = false;
+        }
     }
 
     onAction(action: ActionDef): void {
@@ -118,6 +128,16 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
         }
         return value;
     }
+    limpiarFiltros(): void {
+        const currentDate = new Date();
+        this.cierreForm.patchValue({
+            mes: currentDate.getMonth() + 1,
+            anio: currentDate.getFullYear()
+        });
+        this.dataSource.data = [];
+        this.toggleSaveButton(false);
+        this.panelOpenState = true;
+    }
 
     vistaPrevia(): void {
         if (this.cierreForm.invalid) return;
@@ -125,6 +145,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
         this.toggleSaveButton(false);
         this.loading = true;
         this.dataSource.data = [];
+
         const { anio, mes } = this.cierreForm.value;
 
         this._cierreMesService.getPreview(anio, mes).subscribe({
@@ -153,6 +174,9 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
                 this.toggleSaveButton(true);
                 this.loading = false;
+
+                this.panelOpenState = false;
+
                 this._cdr.markForCheck();
             },
             error: (error) => {

@@ -6,5 +6,6 @@ export const CIERRE_MES_NAV_DEF: NavigationDef = {
     url: '/cierre-mes',
     icon: 'heroicons_outline:calendar-days',
     group: null,
-    showInMenu: true
+    showInMenu: true,
+    order: 6
 };

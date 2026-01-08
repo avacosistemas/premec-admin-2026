@@ -6,5 +6,6 @@ export const REPORTE_HORAS_MAQUINA_NAV_DEF: NavigationDef = {
   url: '/reporteHorasMaquina',
   icon: 'heroicons_outline:document-text',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 2
 };

@@ -6,5 +6,6 @@ export const RECIBOS_NAV_DEF: NavigationDef = {
   url: '/recibos',
   icon: 'heroicons_outline:currency-dollar',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 4
 };

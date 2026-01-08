@@ -46,6 +46,11 @@ export const appRoutes: Route[] = [
                 loadChildren: () => import('@fwk/modules/dev-tools/dev-tools.routes')
             },
             { path: 'unlock-session', data: { layout: 'empty' }, loadChildren: () => import('@fwk/auth/components/unlock-session/unlock-session.routes') },
+            { 
+                path: 'change-password', 
+                data: { layout: 'empty' },
+                loadChildren: () => import('@fwk/auth/components/change-password/change-password.routes') 
+            },
             { path: 'welcome', loadChildren: () => import('app/modules/welcome/welcome.routes') },
             ...CRUD_MODULES.map(crudModule => ({
                 path: crudModule.path,

@@ -1,0 +1,120 @@
+<div class="flex flex-col w-full mx-auto">
+    <mat-card class="w-full shadow-none rounded-none overflow-hidden">
+        <mat-card-content class="p-6">
+            <form [formGroup]="processingForm" class="flex flex-col gap-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <div class="w-full">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                            <mat-label>{{ 'recibos_proc_tipo_recibo' | translate:i18nName }}</mat-label>
+                            <mat-select formControlName="receiptType">
+                                <mat-option *ngFor="let type of receiptTypes" [value]="type">
+                                    {{ type }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error>{{ 'recibos_proc_tipo_requerido' | translate:i18nName }}</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <fwk-file-uploader formControlName="pdfFile" 
+                        [accept]="'.pdf, application/pdf'"
+                        [title]="'recibos_proc_drop_title' | translate:i18nName"
+                        [description]="'recibos_proc_drop_subtitle' | translate:i18nName"
+                        [icon]="'heroicons_outline:document-text'" [isLoading]="isLoadingProcess"
+                        [loadingText]="'recibos_proc_procesando' | translate:i18nName"
+                        [errorMessage]="processingForm.get('pdfFile').hasError('required') && processingForm.get('pdfFile').touched ? ('recibos_proc_archivo_requerido' | translate:i18nName) : null"
+                        (fileSelected)="onFileSelected($event)">
+                    </fwk-file-uploader>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+
+    <div *ngIf="dataSource.data.length > 0" class="flex-auto overflow-auto container-table dark:bg-transparent">
+        <table mat-table [dataSource]="dataSource" matSort class="w-full bg-transparent">
+
+            <ng-container matColumnDef="legajo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_legajo' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.legajo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombreCompleto">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_nombre' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.nombreCompleto }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="periodo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_periodo' |
+                    translate:i18nName }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.periodo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="neto">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_neto' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> $ {{ element.neto | number:'1.2-2':'es-AR' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_tipo' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.tipo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="aprobado">
+                <th mat-header-cell *matHeaderCellDef class="text-center w-28"> {{ 'recibos_proc_col_aprobado' |
+                    translate:i18nName }} </th>
+                <td mat-cell *matCellDef="let element" class="text-center">
+                    <mat-slide-toggle [checked]="element.aprobado" color="accent"
+                        (change)="onApprovalChange(element, $event)">
+                    </mat-slide-toggle>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="observaciones">
+                <th mat-header-cell *matHeaderCellDef class="w-1/4"> {{ 'recibos_proc_col_observaciones' |
+                    translate:i18nName }} </th>
+                <td mat-cell *matCellDef="let element">
+                    <mat-form-field *ngIf="!element.aprobado" appearance="outline" subscriptSizing="dynamic"
+                        class="w-full dense-form-field my-1">
+                        <textarea matInput [(ngModel)]="element.observaciones"
+                            [placeholder]="'recibos_proc_obs_placeholder' | translate:i18nName"
+                            (blur)="onObservationsChange()" rows="1"></textarea>
+                    </mat-form-field>
+                    <span *ngIf="element.aprobado" class="text-gray-400 italic text-xs">
+                        {{ 'recibos_proc_sin_obs' | translate:i18nName }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="descripcion">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_descripcion' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.descripcion }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="timeInMilis">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_timeinmilis' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.timeInMilis }} </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                class="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50"></tr>
+        </table>
+        <mat-paginator *ngIf="dataSource.data.length > 0" [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons
+            class="border-t bottom-0 fixed print:hidden w-full z-30">
+        </mat-paginator>
+    </div>
+</div>

@@ -6,5 +6,6 @@ export const GRUPOS_TIPO_ACTIVIDAD_NAV_DEF: NavigationDef = {
   url: '/gruposTipoActividad',
   icon: 'heroicons_outline:list-bullet',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 1
 };

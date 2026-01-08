@@ -171,14 +171,21 @@ export class AuthService implements AbstractAuthService {
     forgotPassword(email: string): Observable<any> {
         return this._httpClient.post(environment.auth.forgotPassword, { email });
     }
+
     resetPassword(data: any): Observable<any> {
         return this._httpClient.post(environment.auth.resetPassword, data);
     }
+
     signUp(data: any): Observable<any> {
         return this._httpClient.post(environment.auth.signUp, data);
     }
+
     unlockSession(data: { email: string; password: string }): Observable<any> {
         return this.signIn({ username: data.email, password: data.password });
+    }
+
+    changePassword(data: any): Observable<any> {
+        return this._httpClient.post(environment.auth.changePassword, data);
     }
 
     getToken(): string | null { return localStorage.getItem(this.TOKEN_KEY); }

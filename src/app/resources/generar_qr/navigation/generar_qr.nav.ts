@@ -6,5 +6,6 @@ export const GENERAR_QR_NAV_DEF: NavigationDef = {
     url: '/generar-qr',
     icon: 'heroicons_outline:qr-code',
     group: null,
-    showInMenu: true
+    showInMenu: true,
+    order: 3
 };

@@ -23,6 +23,14 @@ export const FWK_I18N_DEF = {
     return_to: 'Volver a',
     success_message: '¡Operación exitosa!',
     year_label: 'Año',
+    change_password: 'Cambiar Contraseña',
+
+    // --- File Uploader ---
+    file_uploader_default_title: 'Cargar archivo',
+    file_uploader_default_description: 'Arrastra tu archivo aquí o haz click para buscar en tu equipo',
+    file_uploader_processing: 'Procesando archivo...',
+    file_uploader_click_to_replace: 'Click en el área para agregar o reemplazar',
+    file_uploader_remove: 'Quitar archivo',
 
     // --- Autenticación y Seguridad ---
     auth_email_not_specified: 'Email no especificado',
@@ -244,6 +252,23 @@ export const FWK_I18N_DEF = {
     error_404_title: 'Página no encontrada',
     error_button_go_back: 'Volver atrás',
     error_button_go_home: 'Ir al inicio',
+
+    // --- Página: Cambiar Contraseña ---
+    change_password_title: 'Cambiar Contraseña',
+    change_password_subtitle: 'Ingresa tu contraseña actual y la nueva para continuar.',
+    current_password_label: 'Contraseña Actual',
+    new_password_label: 'Nueva Contraseña',
+    new_password_confirm_label: 'Confirmar Nueva Contraseña',
+    change_password_button: 'Cambiar Contraseña',
+    
+    // --- Cambiar Contraseña: Errores y Mensajes ---
+    current_password_required_error: 'La contraseña actual es requerida',
+    new_password_required_error: 'La nueva contraseña es requerida',
+    new_password_confirm_required_error: 'La confirmación es requerida',
+    current_password_invalid_error: 'La contraseña actual es incorrecta',
+    change_password_success_title: '¡Contraseña Actualizada!',
+    change_password_success_message: 'Tu contraseña ha sido actualizada. Cerrando sesión en {{countdown}} segundos...',
+    change_password_error_message: 'Ocurrió un error al intentar cambiar la contraseña.',
 
     // --- Widgets de Dashboard ---
     widget_empty_message: 'No hay información disponible para mostrar.',

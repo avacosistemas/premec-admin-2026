@@ -85,6 +85,12 @@
                         [mode]="'indeterminate'">
                     </mat-progress-spinner>
                 </button>
+
+                <a *ngIf="showForgotPassword"
+                    class="text-md font-medium w-full text-center mt-4 text-primary-500 hover:underline cursor-pointer"
+                    [routerLink]="['/forgot-password']">
+                    {{ 'forgot_password_title' | translate }}
+                </a>
             </form>
         </div>
     </div>

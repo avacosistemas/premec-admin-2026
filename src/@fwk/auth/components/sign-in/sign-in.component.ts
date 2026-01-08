@@ -17,6 +17,7 @@ import { FWK_CONFIG } from '@fwk/model/fwk-config';
 import { inject } from '@angular/core';
 import { LogoComponent } from '@fwk/components/logo/logo.component';
 import { LocalStorageService } from '@fwk/services/local-storage/local-storage.service';
+import { environment } from 'environments/environment';
 
 interface SignInForm {
     username: FormControl<string>;
@@ -46,6 +47,7 @@ export class AuthSignInComponent implements OnInit {
     };
     signInForm: FormGroup<SignInForm>;
     showAlert: boolean = false;
+    showForgotPassword = false;
 
     constructor(
         private _activatedRoute: ActivatedRoute,
@@ -57,7 +59,7 @@ export class AuthSignInComponent implements OnInit {
 
     ngOnInit(): void {
         const savedUsername = localStorage.getItem(this.REMEMBER_KEY);
-
+        this.showForgotPassword = !!environment.auth.forgotPassword && environment.auth.forgotPassword.trim() !== '';
         this.signInForm = this._formBuilder.group({
             username: ['', [Validators.required]],
             password: ['', Validators.required],

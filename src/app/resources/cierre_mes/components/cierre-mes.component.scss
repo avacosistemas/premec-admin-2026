@@ -53,6 +53,13 @@ app-cierre-mes {
     line-height: 1.4;
 }
 
+::ng-deep .mat-expansion-panel-body {
+    padding-bottom: 0px !important;
+    padding-top: 5px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
 :host ::ng-deep {
     --table-border: var(--fuse-border);
     --row-hover-bg: var(--fuse-primary-100);
@@ -169,4 +176,12 @@ app-cierre-mes {
     mat-paginator {
         background: var(--fuse-bg-card) !important;
     }
+}
+
+.mat-mdc-table .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
+    background-color: #f3f4f6 !important;
+}
+
+.dark .mat-mdc-table .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
+    background-color: #111827 !important;
 }

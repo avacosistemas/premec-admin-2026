@@ -1,0 +1,221 @@
+<mat-expansion-panel class="shadow-none border-b rounded-none dark:bg-transparent z-20" [expanded]="panelOpenState"
+    (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+
+    <mat-expansion-panel-header class="px-4 sm:px-6">
+        <mat-panel-title class="flex items-center space-x-3">
+            <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <span class="font-semibold">{{ 'novedades_contador_busqueda' | translate:i18nName }}</span>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="novedadesForm" (ngSubmit)="vistaPrevia()" class="w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'novedades_contador_mes' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="mes">
+                    <mat-option *ngFor="let mes of meses" [value]="mes.value">
+                        {{ mes.viewValue }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'novedades_contador_anio' | translate:i18nName }}</mat-label>
+                <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
+            </mat-form-field>
+        </div>
+    </form>
+
+    <mat-action-row class="p-4 sm:px-6">
+        <div class="flex items-center justify-end w-full space-x-2">
+            <button mat-stroked-button type="button" (click)="limpiarFiltros()"
+                [matTooltip]="'novedades_contador_limpiar' | translate:i18nName">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'novedades_contador_limpiar' | translate:i18nName }}</span>
+            </button>
+
+            <button mat-flat-button color="accent" type="button" (click)="vistaPrevia()"
+                [disabled]="novedadesForm.invalid || loading"
+                [matTooltip]="'novedades_contador_vista_previa' | translate:i18nName">
+                <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!loading" class="icon-size-5"
+                    [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                <span class="ml-2 hidden sm:inline" *ngIf="!loading">{{ 'novedades_contador_vista_previa' |
+                    translate:i18nName }}</span>
+            </button>
+        </div>
+    </mat-action-row>
+    <mat-progress-bar *ngIf="saving" mode="indeterminate"
+        class="absolute bottom-0 left-0 w-full z-30"></mat-progress-bar>
+</mat-expansion-panel>
+
+<div class="flex flex-col flex-auto min-w-0 w-full bg-gray-50 dark:bg-gray-900">
+    <div class="flex-auto relative overflow-hidden h-full dark:bg-transparent flex flex-col">
+
+        <div *ngIf="!novedadesData"
+            class="flex-auto flex flex-col items-center h-full p-6 py-10 text-center text-secondary">
+            <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:circle-stack"></mat-icon>
+            <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">{{
+                'novedades_contador_sin_resultados_titulo' | translate:i18nName }}</div>
+            <div class="mt-1 max-w-sm">{{ 'novedades_contador_sin_resultados_desc' | translate:i18nName }}</div>
+        </div>
+
+        <div *ngIf="novedadesData" class="flex-auto overflow-hidden flex flex-col">
+            <mat-tab-group animationDuration="0ms" class="h-full">
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_jornales' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: jornalesDataSource, expandedItem: expandedJornal, type: 'jornal' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #jornalesPaginator *ngIf="jornalesDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_fueraconvenio' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: fueraConvenioDataSource, expandedItem: expandedFuera, type: 'fuera' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #fueraConvenioPaginator *ngIf="fueraConvenioDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_mensual' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: mensualDataSource, expandedItem: expandedMensual, type: 'mensual' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #mensualPaginator *ngIf="mensualDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+            </mat-tab-group>
+        </div>
+    </div>
+</div>
+
+<ng-template #tableTemplate let-dataSource="dataSource" let-expandedItem="expandedItem" let-type="type">
+    <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="w-full bg-transparent">
+        <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef class="w-10 px-2 border-b"></th>
+            <td mat-cell *matCellDef="let element" class="px-2 border-b text-center w-10">
+                <button mat-icon-button (click)="toggleExpand(element, type); $event.stopPropagation()">
+                    <mat-icon
+                        [svgIcon]="isExpanded(element, type) ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="legajo">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_legajo' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.legajo}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombreCompleto">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_nombre' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.nombre}} {{element.apellido}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cuil">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_cuil' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.cuil}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="novedades">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium w-1/3">{{
+                'novedades_contador_col_novedades' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full dense-form-field my-1">
+                    <input matInput [(ngModel)]="element.novedades" placeholder="...">
+                </mat-form-field>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let element" [attr.colspan]="commonDisplayedColumns.length" class="p-0 border-0">
+                <div class="overflow-hidden flex flex-col w-full bg-gray-50/50 dark:bg-gray-900 border-l-4 border-l-primary-500"
+                    [@detailExpand]="isExpanded(element, type) ? 'expanded' : 'collapsed'">
+                    <div class="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_categoria' | translate:i18nName
+                                }}</span><span>{{element.categoria}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_feriado' | translate:i18nName
+                                }}</span><span>{{element.feriado}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_tarde' | translate:i18nName
+                                }}</span><span>{{element.tarde}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_adelantosueldo' | translate:i18nName
+                                }}</span><span>{{element.adelantoSueldo}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_prestamos' | translate:i18nName
+                                }}</span><span>{{element.prestamos}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_gratificaciones' | translate:i18nName
+                                }}</span><span>{{element.gratificaciones}}</span></div>
+
+                        <ng-container *ngIf="type !== 'fuera'">
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_valorhora' | translate:i18nName
+                                    }}</span><span>{{element.valorHora}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hsnormales' | translate:i18nName
+                                    }}</span><span>{{element.hsNormales}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hs50' | translate:i18nName
+                                    }}</span><span>{{element.hs50}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hs100' | translate:i18nName
+                                    }}</span><span>{{element.hs100}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_feriadoextra' | translate:i18nName
+                                    }}</span><span>{{element.feriadoExtra}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_comida' | translate:i18nName
+                                    }}</span><span>{{element.comida}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hsproductivas' | translate:i18nName
+                                    }}</span><span>{{element.hsProductivas}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_premio' | translate:i18nName
+                                    }}</span><span>{{element.premio}}</span></div>
+                        </ng-container>
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="commonDisplayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let element; columns: commonDisplayedColumns;"
+            class="cursor-pointer bg-white dark:bg-gray-900 transition-colors"
+            [class.bg-primary-50]="isExpanded(element, type)" (click)="toggleExpand(element, type)">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="h-0"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell text-center p-8 text-secondary" [attr.colspan]="commonDisplayedColumns.length">
+                {{ 'novedades_contador_no_hay_registros' | translate:i18nName }}
+            </td>
+        </tr>
+    </table>
+</ng-template>

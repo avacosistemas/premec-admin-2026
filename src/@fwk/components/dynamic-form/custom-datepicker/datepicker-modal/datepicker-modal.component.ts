@@ -51,7 +51,7 @@ export class DatePickerModalComponent implements OnInit {
         label: format(new Date(2000, i, 1), 'MMMM', { locale: es }),
         value: i + 1
     }));
-    years = Array.from({ length: 11 }, (_, i) => 2020 + i); // 2020-2030
+    years = Array.from({ length: 11 }, (_, i) => 2020 + i);
     hours = Array.from({ length: 24 }, (_, i) => i);
     minuteOptions = Array.from({ length: 12 }, (_, i) => i * 5);
     calendarDays: CalendarDay[] = [];

@@ -12,6 +12,8 @@ export const RECIBOS_I18N_DEF: I18n = {
         recibos_grid_column_month: 'Mes (Número)',
         recibos_grid_column_monthString: 'Mes',
         recibos_grid_column_tipo: 'Tipo',
+        recibos_grid_column_descripcion: 'Descripción',
+        recibos_grid_column_filepath: 'FilePath',
         recibos_grid_action_download_receipt: 'Descargar Recibo',
         recibos_filter_form_fields_def_field_year: 'Año',
         recibos_filter_form_fields_def_field_month: 'Mes',

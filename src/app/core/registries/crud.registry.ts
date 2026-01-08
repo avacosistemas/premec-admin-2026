@@ -11,6 +11,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/cierre_mes/cierre_mes.def')
     },
     {
+        path: 'fichado-procesamiento',
+        loader: () => import('app/resources/fichado_procesamiento/fichado_procesamiento.def')
+    },
+    {
         path: 'generar-qr',
         loader: () => import('app/resources/generar_qr/generar_qr.def')
     },
@@ -23,12 +27,20 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/item_checklist_grupo/item_checklist_grupo.def')
     },
     {
+        path: 'novedades-contador',
+        loader: () => import('app/resources/novedades_contador/novedades_contador.def')
+    },
+    {
         path: 'permiso',
         loader: () => import('app/resources/permiso/permiso.def')
     },
     {
         path: 'recibos',
         loader: () => import('app/resources/recibos/recibos.def')
+    },
+    {
+        path: 'recibos-procesamiento',
+        loader: () => import('app/resources/recibos_procesamiento/recibos_procesamiento.def')
     },
     {
         path: 'reporteHorasMaquina',
@@ -55,11 +67,14 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
 export async function loadAllCrudDefs(): Promise<CrudDef[]> {
     const loaderPromises = [
         import('app/resources/cierre_mes/cierre_mes.def'),
+        import('app/resources/fichado_procesamiento/fichado_procesamiento.def'),
         import('app/resources/generar_qr/generar_qr.def'),
         import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def'),
         import('app/resources/item_checklist_grupo/item_checklist_grupo.def'),
+        import('app/resources/novedades_contador/novedades_contador.def'),
         import('app/resources/permiso/permiso.def'),
         import('app/resources/recibos/recibos.def'),
+        import('app/resources/recibos_procesamiento/recibos_procesamiento.def'),
         import('app/resources/reporte_horas_maquina/reporte_horas_maquina.def'),
         import('app/resources/seguridad_grupo/seguridad_grupo.def'),
         import('app/resources/seguridad_grupo_permiso/seguridad_grupo_permiso.def'),

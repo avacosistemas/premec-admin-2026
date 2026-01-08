@@ -7659,7 +7659,7 @@ export class DatePickerModalComponent implements OnInit {
         label: format(new Date(2000, i, 1), 'MMMM', { locale: es }),
         value: i + 1
     }));
-    years = Array.from({ length: 11 }, (_, i) => 2020 + i); // 2020-2030
+    years = Array.from({ length: 11 }, (_, i) => 2020 + i);
     hours = Array.from({ length: 24 }, (_, i) => i);
     minuteOptions = Array.from({ length: 12 }, (_, i) => i * 5);
     calendarDays: CalendarDay[] = [];
@@ -8966,6 +8966,308 @@ export class DynamicUrlComponent implements OnInit, OnDestroy {
     }
 }
 
+--- FILE: @fwk/components/file-uploader/file-uploader.component.html ---
+
+<div class="flex flex-col w-full">
+    <label *ngIf="label" class="block text-sm font-medium text-secondary mb-2">
+        {{ label }} <span *ngIf="required" class="text-red-500">*</span>
+    </label>
+
+    <input hidden type="file" #fileInput (change)="onFileSelected($event)" [accept]="accept" [multiple]="multiple"
+        [disabled]="isDisabled || isLoading">
+
+    <div class="relative w-full cursor-pointer group" (click)="!isDisabled && !isLoading && triggerFileInput()"
+        [class.cursor-not-allowed]="isDisabled || isLoading" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+        <div class="flex transition-all duration-500 ease-in-out border-2 border-dashed rounded-xl overflow-hidden"
+            [ngClass]="{
+            'flex-row items-center p-2 border-green-500 bg-green-50/30 dark:bg-green-900/10 h-auto': hasFiles && !isLoading && !errorMessage,
+            'flex-col items-center justify-center min-h-[220px] border-gray-300 dark:border-gray-600 hover:border-accent-400 hover:bg-gray-50 dark:hover:bg-gray-800': !hasFiles && !isLoading && !errorMessage,
+            'flex-col items-center justify-center min-h-[220px] border-accent-500 bg-accent-50/50 dark:bg-accent-900/20': isLoading || isDragging,
+            'flex-col items-center justify-center min-h-[220px] border-red-500 bg-red-50 dark:bg-red-900/10': errorMessage
+         }">
+
+            <ng-container *ngIf="!hasFiles && !isLoading">
+                <div class="flex flex-col items-center w-full justify-center animate-fadeIn px-6 py-10">
+                    <div
+                        class="p-5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <mat-icon class="icon-size-12" color="accent" [svgIcon]="icon"></mat-icon>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 text-center">
+                        {{ title || ('file_uploader_default_title' | translate) }}
+                    </h3>
+                    <p class="mt-2 text-sm text-secondary text-center max-w-xs">
+                        {{ description || ('file_uploader_default_description' | translate) }}
+                    </p>
+                    <p *ngIf="accept" class="mt-2 text-xs text-gray-400 uppercase tracking-wide">
+                        {{ accept.split(',').join(', ') }}
+                    </p>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="isLoading">
+                <div class="flex flex-col items-center justify-center w-full p-6">
+                    <mat-spinner [diameter]="48" color="accent" mode="indeterminate" class="mb-4"></mat-spinner>
+                    <span class="text-accent-600 font-bold animate-pulse tracking-wide">
+                        {{ loadingText || ('file_uploader_processing' | translate) }}
+                    </span>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="hasFiles && !isLoading">
+                <div class="flex flex-col w-full gap-2">
+                    <div *ngFor="let file of files; let i = index"
+                        class="flex items-center justify-between w-full animate-slideInRight bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-colors duration-200"
+                                [ngClass]="getFileColorClass(file)">
+                                <mat-icon class="icon-size-5" style="color: inherit;" [svgIcon]="getFileIcon(file)"></mat-icon>
+                            </div>
+
+                            <div class="flex flex-col overflow-hidden min-w-0">
+                                <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate"
+                                    [matTooltip]="file.name">
+                                    {{ file.name }}
+                                </span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400">
+                                    {{ formatBytes(file.size) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button mat-icon-button color="warn" (click)="removeFile(i, $event)"
+                            [matTooltip]="'file_uploader_remove' | translate">
+                            <mat-icon class="icon-size-5" svgIcon="heroicons_outline:trash"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+
+    <mat-error *ngIf="errorMessage" class="text-xs mt-2 ml-1">
+        {{ errorMessage }}
+    </mat-error>
+</div>
+
+--- FILE: @fwk/components/file-uploader/file-uploader.component.ts ---
+
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, forwardRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+@Component({
+    selector: 'fwk-file-uploader',
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatButtonModule,
+        MatTooltipModule,
+        TranslatePipe,
+        MatFormFieldModule
+    ],
+    templateUrl: './file-uploader.component.html',
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => FileUploaderComponent),
+            multi: true
+        }
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class FileUploaderComponent implements ControlValueAccessor {
+    @Input() label: string = '';
+    @Input() title: string = '';
+    @Input() description: string = '';
+    @Input() icon: string = 'heroicons_outline:cloud-arrow-up';
+    @Input() accept: string = '*/*'; 
+    @Input() multiple: boolean = false;
+    @Input() isLoading: boolean = false;
+    @Input() loadingText: string = '';
+    @Input() required: boolean = false;
+    @Input() errorMessage: string | null = null;
+
+    @Output() fileSelected = new EventEmitter<File | File[] | null>();
+
+    @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
+
+    files: File[] = [];
+    isDisabled: boolean = false;
+    isDragging: boolean = false;
+
+    onChange: (value: File | File[] | null) => void = () => { };
+    onTouched: () => void = () => { };
+
+    constructor(private _cdr: ChangeDetectorRef) {}
+
+    get hasFiles(): boolean {
+        return this.files && this.files.length > 0;
+    }
+
+    writeValue(obj: any): void {
+        if (obj === null || obj === undefined) {
+            this.files = [];
+        } else if (Array.isArray(obj)) {
+            this.files = obj;
+        } else if (obj instanceof File) {
+            this.files = [obj];
+        }
+        this._cdr.markForCheck();
+    }
+
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.onTouched = fn;
+    }
+
+    setDisabledState?(isDisabled: boolean): void {
+        this.isDisabled = isDisabled;
+        this._cdr.markForCheck();
+    }
+
+    triggerFileInput(): void {
+        this.fileInputRef.nativeElement.value = '';
+        this.fileInputRef.nativeElement.click();
+    }
+
+    onFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        this.onTouched();
+        
+        if (input.files && input.files.length > 0) {
+            this.handleFiles(input.files);
+        }
+    }
+
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!this.isDisabled && !this.isLoading) {
+            this.isDragging = true;
+        }
+    }
+
+    onDragLeave(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+    }
+
+    onDrop(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+        this.onTouched();
+
+        if (this.isDisabled || this.isLoading) return;
+
+        const files = event.dataTransfer?.files;
+        if (files && files.length > 0) {
+            this.handleFiles(files);
+        }
+    }
+
+    removeFile(index: number, event: Event): void {
+        event.stopPropagation();
+        this.files.splice(index, 1);
+        this.emitValue();
+        this.onTouched();
+    }
+
+    private handleFiles(fileList: FileList): void {
+        const validFiles: File[] = [];
+        const acceptedExtensions = this.accept.split(',').map(e => e.trim().toLowerCase());
+
+        for (let i = 0; i < fileList.length; i++) {
+            const file = fileList[i];
+            if (this.accept === '*/*' || this.checkExtension(file, acceptedExtensions)) {
+                validFiles.push(file);
+            }
+        }
+
+        if (this.multiple) {
+            this.files = [...this.files, ...validFiles];
+        } else {
+            if (validFiles.length > 0) {
+                this.files = [validFiles[0]];
+            }
+        }
+
+        this.emitValue();
+    }
+
+    private checkExtension(file: File, accepted: string[]): boolean {
+        const fileName = file.name.toLowerCase();
+        const fileType = file.type.toLowerCase();
+        
+        return accepted.some(ext => {
+            if (ext.endsWith('/*')) {
+                const baseType = ext.substring(0, ext.length - 2);
+                return fileType.startsWith(baseType);
+            }
+            return fileName.endsWith(ext) || fileType === ext;
+        });
+    }
+
+    private emitValue(): void {
+        const value = this.multiple ? this.files : (this.files.length > 0 ? this.files[0] : null);
+        this.onChange(value);
+        this.fileSelected.emit(value);
+        this._cdr.markForCheck();
+    }
+
+    formatBytes(bytes: number, decimals = 2): string {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    getFileIcon(file: File): string {
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.pdf')) return 'heroicons_outline:document-text';
+        if (name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')) return 'heroicons_outline:table-cells';
+        if (name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) return 'heroicons_outline:photo';
+        if (name.endsWith('.txt') || name.endsWith('.rtf')) return 'heroicons_outline:document';
+        if (name.endsWith('.zip') || name.endsWith('.rar')) return 'heroicons_outline:archive-box';
+
+        return 'heroicons_outline:document';
+    }
+
+    getFileColorClass(file: File): string {
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.pdf')) {
+            return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
+        }
+        if (name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')) {
+            return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+        }
+        if (name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
+            return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+        }
+        if (name.endsWith('.zip') || name.endsWith('.rar')) {
+            return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
+        }
+
+        return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+    }
+}
+
 --- FILE: @fwk/components/form-grid-dialog/form-grid.dialog.component.html ---
 
 ﻿<div class="{{ data.dialog?.modalKey }}-modal {{ getUrl() }}-modal">
@@ -9730,17 +10032,56 @@ export class ModalPreviewComponent implements OnInit {
             </div>
 
             <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
-                <button *ngFor="let action of getVisibleActions()" mat-stroked-button color="accent"
-                    [matTooltip]="action.actionName" (click)="executeAction(action)">
-                    <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
-                    <span class="ml-2">{{ action.actionName }}</span>
-                </button>
+                <ng-container *ngFor="let action of getVisibleActions()">
+                    <ng-container *ngIf="!action.hidden" [ngSwitch]="action.appearance">
+
+                        <button *ngSwitchCase="'flat'"
+                            mat-flat-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                        <button *ngSwitchCase="'basic'"
+                            mat-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                        <button *ngSwitchCase="'icon'"
+                            mat-icon-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                        </button>
+
+                        <button *ngSwitchDefault
+                            mat-stroked-button
+                            [color]="action.color || 'accent'" 
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                    </ng-container>
+                </ng-container>
             </div>
         </div>
     </div>
 
     <div class="flex-auto">
-        <div class="relative overflow-hidden">
+        <div class="h-full relative overflow-hidden">
             <ng-template #contentContainer></ng-template>
         </div>
     </div>
@@ -9758,7 +10099,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { PageComponentDef } from '@fwk/model/component-def/page-component-def';
 import { ActionDef } from '@fwk/model/component-def/action-def';
@@ -9789,7 +10130,7 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
 
     private destroy$ = new Subject<void>();
     private componentInstance: CustomPageComponent | null = null;
-
+    public componentSubscription: Subscription | null = null;
     private route = inject(ActivatedRoute);
     private cdr = inject(ChangeDetectorRef);
     private authService = inject(AuthService);
@@ -9797,10 +10138,16 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
     private injector = inject(Injector);
 
     ngOnInit(): void {
-        this.definition = this.route.snapshot.data['definition'];
-        if (!this.definition) {
+        const defData = this.route.snapshot.data['definition'];
+
+        if (!defData) {
             console.error('[PageComponentWrapper] No se encontró la definición de página en los datos de la ruta.');
             return;
+        }
+
+        this.definition = { ...defData };
+        if (defData.actions) {
+            this.definition.actions = defData.actions.map(action => ({ ...action }));
         }
 
         const i18n = this.i18nService.getDictionary(this.definition.i18n.name);
@@ -9832,7 +10179,6 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
 
     private loadDynamicComponent(): void {
         if (!this.definition || !this.definition.component || !this.contentContainer) {
-            console.error("No se puede cargar el componente dinámico: falta definición, componente o contenedor.");
             return;
         }
 
@@ -9841,13 +10187,25 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
             injector: this.injector
         });
 
-        if (componentRef.instance && typeof componentRef.instance.onAction === 'function') {
+        if (componentRef.instance) {
             this.componentInstance = componentRef.instance;
-        } else {
-            console.warn(`El componente ${this.definition.component.name} no parece implementar la interfaz 'CustomPageComponent' con el método 'onAction'. Las acciones del header podrían no funcionar.`);
+            if (this.componentInstance.actionStateChange) {
+                this.componentSubscription = this.componentInstance.actionStateChange
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe((update) => {
+                        this.updateActionState(update.key, update.changes);
+                    });
+            }
         }
-
         this.cdr.detectChanges();
+    }
+
+    private updateActionState(key: string, changes: Partial<ActionDef>): void {
+        const action = this.definition.actions?.find(a => a.actionNameKey === key);
+        if (action) {
+            Object.assign(action, changes);
+            this.cdr.markForCheck();
+        }
     }
 
     ngOnDestroy(): void {
@@ -9856,11 +10214,10 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
     }
 
     getVisibleActions(): ActionDef[] {
-        if (!this.definition.actions) {
-            return [];
-        }
+        if (!this.definition.actions) return [];
+
         return this.definition.actions.filter(action =>
-            this.authService.hasPermission(action.actionSecurity)
+            this.authService.hasPermission(action.actionSecurity) && !action.hidden
         );
     }
 
@@ -10866,6 +11223,13 @@ export const FWK_I18N_DEF = {
     return_to: 'Volver a',
     success_message: '¡Operación exitosa!',
     year_label: 'Año',
+
+    // --- File Uploader ---
+    file_uploader_default_title: 'Cargar archivo',
+    file_uploader_default_description: 'Arrastra tu archivo aquí o haz click para buscar en tu equipo',
+    file_uploader_processing: 'Procesando archivo...',
+    file_uploader_click_to_replace: 'Click en el área para agregar o reemplazar',
+    file_uploader_remove: 'Quitar archivo',
 
     // --- Autenticación y Seguridad ---
     auth_email_not_specified: 'Email no especificado',
@@ -12655,7 +13019,7 @@ export class EmptyLayoutComponent implements OnDestroy
 
     <ng-container fuseVerticalNavigationContentHeader>
         <div [routerLink]="'/'" class="flex items-center cursor-pointer justify-center h-20">
-            <fwk-logo size="small" imgClass="w-8"></fwk-logo>
+            <fwk-logo size="small" imgClass="w-12"></fwk-logo>
         </div>
     </ng-container>
 
@@ -12822,6 +13186,12 @@ export class ActionDef {
   actionName?: string;
   title?: string;
   icon?: string;
+
+  color?: 'primary' | 'accent' | 'warn';
+  appearance?: 'stroked' | 'flat' | 'basic' | 'icon';
+  hidden?: boolean;
+  disabled?: boolean;
+
   form?: DynamicField<any>[];
   formDef?: FormDef;
   actionType?: string;
@@ -13126,6 +13496,7 @@ export interface ColumnDef {
     icon?: string;
     group?: string; 
     showInMenu?: boolean;
+    order?: number;
 }
 
 --- FILE: @fwk/model/component-def/page-component-def.ts ---
@@ -13678,13 +14049,12 @@ export class I18n {
 
 --- FILE: @fwk/model/page-component.interface.ts ---
 
+import { EventEmitter } from '@angular/core';
 import { ActionDef } from './component-def/action-def';
 
 export interface CustomPageComponent {
-    /**
-     * @param action
-     */
     onAction(action: ActionDef): void;
+    actionStateChange?: EventEmitter<{ key: string, changes: Partial<ActionDef> }>;
 }
 
 --- FILE: @fwk/model/page-entity.ts ---
@@ -19897,6 +20267,10 @@ import { Navigation, NavigationGroup } from './navigation.types';
 import { FWK_CRUD_MODULES_LOADER, FWK_NAVIGATION_GROUPS } from './navigation.tokens';
 import { AbstractAuthService } from '@fwk/auth/abstract-auth.service';
 
+interface ExtendedNavigationItem extends FuseNavigationItem {
+    order?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NavigationService {
     private _navigation: ReplaySubject<Navigation> = new ReplaySubject<Navigation>(1);
@@ -19937,11 +20311,21 @@ export class NavigationService {
         }).filter(Boolean) as CrudDef[];
     }
 
-    private sortNavigationItems = (a: FuseNavigationItem, b: FuseNavigationItem): number => {
+    private sortNavigationItems = (a: ExtendedNavigationItem, b: ExtendedNavigationItem): number => {
+        if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+        }
+        if (a.order !== undefined && b.order === undefined) {
+            return -1;
+        }
+        if (b.order !== undefined && a.order === undefined) {
+            return 1;
+        }
+
         const typeWeights = {
-            'basic': 1,
+            'group': 1,
             'collapsable': 2,
-            'group': 3
+            'basic': 3
         };
 
         const aWeight = typeWeights[a.type] || 10;
@@ -19951,27 +20335,30 @@ export class NavigationService {
             return aWeight - bWeight;
         }
 
-        return a.title.localeCompare(b.title);
+        return (a.title || '').localeCompare(b.title || '');
     };
 
     private async buildDynamicNavigation(): Promise<FuseNavigationItem[]> {
         const crudDefs = await this.loadAllCrudDefs();
 
-        const menuGeneralGroup: FuseNavigationItem = {
+        const menuGeneralGroup: ExtendedNavigationItem = {
             id: 'menu-general',
             title: 'Menú General',
             type: 'group',
             children: [],
+            order: 0
         };
 
-        const collapsibleMenus = new Map<string, FuseNavigationItem>();
-        this.navigationGroups.forEach((groupDef: NavigationGroup) => {
+        const collapsibleMenus = new Map<string, ExtendedNavigationItem>();
+        
+          this.navigationGroups.forEach((groupDef: NavigationGroup) => {
             collapsibleMenus.set(groupDef.id, {
                 id: groupDef.id,
                 title: groupDef.title,
-                type: 'collapsable',
+                type: groupDef.type || 'collapsable', 
                 icon: groupDef.icon,
                 children: [],
+                order: (groupDef as any).order 
             });
         });
 
@@ -19991,12 +20378,13 @@ export class NavigationService {
                 }
             }
 
-            const navItem: FuseNavigationItem = {
+            const navItem: ExtendedNavigationItem = {
                 id: navDef.id,
                 title: translatedTitle,
                 type: 'basic',
                 icon: navDef.icon,
                 link: navDef.url,
+                order: navDef.order
             };
 
             if (navDef.group) {
@@ -20005,7 +20393,8 @@ export class NavigationService {
                 let parentMenu = collapsibleMenus.get(rootGroupId);
 
                 if (!parentMenu) {
-                    console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado.`);
+                    console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado para ${navDef.id}.`);
+                    menuGeneralGroup.children?.push(navItem);
                     return;
                 }
 
@@ -20021,7 +20410,7 @@ export class NavigationService {
                         };
                         parentMenu.children?.push(subGroup);
                     }
-                    parentMenu = subGroup;
+                    parentMenu = subGroup as ExtendedNavigationItem;
                 }
                 parentMenu.children?.push(navItem);
 
@@ -20030,17 +20419,23 @@ export class NavigationService {
             }
         });
 
+        const rootItems: ExtendedNavigationItem[] = [];
+
         collapsibleMenus.forEach(menu => {
             if (menu.children && menu.children.length > 0) {
-                menuGeneralGroup.children?.push(menu);
+                menu.children.sort(this.sortNavigationItems);
+                rootItems.push(menu);
             }
         });
 
-        if (menuGeneralGroup.children) {
+        if (menuGeneralGroup.children && menuGeneralGroup.children.length > 0) {
             menuGeneralGroup.children.sort(this.sortNavigationItems);
+            rootItems.push(menuGeneralGroup);
         }
 
-        return [menuGeneralGroup];
+        rootItems.sort(this.sortNavigationItems);
+
+        return rootItems;
     }
 }
 
@@ -26296,7 +26691,7 @@ export class AppComponent {
 
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common'; 
-import localeEs from '@angular/common/locales/es';
+import localeEsAr from '@angular/common/locales/es';
 
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -26311,7 +26706,7 @@ import { provideFwkCore } from '@fwk/providers/core.provider';
 import { provideAppNavigation } from '@fwk/navigation/navigation.provider';
 import { provideFwkBranding } from '@fwk/providers/config.provider';
 
-registerLocaleData(localeEs, 'es');
+registerLocaleData(localeEsAr, 'es-AR');
 
 function getInitialScheme(): Scheme {
     const storedScheme = localStorage.getItem('fuse-theme-scheme');
@@ -26323,7 +26718,7 @@ function getInitialScheme(): Scheme {
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        { provide: LOCALE_ID, useValue: 'es' }, 
+        { provide: LOCALE_ID, useValue: 'es-AR' },
 
         provideAnimations(),
         provideHttpClient(withInterceptorsFromDi()),
@@ -26476,6 +26871,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/cierre_mes/cierre_mes.def')
     },
     {
+        path: 'fichado-procesamiento',
+        loader: () => import('app/resources/fichado_procesamiento/fichado_procesamiento.def')
+    },
+    {
         path: 'generar-qr',
         loader: () => import('app/resources/generar_qr/generar_qr.def')
     },
@@ -26488,12 +26887,20 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/item_checklist_grupo/item_checklist_grupo.def')
     },
     {
+        path: 'novedades-contador',
+        loader: () => import('app/resources/novedades_contador/novedades_contador.def')
+    },
+    {
         path: 'permiso',
         loader: () => import('app/resources/permiso/permiso.def')
     },
     {
         path: 'recibos',
         loader: () => import('app/resources/recibos/recibos.def')
+    },
+    {
+        path: 'recibos-procesamiento',
+        loader: () => import('app/resources/recibos_procesamiento/recibos_procesamiento.def')
     },
     {
         path: 'reporteHorasMaquina',
@@ -26520,11 +26927,14 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
 export async function loadAllCrudDefs(): Promise<CrudDef[]> {
     const loaderPromises = [
         import('app/resources/cierre_mes/cierre_mes.def'),
+        import('app/resources/fichado_procesamiento/fichado_procesamiento.def'),
         import('app/resources/generar_qr/generar_qr.def'),
         import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def'),
         import('app/resources/item_checklist_grupo/item_checklist_grupo.def'),
+        import('app/resources/novedades_contador/novedades_contador.def'),
         import('app/resources/permiso/permiso.def'),
         import('app/resources/recibos/recibos.def'),
+        import('app/resources/recibos_procesamiento/recibos_procesamiento.def'),
         import('app/resources/reporte_horas_maquina/reporte_horas_maquina.def'),
         import('app/resources/seguridad_grupo/seguridad_grupo.def'),
         import('app/resources/seguridad_grupo_permiso/seguridad_grupo_permiso.def'),
@@ -26562,7 +26972,7 @@ export async function loadCrudDefByPath(path: string): Promise<CrudDef | null> {
                     ¡Hola {{ user.name }}!
                 </h1>
                 <p class="mt-3 text-lg md:text-xl text-secondary max-w-2xl">
-                    Bienvenido al panel de administración de PREMEC. ¿Qué te gustaría hacer hoy?
+                    Bienvenido al panel de administración de PREMEC. <br/>¿Qué te gustaría hacer hoy?
                 </p>
             </div>
         </div>
@@ -26629,7 +27039,7 @@ export async function loadCrudDefByPath(path: string): Promise<CrudDef | null> {
 
 --- FILE: app/modules/welcome/welcome.component.ts ---
 
-import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { User } from '@fwk/auth/user.types';
@@ -26637,6 +27047,8 @@ import { UserService } from '@fwk/auth/user.service';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { WELCOME_DATA } from './welcome.data';
+import { WelcomeSection } from './welcome.types';
+import { AuthService } from '@fwk/auth/auth.service';
 
 @Component({
     selector: 'welcome',
@@ -26647,13 +27059,37 @@ import { WELCOME_DATA } from './welcome.data';
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WelcomeComponent {
+export class WelcomeComponent implements OnInit {
     user$: Observable<User>;
-    sections = WELCOME_DATA;
+    sections: WelcomeSection[] = [];
+
     private _userService = inject(UserService);
+    private _authService = inject(AuthService);
 
     constructor() {
         this.user$ = this._userService.user$;
+    }
+
+    ngOnInit(): void {
+        this.filterSectionsByPermission();
+    }
+
+    private filterSectionsByPermission(): void {
+        const filteredSections = WELCOME_DATA.map(section => {
+            const allowedItems = section.items.filter(item => {
+                if (!item.permission) {
+                    return true;
+                }
+                return this._authService.hasPermission(item.permission);
+            });
+
+            return {
+                ...section,
+                items: allowedItems
+            };
+        });
+
+        this.sections = filteredSections.filter(section => section.items.length > 0);
     }
 }
 
@@ -26663,215 +27099,106 @@ import { WelcomeSection } from './welcome.types';
 
 export const WELCOME_DATA: WelcomeSection[] = [
     {
-        title: 'Gestión de Contenidos',
+        title: 'Gestión de RRHH',
         items: [
             {
-                title: 'Contenidos',
-                description: 'Administra artículos, noticias y páginas institucionales.',
+                title: 'Recibos',
+                description: 'Consulta y descarga de recibos de sueldo.',
+                icon: 'heroicons_outline:currency-dollar',
+                route: '/recibos',
+                color: 'green',
+                permission: 'RECIBOS_SECURITY_READ'
+            },
+            {
+                title: 'Procesar Recibos',
+                description: 'Carga y procesamiento masivo de recibos.',
+                icon: 'heroicons_outline:document-arrow-up',
+                route: '/recibos-procesamiento',
+                color: 'teal',
+                permission: 'RECIBOS_PROCESAMIENTO_READ'
+            },
+            {
+                title: 'Cierre de Mes',
+                description: 'Gestión y control del cierre mensual.',
+                icon: 'heroicons_outline:calendar-days',
+                route: '/cierre-mes',
+                color: 'blue',
+                permission: 'CIERRE_MES_READ'
+            },
+            {
+                title: 'Procesar Fichados',
+                description: 'Importación y análisis de fichadas.',
+                icon: 'heroicons_outline:clock',
+                route: '/fichado-procesamiento',
+                color: 'indigo',
+                permission: 'FICHADO_PROCESAMIENTO_READ'
+            },
+            {
+                title: 'Novedades Contador',
+                description: 'Reporte de novedades para liquidación.',
+                icon: 'heroicons_outline:calculator',
+                route: '/novedades-contador',
+                color: 'purple',
+                permission: 'NOVEDADES_CONTADOR_READ'
+            }
+        ]
+    },
+    {
+        title: 'Gestión de Actividades',
+        items: [
+            {
+                title: 'Grupos de Actividad',
+                description: 'Configuración de grupos por tipo de actividad.',
+                icon: 'heroicons_outline:list-bullet',
+                route: '/gruposTipoActividad',
+                color: 'orange',
+                permission: 'GRUPOS_TIPO_ACTIVIDAD_READ'
+            },
+            {
+                title: 'Reporte Horas Máquina',
+                description: 'Informe detallado de horas máquina.',
                 icon: 'heroicons_outline:document-text',
-                route: '/contenido',
-                color: 'primary'
+                route: '/reporteHorasMaquina',
+                color: 'cyan',
+                permission: 'REPORTE_HORAS_MAQUINA_READ'
             },
             {
-                title: 'Revistas Digitales',
-                description: 'Gestión de ediciones de revistas y sus artículos.',
-                icon: 'heroicons_outline:book-open',
-                route: '/Revistas',
-                color: 'primary'
-            },
-            {
-                title: 'Noticias Carrousel',
-                description: 'Configura las noticias destacadas del home.',
-                icon: 'heroicons_outline:document',
-                route: '/noticiaCarrousel',
-                color: 'indigo'
-            },
-            {
-                title: 'Secciones',
-                description: 'Estructura del sitio y agrupación de contenidos.',
-                icon: 'heroicons_outline:squares-2x2',
-                route: '/seccion',
-                color: 'indigo'
-            },
-            {
-                title: 'Banners',
-                description: 'Publicidad y banners rotativos.',
-                icon: 'heroicons_outline:photo',
-                route: '/banner',
-                color: 'purple'
-            },
-            {
-                title: 'Modal Home',
-                description: 'Ventanas emergentes para avisos importantes.',
-                icon: 'heroicons_outline:window',
-                route: '/modalHome',
-                color: 'purple'
+                title: 'Generar QR',
+                description: 'Generación de códigos QR de servicio.',
+                icon: 'heroicons_outline:qr-code',
+                route: '/generar-qr',
+                color: 'slate',
+                permission: 'GENERAR_QR_READ'
             }
         ]
     },
     {
-        title: 'Matrículas y Personas',
+        title: 'Seguridad y Usuarios',
         items: [
             {
-                title: 'Búsqueda de Contactos',
-                description: 'Gestión centralizada de personas y matriculados.',
-                icon: 'heroicons_outline:identification',
-                route: '/identificacionBusqueda',
-                color: 'teal'
-            },
-            {
-                title: 'Prematriculación',
-                description: 'Bandeja de entrada de trámites de prematriculación.',
-                icon: 'heroicons_outline:clipboard-document-check', // Icono sugerido
-                route: '/prematriculacion',
-                color: 'teal'
-            },
-            {
-                title: 'Solicitudes de Fotos',
-                description: 'Aprobación de nuevas fotos de perfil.',
-                icon: 'heroicons_outline:camera', // Icono basado en el contexto
-                route: '/contactImageTemp',
-                color: 'cyan'
-            },
-            {
-                title: 'Certificados',
-                description: 'Historial y emisión de certificados.',
-                icon: 'heroicons_outline:document-check', // Icono sugerido
-                route: '/CertificadoMatriculado',
-                color: 'cyan'
-            }
-        ]
-    },
-    {
-        title: 'Comunicación',
-        items: [
-            {
-                title: 'Campañas de Mailing',
-                description: 'Envíos masivos y seguimiento.',
-                icon: 'heroicons_outline:at-symbol',
-                route: '/mailing',
-                color: 'sky'
-            },
-            {
-                title: 'Boletines',
-                description: 'Armado y distribución de newsletters.',
-                icon: 'heroicons_outline:envelope',
-                route: '/boletin',
-                color: 'sky'
-            },
-            {
-                title: 'Listas de Contactos',
-                description: 'Segmentación de audiencias.',
+                title: 'Usuarios',
+                description: 'Administración de usuarios del sistema.',
                 icon: 'heroicons_outline:users',
-                route: '/ContactList',
-                color: 'blue'
+                route: '/users',
+                color: 'rose',
+                permission: 'USUARIOS_READ'
             },
             {
-                title: 'Plantillas de Mensajes',
-                description: 'Configuración de templates de email del sistema.',
-                icon: 'heroicons_outline:envelope-open',
-                route: '/messageTemplate',
-                color: 'blue'
-            }
-        ]
-    },
-    {
-        title: 'Ventas y Finanzas',
-        items: [
-            {
-                title: 'Operaciones',
-                description: 'Listado general de ventas y transacciones.',
-                icon: 'heroicons_outline:ticket',
-                route: '/ventas',
-                color: 'green'
-            },
-            {
-                title: 'Productos',
-                description: 'Catálogo de productos a la venta.',
-                icon: 'heroicons_outline:archive-box',
-                route: '/Producto',
-                color: 'green'
-            },
-            {
-                title: 'Cuotas Generales',
-                description: 'Configuración de valores y periodos.',
-                icon: 'heroicons_outline:receipt-percent',
-                route: '/cuotasGeneral',
-                color: 'emerald'
-            },
-            {
-                title: 'Categorías Venta',
-                description: 'Clasificación de productos.',
-                icon: 'heroicons_outline:squares-2x2',
-                route: '/Categoria',
-                color: 'emerald'
-            }
-        ]
-    },
-    {
-        title: 'Interacción y Herramientas',
-        items: [
-            {
-                title: 'Formularios',
-                description: 'Creador de formularios dinámicos.',
-                icon: 'heroicons_outline:clipboard-document-list',
-                route: '/formulario',
-                color: 'orange'
-            },
-            {
-                title: 'Inscriptos (Respuestas)',
-                description: 'Ver inscriptos y respuestas de formularios.',
-                icon: 'heroicons_outline:user-group', // Icono sugerido
-                route: '/formResponse',
-                color: 'orange'
-            },
-            {
-                title: 'Carga Masiva',
-                description: 'Herramienta para importación de archivos.',
-                icon: 'heroicons_outline:cloud-arrow-up',
-                route: '/upload-files',
-                color: 'amber'
-            },
-            {
-                title: 'Banco de Imágenes',
-                description: 'Repositorio central de imágenes.',
-                icon: 'heroicons_outline:photo',
-                route: '/imagen',
-                color: 'amber'
-            }
-        ]
-    },
-    {
-        title: 'Análisis y Sistema',
-        items: [
-            {
-                title: 'Estadísticas',
-                description: 'Panel general de métricas (Matrículas, Contenidos).',
-                icon: 'heroicons_outline:chart-pie',
-                route: '/estadisticasMatriculas',
-                color: 'rose'
-            },
-            {
-                title: 'Usuarios Admin',
-                description: 'Gestión de usuarios del sistema.',
+                title: 'Grupos de Seguridad',
+                description: 'Definición de roles y grupos.',
                 icon: 'heroicons_outline:user-group',
-                route: '/userAdmin',
-                color: 'slate'
+                route: '/seguridadgrupo',
+                color: 'red',
+                permission: 'SEGURIDAD_GRUPO_READ'
             },
             {
-                title: 'Roles y Permisos',
-                description: 'Configuración de seguridad y accesos.',
-                icon: 'heroicons_outline:lock-closed',
+                title: 'Permisos',
+                description: 'Catálogo de permisos del sistema.',
+                icon: 'heroicons_outline:key',
                 route: '/permiso',
-                color: 'slate'
+                color: 'pink',
+                permission: 'PERMISOS_READ'
             },
-            {
-                title: 'Cuentas de Correo',
-                description: 'Configuración de remitentes SMTP.',
-                icon: 'heroicons_outline:at-symbol',
-                route: '/emailAccount',
-                color: 'slate'
-            }
         ]
     }
 ];
@@ -26895,7 +27222,8 @@ export interface WelcomeCard {
     description: string;
     icon: string;
     route: string;
-    color: 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate'; 
+    color: 'red' | 'pink' | 'gray' | 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate'; 
+    permission?: string;
 }
 
 export interface WelcomeSection {
@@ -26948,30 +27276,34 @@ export const CIERRE_MES_DEF: PageComponentDef = {
     navigation: CIERRE_MES_NAV_DEF,
     security: CIERRE_MES_SECURITY_DEF,
     backButton: false,
-    actions: [
+     actions: [
         {
             actionNameKey: 'cierre_mes_guardar',
             actionType: 'custom_save_cierres',
             icon: 'heroicons_outline:check-circle',
-            actionSecurity: CIERRE_MES_SECURITY_DEF.updateAccess 
+            actionSecurity: CIERRE_MES_SECURITY_DEF.updateAccess,
+            hidden: true
         }
     ]
 };
 
 --- FILE: app/resources/cierre_mes/components/cierre-mes.component.html ---
 
-<div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900">
+<mat-expansion-panel class="shadow-none border-b rounded-none dark:bg-transparent z-20" [expanded]="panelOpenState"
+    (opened)="panelOpenState = true" (closed)="panelOpenState = false">
 
-    <div class="flex-none w-full bg-card border-b print:hidden z-20 shadow-sm relative">
-        <form [formGroup]="cierreForm" (ngSubmit)="vistaPrevia()"
-            class="flex flex-col sm:flex-row items-center p-4 gap-4">
+    <mat-expansion-panel-header class="px-4 sm:px-6">
+        <mat-panel-title class="flex items-center space-x-3">
+            <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <span class="font-semibold">{{ 'cierre_mes_busqueda' | translate:i18nName }}</span>
+        </mat-panel-title>
+        <mat-panel-description class="flex items-center justify-end">
+        </mat-panel-description>
+    </mat-expansion-panel-header>
 
-            <div class="hidden sm:flex items-center gap-2 text-secondary mr-2">
-                <mat-icon svgIcon="heroicons_outline:magnifying-glass"></mat-icon>
-                <span class="font-medium">Buscar</span>
-            </div>
-
-            <mat-form-field appearance="outline" class="w-full sm:w-64" subscriptSizing="dynamic">
+    <form [formGroup]="cierreForm" (ngSubmit)="vistaPrevia()" class="w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
                 <mat-label>{{ 'cierre_mes_mes' | translate:i18nName }}</mat-label>
                 <mat-select formControlName="mes">
                     <mat-option *ngFor="let mes of meses" [value]="mes.value">
@@ -26980,50 +27312,58 @@ export const CIERRE_MES_DEF: PageComponentDef = {
                 </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full sm:w-40" subscriptSizing="dynamic">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
                 <mat-label>{{ 'cierre_mes_anio' | translate:i18nName }}</mat-label>
                 <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
             </mat-form-field>
+        </div>
+        <button type="submit" hidden></button>
+    </form>
 
-            <div class="flex-auto"></div>
+    <mat-action-row class="p-4 sm:px-6">
+        <div class="flex items-center justify-end w-full space-x-2">
 
-            <button mat-flat-button color="primary" type="submit" [disabled]="cierreForm.invalid || loading"
-                class="w-full sm:w-auto h-10">
-                <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"
-                    class="mr-2"></mat-progress-spinner>
-                <mat-icon *ngIf="!loading" svgIcon="heroicons_outline:eye" class="mr-2"></mat-icon>
-                <span>{{ 'cierre_mes_vista_previa' | translate:i18nName }}</span>
+            <button mat-stroked-button type="button" (click)="limpiarFiltros()"
+                [matTooltip]="'cierre_mes_limpiar' | translate:i18nName">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'cierre_mes_limpiar' | translate:i18nName }}</span>
             </button>
-        </form>
 
-        <mat-progress-bar *ngIf="saving" mode="indeterminate" class="absolute bottom-0 w-full z-30"></mat-progress-bar>
-    </div>
+            <button mat-flat-button color="accent" type="button" (click)="vistaPrevia()"
+                [disabled]="cierreForm.invalid || loading"
+                [matTooltip]="'cierre_mes_vista_previa' | translate:i18nName">
 
-    <div class="flex-auto relative overflow-hidden bg-white h-full dark:bg-transparent flex flex-col">
+                <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!loading" class="icon-size-5"
+                    [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+
+                <span class="ml-2 hidden sm:inline" *ngIf="!loading">
+                    {{ 'cierre_mes_vista_previa' | translate:i18nName }}
+                </span>
+            </button>
+
+        </div>
+    </mat-action-row>
+
+    <mat-progress-bar *ngIf="saving" mode="indeterminate"
+        class="absolute bottom-0 left-0 w-full z-30"></mat-progress-bar>
+</mat-expansion-panel>
+
+<div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900">
+    <div class="flex-auto relative overflow-hidden h-full dark:bg-transparent flex flex-col">
 
         <div *ngIf="dataSource.data.length === 0"
-            class="flex-auto flex flex-col items-center h-full justify-center p-6 text-center">
+            class="flex-auto flex flex-col items-center h-full p-6 py-10 text-center">
             <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:circle-stack"></mat-icon>
-            <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">Sin resultados</div>
-            <div class="text-secondary mt-1 max-w-sm">Seleccione el período y genere una vista previa para comenzar.
+            <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">{{ 'cierre_mes_sin_resultados' |
+                translate:i18nName }}</div>
+            <div class="text-secondary mt-1 max-w-sm">{{ 'cierre_mes_sin_resultados_descripcion' | translate:i18nName }}
             </div>
         </div>
 
         <div *ngIf="dataSource.data.length > 0"
-            class="flex-auto overflow-auto container-table bg-white dark:bg-transparent">
-            <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="w-full">
-
-                <ng-container matColumnDef="expand">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="w-10 px-2 border-b bg-gray-50 dark:bg-gray-800 sticky top-0 z-10"></th>
-                    <td mat-cell *matCellDef="let element" class="px-2 border-b text-center w-10">
-                        <button mat-icon-button
-                            (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
-                            <mat-icon
-                                [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+            class="flex-auto overflow-auto container-table pb-20 dark:bg-transparent">
+            <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full">
 
                 <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
                     <th mat-header-cell *matHeaderCellDef class="text-sm">
@@ -27031,6 +27371,18 @@ export const CIERRE_MES_DEF: PageComponentDef = {
                     </th>
                     <td mat-cell *matCellDef="let element">
                         {{element[column]}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expand">
+                    <th mat-header-cell *matHeaderCellDef class="w-10 px-2 border-b">
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="px-2 border-b text-center w-10">
+                        <button mat-icon-button
+                            (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+                            <mat-icon
+                                [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                        </button>
                     </td>
                 </ng-container>
 
@@ -27110,8 +27462,7 @@ export const CIERRE_MES_DEF: PageComponentDef = {
                                             maxlength="200" />
                                     </mat-form-field>
 
-                                    <div
-                                        class="flex justify-center p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-10 items-center">
+                                    <div class="flex justify-center p-2 rounded h-10 items-center">
                                         <mat-slide-toggle [(ngModel)]="element.premioAsistencia" color="primary">
                                             {{ 'cierre_mes_premioasistencia' | translate:i18nName }}
                                         </mat-slide-toggle>
@@ -27124,7 +27475,7 @@ export const CIERRE_MES_DEF: PageComponentDef = {
 
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"></tr>
                 <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-                    class="element-row cursor-pointer hover:bg-primary-50 dark:hover:bg-gray-800/50 transition-colors"
+                    class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-800/50 transition-colors"
                     [class.bg-primary-50]="expandedElement === element"
                     [class.dark:bg-gray-800]="expandedElement === element"
                     (click)="expandedElement = expandedElement === element ? null : element">
@@ -27141,7 +27492,7 @@ export const CIERRE_MES_DEF: PageComponentDef = {
 
 --- FILE: app/resources/cierre_mes/components/cierre-mes.component.ts ---
 
-import { Component, OnInit, ViewChild, inject, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, ChangeDetectorRef, ViewEncapsulation, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -27155,8 +27506,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { map, Observable } from 'rxjs';
 
 import { NotificationService } from '@fwk/services/notification/notification.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
@@ -27183,6 +27537,8 @@ import { CierreMesService } from '../cierre-mes.service';
         MatPaginatorModule,
         MatSlideToggleModule,
         MatProgressBarModule,
+        MatExpansionModule,
+        MatTooltipModule,
         TranslatePipe
     ],
     templateUrl: './cierre-mes.component.html',
@@ -27197,6 +27553,7 @@ import { CierreMesService } from '../cierre-mes.service';
     ],
 })
 export class CierreMesComponent implements OnInit, CustomPageComponent {
+    @Output() actionStateChange = new EventEmitter<{ key: string, changes: Partial<ActionDef> }>();
 
     private _fb = inject(FormBuilder);
     private _notificationService = inject(NotificationService);
@@ -27220,6 +27577,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
     isMobile: boolean = false;
 
+    panelOpenState = true;
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
     ngOnInit(): void {
@@ -27242,6 +27600,10 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
             .subscribe(({ matchingAliases }) => {
                 this.isMobile = !matchingAliases.includes('md');
             });
+
+        if (this.isMobile) {
+            this.panelOpenState = false;
+        }
     }
 
     onAction(action: ActionDef): void {
@@ -27260,12 +27622,24 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
         }
         return value;
     }
+    limpiarFiltros(): void {
+        const currentDate = new Date();
+        this.cierreForm.patchValue({
+            mes: currentDate.getMonth() + 1,
+            anio: currentDate.getFullYear()
+        });
+        this.dataSource.data = [];
+        this.toggleSaveButton(false);
+        this.panelOpenState = true;
+    }
 
     vistaPrevia(): void {
         if (this.cierreForm.invalid) return;
 
+        this.toggleSaveButton(false);
         this.loading = true;
         this.dataSource.data = [];
+
         const { anio, mes } = this.cierreForm.value;
 
         this._cierreMesService.getPreview(anio, mes).subscribe({
@@ -27274,6 +27648,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
                 if (dataArray.length === 0) {
                     this._notificationService.notify(this.translate('cierre_mes_no_hay_resultados'));
+                    this.toggleSaveButton(false);
                     this.loading = false;
                     this._cdr.markForCheck();
                     return;
@@ -27291,12 +27666,17 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
                 this.dataSource.data = processedData;
                 setTimeout(() => this.dataSource.paginator = this.paginator);
 
+                this.toggleSaveButton(true);
                 this.loading = false;
+
+                this.panelOpenState = false;
+
                 this._cdr.markForCheck();
             },
             error: (error) => {
                 console.error(error);
                 this._notificationService.notifyError(this.translate('cierre_mes_error_vista_previa'));
+                this.toggleSaveButton(false);
                 this.loading = false;
                 this._cdr.markForCheck();
             }
@@ -27316,17 +27696,37 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
         const { anio, mes } = this.cierreForm.value;
 
+        this.actionStateChange.emit({
+            key: 'cierre_mes_guardar',
+            changes: { disabled: true }
+        });
+
         this._cierreMesService.saveCierres(this.dataSource.data, anio, mes).subscribe({
             next: () => {
                 this._notificationService.notifySuccess(this.translate('cierre_mes_exito_guardado'));
                 this.saving = false;
+                this.toggleSaveButton(false);
                 this._cdr.markForCheck();
             },
             error: (error) => {
                 console.error(error);
                 this._notificationService.notifyError(this.translate('cierre_mes_error_guardado'));
                 this.saving = false;
+                this.actionStateChange.emit({
+                    key: 'cierre_mes_guardar',
+                    changes: { disabled: false }
+                });
                 this._cdr.markForCheck();
+            }
+        });
+    }
+
+    private toggleSaveButton(show: boolean): void {
+        this.actionStateChange.emit({
+            key: 'cierre_mes_guardar',
+            changes: {
+                hidden: !show,
+                disabled: false
             }
         });
     }
@@ -27342,19 +27742,23 @@ export const CIERRE_MES_I18N_DEF: I18n = {
     words: {
         page_title: 'Cierre de Mes',
         cierre_mes_nav_def: 'Cierre de Mes',
-        
+
         cierre_mes_mes: 'Mes',
         cierre_mes_anio: 'Año',
         cierre_mes_error_anio: 'El año debe ser entre 2001 y {{year}}',
         cierre_mes_vista_previa: 'Vista Previa',
         cierre_mes_guardar: 'Guardar Cierres',
         cierre_mes_cargando: 'Cargando...',
-        
+        cierre_mes_sin_resultados: 'Sin resultados',
+        cierre_mes_sin_resultados_descripcion: 'Seleccione el período y genere una vista previa para comenzar.',
+        cierre_mes_busqueda: 'Búsqueda',
+        cierre_mes_limpiar: 'Limpiar',
+
         cierre_mes_exito_guardado: 'Los cierres se han guardado correctamente.',
         cierre_mes_error_guardado: 'Ocurrió un error al guardar los cierres.',
         cierre_mes_error_vista_previa: 'Ocurrió un error al obtener la vista previa.',
         cierre_mes_no_hay_resultados: 'No se encontraron resultados para el período seleccionado.',
-        
+
         cierre_mes_legajo: 'Legajo',
         cierre_mes_usuariosap: 'Usuario SAP',
         cierre_mes_nombre: 'Nombre',
@@ -27363,7 +27767,7 @@ export const CIERRE_MES_I18N_DEF: I18n = {
         cierre_mes_fichadohora: 'Hs. Fichado',
         cierre_mes_efectividad: 'Efectividad',
         cierre_mes_cumplimientoobjetivo: 'Cumplimiento Obj.',
-        
+
         cierre_mes_cantmb: 'MB',
         cierre_mes_cantb: 'B',
         cierre_mes_cantr: 'R',
@@ -27372,7 +27776,7 @@ export const CIERRE_MES_I18N_DEF: I18n = {
         cierre_mes_cantidadactividades: 'Actividades',
         cierre_mes_porcentajevaloracion: '% Valoración',
         cierre_mes_objetivoactividades: 'Objetivo Act.',
-        
+
         cierre_mes_viaticos: 'Viáticos',
         cierre_mes_adelanto: 'Adelanto',
         cierre_mes_prestamo: 'Préstamo',
@@ -27391,7 +27795,8 @@ export const CIERRE_MES_NAV_DEF: NavigationDef = {
     url: '/cierre-mes',
     icon: 'heroicons_outline:calendar-days',
     group: null,
-    showInMenu: true
+    showInMenu: true,
+    order: 6
 };
 
 --- FILE: app/resources/cierre_mes/security/cierre_mes.security.ts ---
@@ -27405,18 +27810,590 @@ export const CIERRE_MES_SECURITY_DEF: SecurityDef = {
     deleteAccess: 'CIERRE_MES_DELETE'
 };
 
+--- FILE: app/resources/fichado_procesamiento/components/fichado-procesamiento.component.html ---
+
+<div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900">
+
+    <mat-card class="w-full bg-card shadow-none rounded-none overflow-hidden">
+        <div class="px-6 py-4">
+            
+            <fwk-file-uploader
+                [accept]="'.xlsx, .xls'"
+                [title]="'FICHADO_PROCESAMIENTO_CARGA_SECTION_SELECT_EXCEL' | translate:i18nName"
+                [description]="'Arrastra tu archivo aquí o haz click para buscar en tu equipo (.xlsx, .xls)'"
+                [icon]="'heroicons_outline:cloud-arrow-up'"
+                [isLoading]="isProcessingExcel"
+                [loadingText]="'FICHADO_PROCESAMIENTO_PROCESANDO' | translate:i18nName"
+                (fileSelected)="onFileSelected($event)">
+            </fwk-file-uploader>
+
+        </div>
+    </mat-card>
+
+    <div class="flex-auto border border-t overflow-hidden" *ngIf="isProcessed">
+        <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="w-full bg-transparent">
+                <ng-container matColumnDef="legajo">
+                    <th mat-header-cell *matHeaderCellDef class="bg-gray-50/80 dark:bg-gray-800 text-sm">
+                        {{ 'FICHADO_PROCESAMIENTO_TABLE_EMPLEADO_LEGAJO' | translate:i18nName }}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="px-6 py-4 font-mono text-sm">
+                        {{element.legajo}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombreCompleto">
+                    <th mat-header-cell *matHeaderCellDef class="bg-gray-50/80 dark:bg-gray-800 text-sm">
+                        {{ 'FICHADO_PROCESAMIENTO_TABLE_EMPLEADO_NOMBRE_COMPLETO' | translate:i18nName }}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="px-6 py-4 font-medium">
+                        {{element.nombreCompleto}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expand">
+                    <th mat-header-cell *matHeaderCellDef class="w-10 bg-gray-50/80 dark:bg-gray-800 text-sm"> </th>
+                    <td mat-cell *matCellDef="let element" class="px-2 text-center">
+                        <button mat-icon-button (click)="expandRow(element); $event.stopPropagation()">
+                            <mat-icon
+                                [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expandedDetail">
+                    <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"
+                        class="p-0 border-0">
+                        <div class="overflow-hidden dark:bg-gray-900 border-t border-b border-gray-200 dark:border-gray-700"
+                            [@detailExpand]="element === expandedElement ? 'expanded' : 'collapsed'">
+
+                            <div class="overflow-x-auto">
+                                <table mat-table [dataSource]="element.fichados"
+                                    class="w-full bg-transparent inner-table">
+
+                                    <ng-container matColumnDef="dia">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_DIA' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.dia}}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="fecha">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_FECHA' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm whitespace-nowrap">
+                                            {{fichado.fecha}}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="entrada1">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_ENTRADA1' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.entrada1}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="salida1">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_SALIDA1' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.salida1}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="entrada2">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_ENTRADA2' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.entrada2}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="salida2">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_SALIDA2' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.salida2}}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="totalDia">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase bg-primary-50/50 dark:bg-primary-900/10">
+                                            {{ 'FICHADO_PROCESAMIENTO_TABLE_DETALLE_TOTAL_DIA' | translate:i18nName }}
+                                        </th>
+                                        <td mat-cell *matCellDef="let fichado"
+                                            class="text-sm font-medium bg-primary-50/50 dark:bg-primary-900/10">
+                                            {{fichado.totalDia}}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="descanso">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_DESCANSO' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.descanso}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="normal">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_NORMAL' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.normal}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="extra50">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_EXTRA50' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.extra50}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="extra100">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_EXTRA100' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm">{{fichado.extra100}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="tarde">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_TARDE' | translate:i18nName }}</th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm text-red-500 font-medium">
+                                            {{fichado.tarde}}</td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="comentarios">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="text-xs font-semibold text-secondary uppercase min-w-[200px]">{{
+                                            'FICHADO_PROCESAMIENTO_TABLE_DETALLE_COMENTARIOS' | translate:i18nName }}
+                                        </th>
+                                        <td mat-cell *matCellDef="let fichado" class="text-sm italic text-secondary">
+                                            {{fichado.comentarios}}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="fichadosDisplayedColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: fichadosDisplayedColumns;"
+                                        class="bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800"></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+                <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+                    class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    [class.bg-gray-50]="expandedElement === element"
+                    [class.dark:bg-gray-800]="expandedElement === element" (click)="expandRow(element)">
+                </tr>
+                <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="h-0"></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+--- FILE: app/resources/fichado_procesamiento/components/fichado-procesamiento.component.ts ---
+
+import { Component, OnInit, inject, ChangeDetectorRef, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
+import { FileUploaderComponent } from '@fwk/components/file-uploader/file-uploader.component';
+import { FichadoProcesamientoService } from '../fichado-procesamiento.service';
+import { FichadoEmpleado, FichadoDetalle, Empleado, FichadoApiResponse } from '../fichado-procesamiento.models';
+import { NotificationService } from '@fwk/services/notification/notification.service';
+import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { CustomPageComponent } from '@fwk/model/page-component.interface';
+import { ActionDef } from '@fwk/model/component-def/action-def';
+import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+
+@Component({
+    selector: 'app-fichado-procesamiento',
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatTableModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        TranslatePipe,
+        FileUploaderComponent
+    ],
+    templateUrl: './fichado-procesamiento.component.html',
+    styleUrls: ['./fichado-procesamiento.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed, void', style({ height: '0px', minHeight: '0', display: 'none' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+    ],
+})
+export class FichadoProcesamientoComponent implements OnInit, CustomPageComponent {
+    @Output() actionStateChange = new EventEmitter<{ key: string, changes: Partial<ActionDef> }>();
+
+    private _fichadoService = inject(FichadoProcesamientoService);
+    private _notificationService = inject(NotificationService);
+    private _i18nService = inject(I18nService);
+    private _dialog = inject(MatDialog);
+    private _cdr = inject(ChangeDetectorRef);
+
+    i18nName = 'FICHADO_PROCESAMIENTO_I18N_DEF';
+    readonly ACTION_SEND_KEY = 'FICHADO_PROCESAMIENTO_RESULTADOS_SECTION_SEND_BUTTON';
+
+    jsonData: FichadoEmpleado[] = [];
+    selectedFile: File | null = null;
+    fileName: string = '';
+    isProcessed: boolean = false;
+    isProcessingExcel: boolean = false;
+    isSendingToSap: boolean = false;
+
+    dataSource = new MatTableDataSource<Empleado>([]);
+    expandedElement: Empleado | null;
+    columnsToDisplay = ['legajo', 'nombreCompleto'];
+    columnsToDisplayWithExpand = [ 'expand', ...this.columnsToDisplay ];
+
+    fichadosDisplayedColumns: string[] = [
+        'dia', 'fecha', 'entrada1', 'salida1', 'entrada2', 'salida2',
+        'totalDia', 'descanso', 'normal', 'extra50', 'extra100',
+        'tarde', 'comentarios'
+    ];
+
+    ngOnInit(): void {
+        this.toggleSendButton(false);
+    }
+
+    onAction(action: ActionDef): void {
+        if (action.actionType === 'custom_send_sap') {
+            this.sendToSap();
+        }
+    }
+
+    private translate(key: string): string {
+        return this._i18nService.getDictionary(this.i18nName)?.translate?.(key) || key;
+    }
+
+    private toggleSendButton(show: boolean, disabled: boolean = false): void {
+        this.actionStateChange.emit({
+            key: this.ACTION_SEND_KEY,
+            changes: {
+                hidden: !show,
+                disabled: disabled
+            }
+        });
+    }
+
+    onFileSelected(fileOrFiles: File | File[] | null): void {
+        if (fileOrFiles && !Array.isArray(fileOrFiles)) {
+            this.selectedFile = fileOrFiles;
+            this.fileName = this.selectedFile.name;
+            
+            this.isProcessed = false;
+            this.jsonData = [];
+            this.dataSource.data = [];
+            this.toggleSendButton(false); 
+
+            this.processExcel();
+        } else {
+            this.selectedFile = null;
+            this.fileName = '';
+            this.dataSource.data = [];
+            this.isProcessed = false;
+            this.toggleSendButton(false);
+        }
+    }
+
+    private fileToBase64(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64String = (reader.result as string).split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = error => reject(error);
+        });
+    }
+
+     async processExcel(): Promise<void> {
+        if (!this.selectedFile) {
+            return;
+        }
+
+        this.isProcessingExcel = true;
+        this.toggleSendButton(false);
+        this._cdr.markForCheck();
+
+        try {
+            const base64FileWithMime = await this.fileToBase64(this.selectedFile);
+
+            this._fichadoService.processExcel(base64FileWithMime).subscribe({
+                next: (response: FichadoApiResponse) => {
+                    const datosFichados = response.data;
+                    this.jsonData = datosFichados;
+
+                    const employeeData: Empleado[] = datosFichados.map(item => ({
+                        ...item.empleado,
+                        nombreCompleto: `${item.empleado.nombre} ${item.empleado.apellido}`,
+                        fichados: new MatTableDataSource<FichadoDetalle>(item.fichados)
+                    }));
+
+                    this.dataSource.data = employeeData;
+                    this.isProcessed = true;
+                    this.isProcessingExcel = false;
+                    
+                    this.toggleSendButton(true);
+                    this._notificationService.notifySuccess(this.translate('FICHADO_PROCESAMIENTO_MSG_SUCCESS_PROCESS'));
+                    this._cdr.markForCheck();
+                },
+                error: (err) => {
+                    this.isProcessingExcel = false;
+                    this.fileName = '';
+                    this.selectedFile = null;
+                    this._notificationService.notifyError(this.translate('FICHADO_PROCESAMIENTO_MSG_ERROR_PROCESS'));
+                    console.error(err);
+                    this._cdr.markForCheck();
+                }
+            });
+        } catch (error) {
+            this.isProcessingExcel = false;
+            this.fileName = '';
+            this.selectedFile = null;
+            this._notificationService.notifyError(this.translate('FICHADO_PROCESAMIENTO_MSG_ERROR_BASE64'));
+            console.error(error);
+            this._cdr.markForCheck();
+        }
+    }
+
+
+    sendToSap(): void {
+        if (!this.jsonData || this.jsonData.length === 0) {
+            this._notificationService.notifyError(this.translate('FICHADO_PROCESAMIENTO_MSG_NO_DATA'));
+            return;
+        }
+
+        this.isSendingToSap = true;
+        
+        this.toggleSendButton(true, true); 
+        this._cdr.markForCheck();
+
+        const payload = {
+            fichados: this.jsonData
+        };
+
+        this._fichadoService.enviarFichados(payload).subscribe({
+            next: (response) => {
+                this.isSendingToSap = false;
+                this._notificationService.notifySuccess(this.translate('FICHADO_PROCESAMIENTO_MSG_SUCCESS_SEND'));
+
+                this.isProcessed = false;
+                this.jsonData = [];
+                this.dataSource.data = [];
+                this.selectedFile = null;
+                this.fileName = '';
+                
+                this.toggleSendButton(false);
+                this._cdr.markForCheck();
+            },
+            error: (err) => {
+                this.isSendingToSap = false;
+                this._notificationService.notifyError(this.translate('FICHADO_PROCESAMIENTO_MSG_ERROR_SEND'));
+                
+                this.toggleSendButton(true, false);
+                
+                console.error(err);
+                this._cdr.markForCheck();
+            }
+        });
+    }
+
+    expandRow(element: Empleado): void {
+        this.expandedElement = this.expandedElement === element ? null : element;
+    }
+}
+
+--- FILE: app/resources/fichado_procesamiento/fichado-procesamiento.models.ts ---
+
+import { MatTableDataSource } from "@angular/material/table";
+
+export interface FichadoApiResponse {
+    status: string;
+    data: FichadoEmpleado[];
+}
+
+export interface FichadoEmpleado {
+    empleado: Empleado;
+    fichados: FichadoDetalle[];
+}
+
+export interface Empleado {
+    username: string;
+    nombre: string;
+    apellido: string;
+    usuarioSap: string;
+    legajo: number;
+    nombreCompleto?: string;
+    fichados?: MatTableDataSource<FichadoDetalle>;
+}
+
+export interface FichadoDetalle {
+    dia: string;
+    fecha: string;
+    entrada1: string;
+    salida1: string;
+    entrada2: string;
+    salida2: string;
+    totalDia: string;
+    descanso: string;
+    normal: string;
+    extra50: string;
+    extra100: string;
+    tarde: string;
+    comentarios: string;
+}
+
+export interface FichadoSendPayload {
+    fichados: FichadoEmpleado[];
+}
+
+--- FILE: app/resources/fichado_procesamiento/fichado-procesamiento.service.ts ---
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { PREFIX_DOMAIN_API } from 'environments/environment';
+import { FichadoApiResponse, FichadoSendPayload } from './fichado-procesamiento.models';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class FichadoProcesamientoService {
+    private _http = inject(HttpClient);
+    private readonly API_URL_PROCESS = `${PREFIX_DOMAIN_API}procesarExcel`;
+    private readonly API_URL_SEND_SAP = `${PREFIX_DOMAIN_API}enviarFichados`;
+
+    processExcel(base64File: string): Observable<FichadoApiResponse> {
+        const requestBody = {
+            file: base64File
+        };
+        return this._http.post<FichadoApiResponse>(this.API_URL_PROCESS, requestBody);
+    }
+
+    enviarFichados(data: FichadoSendPayload): Observable<any> {
+        return this._http.post(this.API_URL_SEND_SAP, data);
+    }
+}
+
+--- FILE: app/resources/fichado_procesamiento/fichado_procesamiento.def.ts ---
+
+import { PageComponentDef } from '@fwk/model/component-def/page-component-def';
+import { FICHADO_PROCESAMIENTO_SECURITY_DEF } from './security/fichado_procesamiento.security';
+import { FICHADO_PROCESAMIENTO_NAV_DEF } from './navigation/fichado_procesamiento.nav';
+import { FICHADO_PROCESAMIENTO_I18N_DEF } from './i18n/fichado_procesamiento.i18n';
+import { FichadoProcesamientoComponent } from './components/fichado-procesamiento.component';
+
+export const FICHADO_PROCESAMIENTO_DEF: PageComponentDef = {
+    name: 'FICHADO_PROCESAMIENTO',
+    component: FichadoProcesamientoComponent,
+    i18n: FICHADO_PROCESAMIENTO_I18N_DEF,
+    navigation: FICHADO_PROCESAMIENTO_NAV_DEF,
+    security: FICHADO_PROCESAMIENTO_SECURITY_DEF,
+    backButton: false,
+    actions: [
+        {
+            actionNameKey: 'FICHADO_PROCESAMIENTO_RESULTADOS_SECTION_SEND_BUTTON',
+            actionType: 'custom_send_sap',
+            icon: 'heroicons_outline:paper-airplane',
+            actionSecurity: FICHADO_PROCESAMIENTO_SECURITY_DEF.updateAccess,
+            appearance: 'flat',
+            hidden: true
+        }
+    ]
+};
+
+--- FILE: app/resources/fichado_procesamiento/i18n/fichado_procesamiento.i18n.ts ---
+
+import { I18n } from "@fwk/model/i18n";
+
+export const FICHADO_PROCESAMIENTO_I18N_DEF: I18n = {
+    name: 'FICHADO_PROCESAMIENTO_I18N_DEF',
+    lang: 'es',
+    words: {
+        page_title: 'Procesamiento de Fichados',
+        fichado_procesamiento_nav_def: 'Procesar Fichados',
+        
+        FICHADO_PROCESAMIENTO_TITULO: 'Procesamiento de Fichados',
+        FICHADO_PROCESAMIENTO_ENVIANDO: 'Enviando a SAP...',
+        FICHADO_PROCESAMIENTO_PROCESANDO: 'Procesando archivo...',
+        
+        FICHADO_PROCESAMIENTO_CARGA_SECTION_SELECT_EXCEL: 'Seleccionar archivo Excel (.xlsx, .xls)',
+        FICHADO_PROCESAMIENTO_CARGA_SECTION_PROCESS_BUTTON: 'Procesar Archivo',
+        
+        FICHADO_PROCESAMIENTO_RESULTADOS_SECTION_SEND_BUTTON: 'Enviar a SAP',
+        
+        FICHADO_PROCESAMIENTO_TABLE_EMPLEADO_LEGAJO: 'Legajo',
+        FICHADO_PROCESAMIENTO_TABLE_EMPLEADO_NOMBRE_COMPLETO: 'Nombre Completo',
+        
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_DIA: 'Día',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_FECHA: 'Fecha',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_ENTRADA1: 'Entrada 1',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_SALIDA1: 'Salida 1',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_ENTRADA2: 'Entrada 2',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_SALIDA2: 'Salida 2',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_TOTAL_DIA: 'Total',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_DESCANSO: 'Descanso',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_NORMAL: 'Normal',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_EXTRA50: 'Extra 50%',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_EXTRA100: 'Extra 100%',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_TARDE: 'Tarde',
+        FICHADO_PROCESAMIENTO_TABLE_DETALLE_COMENTARIOS: 'Comentarios',
+        
+        FICHADO_PROCESAMIENTO_MSG_SELECT_FILE: 'Por favor, seleccione un archivo de Excel.',
+        FICHADO_PROCESAMIENTO_MSG_SUCCESS_PROCESS: 'Excel procesado correctamente.',
+        FICHADO_PROCESAMIENTO_MSG_ERROR_PROCESS: 'Error al procesar el archivo Excel.',
+        FICHADO_PROCESAMIENTO_MSG_ERROR_BASE64: 'Error al leer el archivo.',
+        FICHADO_PROCESAMIENTO_MSG_NO_DATA: 'No hay datos procesados para enviar.',
+        FICHADO_PROCESAMIENTO_MSG_SUCCESS_SEND: 'Datos enviados a SAP correctamente.',
+        FICHADO_PROCESAMIENTO_MSG_ERROR_SEND: 'Error al enviar los datos a SAP.',
+    }
+};
+
+--- FILE: app/resources/fichado_procesamiento/navigation/fichado_procesamiento.nav.ts ---
+
+import { NavigationDef } from "@fwk/model/component-def/navigation-def";
+
+export const FICHADO_PROCESAMIENTO_NAV_DEF: NavigationDef = {
+    id: 'fichadoProcesamiento',
+    translateKey: 'fichado_procesamiento_nav_def',
+    url: '/fichado-procesamiento',
+    icon: 'heroicons_outline:clock',
+    group: null,
+    showInMenu: true,
+    order: 7
+};
+
+--- FILE: app/resources/fichado_procesamiento/security/fichado_procesamiento.security.ts ---
+
+import { SecurityDef } from "@fwk/model/component-def/security-def";
+
+export const FICHADO_PROCESAMIENTO_SECURITY_DEF: SecurityDef = {
+    readAccess: 'FICHADO_PROCESAMIENTO_READ',
+    updateAccess: 'FICHADO_PROCESAMIENTO_UPDATE',
+    createAccess: 'FICHADO_PROCESAMIENTO_CREATE',
+    deleteAccess: 'FICHADO_PROCESAMIENTO_DELETE'
+};
+
 --- FILE: app/resources/generar_qr/components/generar-qr.component.html ---
 
 <div class="flex flex-col items-center justify-center w-full p-6 sm:p-10">
     <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <mat-card class="w-full bg-card rounded-2xl shadow overflow-hidden h-fit">
-            <div class="p-4 border-b">
+            <div class="p-4 pb-1 w-full text-center">
                 <h2 class="text-xl font-bold">{{ 'GENERAR_QR_INGRESE_ID' | translate:i18nName }}</h2>
             </div>
             <div class="p-4 flex flex-col gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>ID de Servicio</mat-label>
+                    <mat-label>{{ 'ID_DE_SERVICIO' | translate:i18nName }}</mat-label>
                     <input matInput id="qr-id" type="number" [(ngModel)]="id" placeholder="Ej: 12345" (keyup.enter)="generateQR()"/>
                 </mat-form-field>
 
@@ -27657,6 +28634,7 @@ export const GENERAR_QR_I18N_DEF: I18n = {
     words: {
         page_title: 'Generar QR de Servicio',
         generar_qr_nav_def: 'Generar QR',
+        ID_DE_SERVICIO: 'ID de Servicio',
         GENERAR_QR_TITULO: 'Generar QR de Servicio',
         GENERAR_QR_INGRESE_ID: 'Ingrese un ID',
         GENERAR_QR_GENERAR: 'Generar QR',
@@ -27678,7 +28656,8 @@ export const GENERAR_QR_NAV_DEF: NavigationDef = {
     url: '/generar-qr',
     icon: 'heroicons_outline:qr-code',
     group: null,
-    showInMenu: true
+    showInMenu: true,
+    order: 3
 };
 
 --- FILE: app/resources/generar_qr/security/generar_qr.security.ts ---
@@ -28006,7 +28985,8 @@ export const GRUPOS_TIPO_ACTIVIDAD_NAV_DEF: NavigationDef = {
   url: '/gruposTipoActividad',
   icon: 'heroicons_outline:list-bullet',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 1
 };
 
 
@@ -28293,7 +29273,7 @@ import { FuseNavigationItem } from '@fuse/components/navigation';
 export interface NavigationGroup extends FuseNavigationItem {
     id: string;
     title: string;
-    type: 'group';
+    type: 'collapsable';
     icon?: string;
     children?: FuseNavigationItem[];
 }
@@ -28302,11 +29282,692 @@ export const NAVIGATION_GROUPS_MAP: NavigationGroup[] = [
     {
         id: 'seguridad',
         title: 'Seguridad',
-        type: 'group',
+        type: 'collapsable',
         icon: 'heroicons_outline:shield-check',
     },
 ];
 
+
+--- FILE: app/resources/novedades_contador/components/novedades-contador.component.html ---
+
+<mat-expansion-panel class="shadow-none border-b rounded-none dark:bg-transparent z-20" [expanded]="panelOpenState"
+    (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+
+    <mat-expansion-panel-header class="px-4 sm:px-6">
+        <mat-panel-title class="flex items-center space-x-3">
+            <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <span class="font-semibold">{{ 'novedades_contador_busqueda' | translate:i18nName }}</span>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="novedadesForm" (ngSubmit)="vistaPrevia()" class="w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'novedades_contador_mes' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="mes">
+                    <mat-option *ngFor="let mes of meses" [value]="mes.value">
+                        {{ mes.viewValue }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'novedades_contador_anio' | translate:i18nName }}</mat-label>
+                <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
+            </mat-form-field>
+        </div>
+    </form>
+
+    <mat-action-row class="p-4 sm:px-6">
+        <div class="flex items-center justify-end w-full space-x-2">
+            <button mat-stroked-button type="button" (click)="limpiarFiltros()"
+                [matTooltip]="'novedades_contador_limpiar' | translate:i18nName">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'novedades_contador_limpiar' | translate:i18nName }}</span>
+            </button>
+
+            <button mat-flat-button color="accent" type="button" (click)="vistaPrevia()"
+                [disabled]="novedadesForm.invalid || loading"
+                [matTooltip]="'novedades_contador_vista_previa' | translate:i18nName">
+                <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!loading" class="icon-size-5"
+                    [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                <span class="ml-2 hidden sm:inline" *ngIf="!loading">{{ 'novedades_contador_vista_previa' |
+                    translate:i18nName }}</span>
+            </button>
+        </div>
+    </mat-action-row>
+    <mat-progress-bar *ngIf="saving" mode="indeterminate"
+        class="absolute bottom-0 left-0 w-full z-30"></mat-progress-bar>
+</mat-expansion-panel>
+
+<div class="flex flex-col flex-auto min-w-0 w-full bg-gray-50 dark:bg-gray-900">
+    <div class="flex-auto relative overflow-hidden h-full dark:bg-transparent flex flex-col">
+
+        <div *ngIf="!novedadesData"
+            class="flex-auto flex flex-col items-center h-full p-6 py-10 text-center text-secondary">
+            <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:circle-stack"></mat-icon>
+            <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">{{
+                'novedades_contador_sin_resultados_titulo' | translate:i18nName }}</div>
+            <div class="mt-1 max-w-sm">{{ 'novedades_contador_sin_resultados_desc' | translate:i18nName }}</div>
+        </div>
+
+        <div *ngIf="novedadesData" class="flex-auto overflow-hidden flex flex-col">
+            <mat-tab-group animationDuration="0ms" class="h-full">
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_jornales' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: jornalesDataSource, expandedItem: expandedJornal, type: 'jornal' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #jornalesPaginator *ngIf="jornalesDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_fueraconvenio' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: fueraConvenioDataSource, expandedItem: expandedFuera, type: 'fuera' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #fueraConvenioPaginator *ngIf="fueraConvenioDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+                <mat-tab class="p-0" [label]="'novedades_contador_tab_mensual' | translate:i18nName">
+                    <ng-template matTabContent>
+                        <div class="flex-auto overflow-auto h-full pb-20">
+                            <ng-container
+                                *ngTemplateOutlet="tableTemplate; context: { dataSource: mensualDataSource, expandedItem: expandedMensual, type: 'mensual' }"></ng-container>
+                        </div>
+
+                        <mat-paginator #mensualPaginator *ngIf="mensualDataSource.data.length > 0"
+                            class="border-t bottom-0 fixed print:hidden w-full z-30 bg-white dark:bg-gray-900"
+                            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-template>
+                </mat-tab>
+
+            </mat-tab-group>
+        </div>
+    </div>
+</div>
+
+<ng-template #tableTemplate let-dataSource="dataSource" let-expandedItem="expandedItem" let-type="type">
+    <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="w-full bg-transparent">
+        <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef class="w-10 px-2 border-b"></th>
+            <td mat-cell *matCellDef="let element" class="px-2 border-b text-center w-10">
+                <button mat-icon-button (click)="toggleExpand(element, type); $event.stopPropagation()">
+                    <mat-icon
+                        [svgIcon]="isExpanded(element, type) ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="legajo">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_legajo' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.legajo}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombreCompleto">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_nombre' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.nombre}} {{element.apellido}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cuil">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium">{{
+                'novedades_contador_col_cuil' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element">{{element.cuil}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="novedades">
+            <th mat-header-cell *matHeaderCellDef class="text-sm font-medium w-1/3">{{
+                'novedades_contador_col_novedades' | translate:i18nName }}</th>
+            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full dense-form-field my-1">
+                    <input matInput [(ngModel)]="element.novedades" placeholder="...">
+                </mat-form-field>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let element" [attr.colspan]="commonDisplayedColumns.length" class="p-0 border-0">
+                <div class="overflow-hidden flex flex-col w-full bg-gray-50/50 dark:bg-gray-900 border-l-4 border-l-primary-500"
+                    [@detailExpand]="isExpanded(element, type) ? 'expanded' : 'collapsed'">
+                    <div class="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_categoria' | translate:i18nName
+                                }}</span><span>{{element.categoria}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_feriado' | translate:i18nName
+                                }}</span><span>{{element.feriado}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_tarde' | translate:i18nName
+                                }}</span><span>{{element.tarde}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_adelantosueldo' | translate:i18nName
+                                }}</span><span>{{element.adelantoSueldo}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_prestamos' | translate:i18nName
+                                }}</span><span>{{element.prestamos}}</span></div>
+                        <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                'novedades_contador_col_gratificaciones' | translate:i18nName
+                                }}</span><span>{{element.gratificaciones}}</span></div>
+
+                        <ng-container *ngIf="type !== 'fuera'">
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_valorhora' | translate:i18nName
+                                    }}</span><span>{{element.valorHora}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hsnormales' | translate:i18nName
+                                    }}</span><span>{{element.hsNormales}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hs50' | translate:i18nName
+                                    }}</span><span>{{element.hs50}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hs100' | translate:i18nName
+                                    }}</span><span>{{element.hs100}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_feriadoextra' | translate:i18nName
+                                    }}</span><span>{{element.feriadoExtra}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_comida' | translate:i18nName
+                                    }}</span><span>{{element.comida}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_hsproductivas' | translate:i18nName
+                                    }}</span><span>{{element.hsProductivas}}</span></div>
+                            <div class="flex flex-col"><span class="text-xs font-bold text-secondary">{{
+                                    'novedades_contador_col_premio' | translate:i18nName
+                                    }}</span><span>{{element.premio}}</span></div>
+                        </ng-container>
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="commonDisplayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let element; columns: commonDisplayedColumns;"
+            class="cursor-pointer bg-white dark:bg-gray-900 transition-colors"
+            [class.bg-primary-50]="isExpanded(element, type)" (click)="toggleExpand(element, type)">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="h-0"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell text-center p-8 text-secondary" [attr.colspan]="commonDisplayedColumns.length">
+                {{ 'novedades_contador_no_hay_registros' | translate:i18nName }}
+            </td>
+        </tr>
+    </table>
+</ng-template>
+
+--- FILE: app/resources/novedades_contador/components/novedades-contador.component.ts ---
+
+import { Component, OnInit, ViewChild, inject, ChangeDetectorRef, ViewEncapsulation, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { NotificationService } from '@fwk/services/notification/notification.service';
+import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { CustomPageComponent } from '@fwk/model/page-component.interface';
+import { ActionDef } from '@fwk/model/component-def/action-def';
+import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+
+import { NovedadesContadorService } from '../novedades-contador.service';
+import { NovedadesContadorData, Jornal, FueraConvenio, Mensual } from '../novedades-contador.models';
+
+@Component({
+    selector: 'app-novedades-contador',
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatTableModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
+        MatExpansionModule,
+        MatTabsModule,
+        MatTooltipModule,
+        TranslatePipe
+    ],
+    templateUrl: './novedades-contador.component.html',
+    styleUrls: ['./novedades-contador.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed, void', style({ height: '0px', minHeight: '0', display: 'none' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+    ],
+})
+export class NovedadesContadorComponent implements OnInit, CustomPageComponent {
+    @Output() actionStateChange = new EventEmitter<{ key: string, changes: Partial<ActionDef> }>();
+
+    private _fb = inject(FormBuilder);
+    private _notificationService = inject(NotificationService);
+    private _novedadesService = inject(NovedadesContadorService);
+    private _i18nService = inject(I18nService);
+    private _cdr = inject(ChangeDetectorRef);
+    private _fuseMediaWatcherService = inject(FuseMediaWatcherService);
+
+    novedadesForm: FormGroup;
+    meses: { value: number, viewValue: string }[];
+    currentYear = new Date().getFullYear();
+    loading = false;
+    saving = false;
+    panelOpenState = true;
+    isMobile = false;
+
+    i18nName = 'NOVEDADES_CONTADOR_I18N_DEF';
+
+    novedadesData: NovedadesContadorData | null = null;
+
+    jornalesDataSource = new MatTableDataSource<Jornal>();
+    fueraConvenioDataSource = new MatTableDataSource<FueraConvenio>();
+    mensualDataSource = new MatTableDataSource<Mensual>();
+
+    commonDisplayedColumns = ['expand', 'legajo', 'nombreCompleto', 'cuil', 'novedades'];
+
+    expandedJornal: Jornal | null;
+    expandedFuera: FueraConvenio | null;
+    expandedMensual: Mensual | null;
+
+    @ViewChild('jornalesPaginator') jornalesPaginator: MatPaginator;
+    @ViewChild('fueraConvenioPaginator') fueraConvenioPaginator: MatPaginator;
+    @ViewChild('mensualPaginator') mensualPaginator: MatPaginator;
+
+    ngOnInit(): void {
+        const currentDate = new Date();
+        this.novedadesForm = this._fb.group({
+            mes: [currentDate.getMonth() + 1, Validators.required],
+            anio: [currentDate.getFullYear(), [Validators.required, Validators.min(2001), Validators.max(this.currentYear)]]
+        });
+
+        this.meses = [
+            { value: 1, viewValue: 'Enero' }, { value: 2, viewValue: 'Febrero' },
+            { value: 3, viewValue: 'Marzo' }, { value: 4, viewValue: 'Abril' },
+            { value: 5, viewValue: 'Mayo' }, { value: 6, viewValue: 'Junio' },
+            { value: 7, viewValue: 'Julio' }, { value: 8, viewValue: 'Agosto' },
+            { value: 9, viewValue: 'Septiembre' }, { value: 10, viewValue: 'Octubre' },
+            { value: 11, viewValue: 'Noviembre' }, { value: 12, viewValue: 'Diciembre' }
+        ];
+
+        this._fuseMediaWatcherService.onMediaChange$
+            .subscribe(({ matchingAliases }) => {
+                this.isMobile = !matchingAliases.includes('md');
+                if (this.isMobile) this.panelOpenState = false;
+            });
+    }
+
+    onAction(action: ActionDef): void {
+        if (action.actionType === 'custom_save_novedades') {
+            this.guardarNovedades();
+        }
+    }
+
+    private translate(key: string): string {
+        return this._i18nService.getDictionary(this.i18nName)?.translate?.(key) || key;
+    }
+
+    limpiarFiltros(): void {
+        const currentDate = new Date();
+        this.novedadesForm.patchValue({
+            mes: currentDate.getMonth() + 1,
+            anio: currentDate.getFullYear()
+        });
+        this.resetData();
+        this.toggleSaveButton(false);
+        this.panelOpenState = true;
+    }
+
+    private resetData(): void {
+        this.novedadesData = null;
+        this.jornalesDataSource.data = [];
+        this.fueraConvenioDataSource.data = [];
+        this.mensualDataSource.data = [];
+    }
+
+    vistaPrevia(): void {
+        if (this.novedadesForm.invalid) return;
+
+        this.toggleSaveButton(false);
+        this.loading = true;
+        this.resetData();
+
+        const { anio, mes } = this.novedadesForm.value;
+
+        this._novedadesService.getPreview(anio, mes).subscribe({
+            next: (response) => {
+                const data = response.data;
+                if (!data || (!data.jornales.length && !data.fueraConvenio.length && !data.mensual.length)) {
+                    this._notificationService.notify(this.translate('novedades_contador_no_hay_resultados'));
+                    this.loading = false;
+                    this._cdr.markForCheck();
+                    return;
+                }
+
+                this.novedadesData = data;
+
+                const initNovedades = (item: any) => ({ ...item, novedades: item.novedades || '' });
+
+                this.jornalesDataSource.data = data.jornales.map(initNovedades);
+                this.fueraConvenioDataSource.data = data.fueraConvenio.map(initNovedades);
+                this.mensualDataSource.data = data.mensual.map(initNovedades);
+
+                setTimeout(() => {
+                    this.jornalesDataSource.paginator = this.jornalesPaginator;
+                    this.fueraConvenioDataSource.paginator = this.fueraConvenioPaginator;
+                    this.mensualDataSource.paginator = this.mensualPaginator;
+                });
+
+                this.toggleSaveButton(true);
+                this.loading = false;
+                this.panelOpenState = false;
+                this._cdr.markForCheck();
+            },
+            error: (error) => {
+                console.error(error);
+                this._notificationService.notifyError(this.translate('novedades_contador_error_vista_previa'));
+                this.loading = false;
+                this._cdr.markForCheck();
+            }
+        });
+    }
+
+    guardarNovedades(): void {
+        if (!this.novedadesData) return;
+        if (this.saving) return;
+
+        this.saving = true;
+        this._cdr.markForCheck();
+        this.toggleSaveButton(false, true);
+
+        this._novedadesService.saveNovedades(this.novedadesData).subscribe({
+            next: () => {
+                this._notificationService.notifySuccess(this.translate('novedades_contador_exito_guardado'));
+                this.saving = false;
+                this.resetData();
+                this.toggleSaveButton(false);
+                this.panelOpenState = true;
+                this._cdr.markForCheck();
+            },
+            error: (error) => {
+                console.error(error);
+                this._notificationService.notifyError(this.translate('novedades_contador_error_guardado'));
+                this.saving = false;
+                this.toggleSaveButton(true);
+                this._cdr.markForCheck();
+            }
+        });
+    }
+
+    toggleExpand(element: any, type: string): void {
+        switch (type) {
+            case 'jornal': this.expandedJornal = this.expandedJornal === element ? null : element; break;
+            case 'fuera': this.expandedFuera = this.expandedFuera === element ? null : element; break;
+            case 'mensual': this.expandedMensual = this.expandedMensual === element ? null : element; break;
+        }
+    }
+
+    isExpanded(element: any, type: string): boolean {
+        switch (type) {
+            case 'jornal': return this.expandedJornal === element;
+            case 'fuera': return this.expandedFuera === element;
+            case 'mensual': return this.expandedMensual === element;
+            default: return false;
+        }
+    }
+
+    private toggleSaveButton(show: boolean, disabled: boolean = false): void {
+        this.actionStateChange.emit({
+            key: 'novedades_contador_guardar',
+            changes: {
+                hidden: !show,
+                disabled: disabled
+            }
+        });
+    }
+}
+
+--- FILE: app/resources/novedades_contador/i18n/novedades_contador.i18n.ts ---
+
+import { I18n } from "@fwk/model/i18n";
+
+export const NOVEDADES_CONTADOR_I18N_DEF: I18n = {
+    name: 'NOVEDADES_CONTADOR_I18N_DEF',
+    lang: 'es',
+    words: {
+        page_title: 'Novedades del Contador',
+        novedades_contador_nav_def: 'Novedades Contador',
+
+        novedades_contador_busqueda: 'Búsqueda',
+        novedades_contador_mes: 'Mes',
+        novedades_contador_anio: 'Año',
+        novedades_contador_vista_previa: 'Vista Previa',
+        novedades_contador_guardar: 'Guardar Novedades',
+        novedades_contador_guardando: 'Guardando...',
+        novedades_contador_limpiar: 'Limpiar',
+
+        novedades_contador_no_hay_resultados: 'No se encontraron resultados para el período seleccionado.',
+        novedades_contador_no_hay_registros: 'No hay registros para mostrar en esta categoría.',
+        novedades_contador_error_vista_previa: 'Ocurrió un error al obtener la vista previa.',
+        novedades_contador_exito_guardado: 'Las novedades se han guardado correctamente.',
+        novedades_contador_error_guardado: 'Ocurrió un error al guardar las novedades.',
+        novedades_contador_sin_resultados_titulo: 'Sin resultados',
+        novedades_contador_sin_resultados_desc: 'Seleccione el período y genere una vista previa para comenzar.',
+
+        novedades_contador_tab_jornales: 'Jornales',
+        novedades_contador_tab_fueraconvenio: 'Fuera de Convenio',
+        novedades_contador_tab_mensual: 'Mensual',
+
+        novedades_contador_col_legajo: 'Legajo',
+        novedades_contador_col_nombre: 'Nombre',
+        novedades_contador_col_cuil: 'CUIL',
+        novedades_contador_col_novedades: 'Novedades',
+        novedades_contador_col_categoria: 'Categoría',
+        novedades_contador_col_valorhora: 'Valor Hora',
+        novedades_contador_col_hsnormales: 'Hs. Normales',
+        novedades_contador_col_hs50: 'Hs. 50%',
+        novedades_contador_col_hs100: 'Hs. 100%',
+        novedades_contador_col_feriado: 'Feriado',
+        novedades_contador_col_feriadoextra: 'Feriado Extra',
+        novedades_contador_col_adelantosueldo: 'Adelanto',
+        novedades_contador_col_prestamos: 'Préstamos',
+        novedades_contador_col_gratificaciones: 'Gratificaciones',
+        novedades_contador_col_tarde: 'Tarde',
+        novedades_contador_col_premio: 'Premio',
+        novedades_contador_col_comida: 'Comida',
+        novedades_contador_col_hsproductivas: 'Hs. Prod.'
+    }
+};
+
+--- FILE: app/resources/novedades_contador/navigation/novedades_contador.nav.ts ---
+
+import { NavigationDef } from "@fwk/model/component-def/navigation-def";
+
+export const NOVEDADES_CONTADOR_NAV_DEF: NavigationDef = {
+    id: 'novedadesContador',
+    translateKey: 'novedades_contador_nav_def',
+    url: '/novedades-contador',
+    icon: 'heroicons_outline:calculator',
+    group: null,
+    showInMenu: true,
+    order: 8
+};
+
+--- FILE: app/resources/novedades_contador/novedades-contador.models.ts ---
+
+export interface NovedadesContadorApiResponse {
+    status: string;
+    data: NovedadesContadorData;
+}
+
+export interface NovedadesContadorData {
+    periodo: string;
+    jornales: Jornal[];
+    fueraConvenio: FueraConvenio[];
+    mensual: Mensual[];
+}
+
+export interface Jornal {
+    legajo: string;
+    apellido: string;
+    nombre: string;
+    cuil: string;
+    categoria: string | null;
+    valorHora: string;
+    feriado: string;
+    hsNormales: string;
+    feriadoExtra: string;
+    adelantoSueldo: string | null;
+    prestamos: string | null;
+    hs50: string;
+    hs100: string;
+    gratificaciones: string | null;
+    tarde: string | null;
+    novedades: string | null;
+    premio: string;
+    comida: string;
+    ausencias: string | null;
+    hsProductivas: string | null;
+}
+
+export interface FueraConvenio {
+    legajo: string;
+    apellido: string;
+    nombre: string;
+    cuil: string;
+    categoria: string | null;
+    feriado: string;
+    adelantoSueldo: string | null;
+    prestamos: string | null;
+    gratificaciones: string | null;
+    tarde: string | null;
+    novedades: string | null;
+    ausencias: string | null;
+}
+
+export interface Mensual {
+    legajo: string;
+    apellido: string;
+    nombre: string;
+    cuil: string;
+    categoria: string | null;
+    valorHora: string;
+    feriado: string;
+    hsNormales: string;
+    feriadoExtra: string;
+    adelantoSueldo: string | null;
+    prestamos: string | null;
+    hs50: string;
+    hs100: string;
+    gratificaciones: string | null;
+    tarde: string | null;
+    novedades: string | null;
+    premio: string;
+    comida: string;
+    ausencias: string | null;
+}
+
+--- FILE: app/resources/novedades_contador/novedades-contador.service.ts ---
+
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { PREFIX_DOMAIN_API } from 'environments/environment';
+import { Observable } from 'rxjs';
+import { NovedadesContadorApiResponse, NovedadesContadorData } from './novedades-contador.models';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class NovedadesContadorService {
+    private _http = inject(HttpClient);
+    private urlPreview = `${PREFIX_DOMAIN_API}novedadescontadorpreview`;
+    private urlSave = `${PREFIX_DOMAIN_API}enviarnovedadescontador`;
+
+    getPreview(anio: number, mes: number): Observable<NovedadesContadorApiResponse> {
+        const params = new HttpParams()
+            .set('anio', anio.toString())
+            .set('mes', mes.toString());
+
+        return this._http.get<NovedadesContadorApiResponse>(this.urlPreview, { params });
+    }
+
+    saveNovedades(data: NovedadesContadorData): Observable<any> {
+        return this._http.post(this.urlSave, data);
+    }
+}
+
+--- FILE: app/resources/novedades_contador/novedades_contador.def.ts ---
+
+import { PageComponentDef } from '@fwk/model/component-def/page-component-def';
+import { NOVEDADES_CONTADOR_SECURITY_DEF } from './security/novedades_contador.security';
+import { NOVEDADES_CONTADOR_NAV_DEF } from './navigation/novedades_contador.nav';
+import { NOVEDADES_CONTADOR_I18N_DEF } from './i18n/novedades_contador.i18n';
+import { NovedadesContadorComponent } from './components/novedades-contador.component';
+
+export const NOVEDADES_CONTADOR_DEF: PageComponentDef = {
+    name: 'NOVEDADES_CONTADOR',
+    component: NovedadesContadorComponent,
+    i18n: NOVEDADES_CONTADOR_I18N_DEF,
+    navigation: NOVEDADES_CONTADOR_NAV_DEF,
+    security: NOVEDADES_CONTADOR_SECURITY_DEF,
+    backButton: false,
+    actions: [
+        {
+            actionNameKey: 'novedades_contador_guardar',
+            actionType: 'custom_save_novedades',
+            icon: 'heroicons_outline:check-circle',
+            actionSecurity: NOVEDADES_CONTADOR_SECURITY_DEF.updateAccess,
+            appearance: 'flat',
+            hidden: true
+        }
+    ]
+};
+
+--- FILE: app/resources/novedades_contador/security/novedades_contador.security.ts ---
+
+import { SecurityDef } from "@fwk/model/component-def/security-def";
+
+export const NOVEDADES_CONTADOR_SECURITY_DEF: SecurityDef = {
+    readAccess: 'NOVEDADES_CONTADOR_READ',
+    updateAccess: 'NOVEDADES_CONTADOR_UPDATE',
+    createAccess: 'NOVEDADES_CONTADOR_CREATE',
+    deleteAccess: 'NOVEDADES_CONTADOR_DELETE'
+};
 
 --- FILE: app/resources/permiso/form/permiso.create.fields.ts ---
 
@@ -28644,6 +30305,14 @@ export const RECIBOS_GRID_DEF: GridDef = {
             columnDef: 'tipo',
             columnNameKey: 'recibos_grid_column_tipo'
         },
+        {
+            columnDef: 'descripcion',
+            columnNameKey: 'recibos_grid_column_descripcion'
+        },
+        {
+            columnDef: 'filePath',
+            columnNameKey: 'recibos_grid_column_filepath'
+        },
     ],
 
     displayedColumns: [
@@ -28651,6 +30320,8 @@ export const RECIBOS_GRID_DEF: GridDef = {
         'year',
         'monthString',
         'tipo',
+        'descripcion',
+        'filePath',
     ],
     sortAllColumns: true,
 
@@ -28659,7 +30330,6 @@ export const RECIBOS_GRID_DEF: GridDef = {
             actionNameKey: 'recibos_grid_action_download_receipt',
             actionType: 'file-download',
             icon: 'file_download',
-
             ws: {
                 key: 'DOWNLOAD_RECIBO_WS',
                 url: PREFIX_DOMAIN_API + 'descargarRecibo',
@@ -28669,7 +30339,9 @@ export const RECIBOS_GRID_DEF: GridDef = {
                     year: 'year',
                     month: 'month',
                     monthString: 'monthString',
-                    tipo: 'tipo'
+                    tipo: 'tipo',
+                    descripcion: 'descripcion',
+                    filePath: 'filePath'
                 }
             }
         },
@@ -28695,6 +30367,8 @@ export const RECIBOS_I18N_DEF: I18n = {
         recibos_grid_column_month: 'Mes (Número)',
         recibos_grid_column_monthString: 'Mes',
         recibos_grid_column_tipo: 'Tipo',
+        recibos_grid_column_descripcion: 'Descripción',
+        recibos_grid_column_filepath: 'FilePath',
         recibos_grid_action_download_receipt: 'Descargar Recibo',
         recibos_filter_form_fields_def_field_year: 'Año',
         recibos_filter_form_fields_def_field_month: 'Mes',
@@ -28713,7 +30387,8 @@ export const RECIBOS_NAV_DEF: NavigationDef = {
   url: '/recibos',
   icon: 'heroicons_outline:currency-dollar',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 4
 };
 
 
@@ -28761,6 +30436,566 @@ export const RECIBOS_SECURITY_DEF: SecurityDef = {
   deleteAccess: 'RECIBOS_SECURITY_DELETE'
 };
 
+
+--- FILE: app/resources/recibos_procesamiento/components/recibos-procesamiento.component.html ---
+
+<div class="flex flex-col w-full mx-auto">
+    <mat-card class="w-full shadow-none rounded-none overflow-hidden">
+        <mat-card-content class="p-6">
+            <form [formGroup]="processingForm" class="flex flex-col gap-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <div class="w-full">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                            <mat-label>{{ 'recibos_proc_tipo_recibo' | translate:i18nName }}</mat-label>
+                            <mat-select formControlName="receiptType">
+                                <mat-option *ngFor="let type of receiptTypes" [value]="type">
+                                    {{ type }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error>{{ 'recibos_proc_tipo_requerido' | translate:i18nName }}</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <fwk-file-uploader formControlName="pdfFile" 
+                        [accept]="'.pdf, application/pdf'"
+                        [title]="'recibos_proc_drop_title' | translate:i18nName"
+                        [description]="'recibos_proc_drop_subtitle' | translate:i18nName"
+                        [icon]="'heroicons_outline:document-text'" [isLoading]="isLoadingProcess"
+                        [loadingText]="'recibos_proc_procesando' | translate:i18nName"
+                        [errorMessage]="processingForm.get('pdfFile').hasError('required') && processingForm.get('pdfFile').touched ? ('recibos_proc_archivo_requerido' | translate:i18nName) : null"
+                        (fileSelected)="onFileSelected($event)">
+                    </fwk-file-uploader>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+
+    <div *ngIf="dataSource.data.length > 0" class="flex-auto overflow-auto container-table dark:bg-transparent">
+        <table mat-table [dataSource]="dataSource" matSort class="w-full bg-transparent">
+
+            <ng-container matColumnDef="legajo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_legajo' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.legajo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombreCompleto">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_nombre' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.nombreCompleto }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="periodo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_periodo' |
+                    translate:i18nName }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.periodo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="neto">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_neto' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> $ {{ element.neto | number:'1.2-2':'es-AR' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_tipo' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.tipo }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="aprobado">
+                <th mat-header-cell *matHeaderCellDef class="text-center w-28"> {{ 'recibos_proc_col_aprobado' |
+                    translate:i18nName }} </th>
+                <td mat-cell *matCellDef="let element" class="text-center">
+                    <mat-slide-toggle [checked]="element.aprobado" color="accent"
+                        (change)="onApprovalChange(element, $event)">
+                    </mat-slide-toggle>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="observaciones">
+                <th mat-header-cell *matHeaderCellDef class="w-1/4"> {{ 'recibos_proc_col_observaciones' |
+                    translate:i18nName }} </th>
+                <td mat-cell *matCellDef="let element">
+                    <mat-form-field *ngIf="!element.aprobado" appearance="outline" subscriptSizing="dynamic"
+                        class="w-full dense-form-field my-1">
+                        <textarea matInput [(ngModel)]="element.observaciones"
+                            [placeholder]="'recibos_proc_obs_placeholder' | translate:i18nName"
+                            (blur)="onObservationsChange()" rows="1"></textarea>
+                    </mat-form-field>
+                    <span *ngIf="element.aprobado" class="text-gray-400 italic text-xs">
+                        {{ 'recibos_proc_sin_obs' | translate:i18nName }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="descripcion">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_descripcion' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.descripcion }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="timeInMilis">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_timeinmilis' | translate:i18nName
+                    }}
+                </th>
+                <td mat-cell *matCellDef="let element"> {{ element.timeInMilis }} </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                class="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50"></tr>
+        </table>
+        <mat-paginator *ngIf="dataSource.data.length > 0" [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons
+            class="border-t bottom-0 fixed print:hidden w-full z-30">
+        </mat-paginator>
+    </div>
+</div>
+
+--- FILE: app/resources/recibos_procesamiento/components/recibos-procesamiento.component.ts ---
+
+import { Component, OnInit, ViewChild, inject, ChangeDetectorRef, EventEmitter, Output, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Subject, debounceTime, takeUntil, tap } from 'rxjs';
+
+import { FileUploaderComponent } from '@fwk/components/file-uploader/file-uploader.component';
+import { RecibosProcesamientoService } from '../recibos-procesamiento.service';
+import { ReciboTabla, ReciboAprobarRechazarRequest } from '../recibos-procesamiento.models';
+import { NotificationService } from '@fwk/services/notification/notification.service';
+import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { CustomPageComponent } from '@fwk/model/page-component.interface';
+import { ActionDef } from '@fwk/model/component-def/action-def';
+@Component({
+    selector: 'app-recibos-procesamiento',
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatCardModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        MatSlideToggleModule,
+        MatTooltipModule,
+        TranslatePipe,
+        FileUploaderComponent
+    ],
+    templateUrl: './recibos-procesamiento.component.html',
+    styleUrls: ['./recibos-procesamiento.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+})
+export class RecibosProcesamientoComponent implements OnInit, CustomPageComponent, OnDestroy {
+    @Output() actionStateChange = new EventEmitter<{ key: string, changes: Partial<ActionDef> }>();
+
+    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatSort) sort: MatSort;
+
+    private _fb = inject(FormBuilder);
+    private _recibosService = inject(RecibosProcesamientoService);
+    private _notificationService = inject(NotificationService);
+    private _i18nService = inject(I18nService);
+    private _cdr = inject(ChangeDetectorRef);
+    private _unsubscribeAll = new Subject<void>();
+
+    i18nName = 'RECIBOS_PROCESAMIENTO_I18N_DEF';
+    processingForm: FormGroup;
+
+    receiptTypes: string[] = [
+        'Sueldo Jornal', 'Sueldo Mensual', 'SAC',
+        'Vacaciones Jornal', 'Vacaciones Mensual',
+        'Ajustes Retroactivos', 'Adelanto', 'Préstamo'
+    ];
+
+    isLoadingProcess = false;
+
+    fileName: string = '';
+
+    dataSource = new MatTableDataSource<ReciboTabla>([]);
+    displayedColumns = ['legajo', 'nombreCompleto', 'periodo', 'neto', 'tipo', 'aprobado', 'observaciones', 'descripcion', 'timeInMilis'];
+
+    ngOnInit(): void {
+        this.processingForm = this._fb.group({
+            receiptType: ['', Validators.required],
+            pdfFile: [null, Validators.required]
+        });
+
+        this.processingForm.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(100),
+                tap((values) => this.syncLocalVariables(values.pdfFile))
+            )
+            .subscribe(() => {
+                this.triggerAutoProcess();
+            });
+    }
+
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
+    private syncLocalVariables(fileValue: any): void {
+        if (fileValue) {
+            const file = Array.isArray(fileValue) ? fileValue[0] : fileValue;
+            if (this.fileName !== file.name) {
+                this.fileName = file.name;
+                this._cdr.markForCheck();
+            }
+        } else {
+            if (this.fileName !== '') {
+                this.fileName = '';
+                this._cdr.markForCheck();
+            }
+        }
+    }
+
+    private triggerAutoProcess(): void {
+        if (this.processingForm.valid) {
+            this.processRecibos();
+        }
+    }
+
+    onAction(action: ActionDef): void {
+        if (action.actionType === 'recibos_proc_enviar_action') {
+            this.sendRecibos();
+        }
+    }
+
+    onFileSelected(file: File | File[] | null): void {
+        if (!file) {
+            this.resetTable();
+        } else {
+            if (this.processingForm.valid) {
+                this.isLoadingProcess = true;
+                this.toggleSendButton(false);
+                this._cdr.markForCheck();
+            }
+        }
+    }
+
+    resetFile(): void {
+        this.processingForm.get('pdfFile').setValue(null);
+        this.resetTable();
+    }
+
+    resetTable(): void {
+        this.dataSource.data = [];
+        this.toggleSendButton(false);
+    }
+
+    async processRecibos(): Promise<void> {
+        this.isLoadingProcess = true;
+        this.toggleSendButton(false);
+        this.dataSource.data = [];
+        this._cdr.markForCheck();
+
+        try {
+            const fileInput = this.processingForm.get('pdfFile').value;
+            const file = Array.isArray(fileInput) ? fileInput[0] : fileInput;
+
+            if (!file) {
+                this.isLoadingProcess = false;
+                this._cdr.markForCheck();
+                return;
+            }
+
+            const base64File = await this.fileToBase64(file);
+            const request = {
+                archivo: base64File,
+                tipo: this.processingForm.get('receiptType').value
+            };
+
+            this._recibosService.processRecibos(request).subscribe({
+                next: (response) => {
+                    const tableData = response.data.map(recibo => ({
+                        ...recibo,
+                        aprobado: true,
+                        observaciones: ''
+                    }));
+                    this.dataSource.data = tableData;
+
+                    setTimeout(() => {
+                        if (this.paginator) this.dataSource.paginator = this.paginator;
+                        if (this.sort) this.dataSource.sort = this.sort;
+                    });
+
+                    this.toggleSendButton(true);
+                    this.isLoadingProcess = false;
+                    this._cdr.markForCheck();
+                },
+                error: (error) => {
+                    console.error(error);
+                    this._notificationService.notifyError(this._i18nService.translate('recibos_proc_error_procesar', this.i18nName));
+                    this.isLoadingProcess = false;
+                    this._cdr.markForCheck();
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            this.isLoadingProcess = false;
+            this._notificationService.notifyError('Error al leer el archivo local.');
+            this._cdr.markForCheck();
+        }
+    }
+
+    onApprovalChange(row: ReciboTabla, event: any): void {
+        row.aprobado = event.checked;
+        if (row.aprobado) {
+            row.observaciones = '';
+        }
+        this.checkSendValidity();
+    }
+
+    onObservationsChange(): void {
+        this.checkSendValidity();
+    }
+
+    checkSendValidity(): void {
+        const isValid = this.dataSource.data.length > 0 && this.dataSource.data.every(row =>
+            row.aprobado || (!row.aprobado && row.observaciones.trim() !== '')
+        );
+        this.toggleSendButton(isValid);
+    }
+
+    sendRecibos(): void {
+        this.actionStateChange.emit({ key: 'recibos_proc_enviar_action', changes: { disabled: true } });
+
+        const requestData: ReciboAprobarRechazarRequest[] = this.dataSource.data.map(row => ({
+            legajo: row.legajo,
+            neto: row.neto,
+            nombreCompleto: row.nombreCompleto,
+            periodo: row.periodo,
+            tipo: row.tipo,
+            aprobado: row.aprobado,
+            observaciones: row.observaciones,
+            descripcion: row.descripcion,
+            timeInMilis: row.timeInMilis,
+        }));
+
+        this._recibosService.approveRejectRecibos(requestData).subscribe({
+            next: () => {
+                this._notificationService.notifySuccess(this._i18nService.translate('recibos_proc_exito_envio', this.i18nName));
+                this.resetFormFull();
+            },
+            error: (error) => {
+                console.error(error);
+                this._notificationService.notifyError(this._i18nService.translate('recibos_proc_error_envio', this.i18nName));
+                this.actionStateChange.emit({ key: 'recibos_proc_enviar_action', changes: { disabled: false } });
+                this._cdr.markForCheck();
+            }
+        });
+    }
+
+    resetFormFull(): void {
+        this.processingForm.reset();
+        this.resetTable();
+        this.toggleSendButton(false);
+        this._cdr.markForCheck();
+    }
+
+    private toggleSendButton(enable: boolean): void {
+        this.actionStateChange.emit({
+            key: 'recibos_proc_enviar_action',
+            changes: {
+                hidden: !enable,
+                disabled: false
+            }
+        });
+    }
+
+    private fileToBase64(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve((reader.result as string).split(',')[1]);
+            reader.onerror = error => reject(error);
+        });
+    }
+}
+
+--- FILE: app/resources/recibos_procesamiento/i18n/recibos_procesamiento.i18n.ts ---
+
+import { I18n } from "@fwk/model/i18n";
+
+export const RECIBOS_PROCESAMIENTO_I18N_DEF: I18n = {
+    name: 'RECIBOS_PROCESAMIENTO_I18N_DEF',
+    lang: 'es',
+    words: {
+        page_title: 'Enviar Recibos',
+        recibos_procesamiento_nav_def: 'Enviar Recibos',
+        
+        recibos_proc_seleccionar_pdf: 'Seleccionar Archivo PDF',
+        recibos_proc_archivo_requerido: 'Debe cargar un archivo PDF.',
+        recibos_proc_tipo_recibo: 'Tipo de Recibo',
+        recibos_proc_tipo_requerido: 'Debe seleccionar un tipo.',
+        
+        recibos_proc_drop_title: 'Cargar PDF de Recibos',
+        recibos_proc_drop_subtitle: 'Arrastra tu archivo aquí o haz click para buscar en tu equipo (.pdf)',
+        recibos_proc_procesando: 'Procesando archivo...',
+        
+        recibos_proc_enviar_action: 'Enviar',
+        recibos_proc_limpiar: 'Limpiar',
+        
+        recibos_proc_col_legajo: 'Legajo',
+        recibos_proc_col_nombre: 'Nombre Completo',
+        recibos_proc_col_periodo: 'Período',
+        recibos_proc_col_neto: 'Neto',
+        recibos_proc_col_tipo: 'Tipo',
+        recibos_proc_col_aprobado: 'Aprobado',
+        recibos_proc_col_observaciones: 'Observaciones',
+        recibos_proc_obs_placeholder: 'Motivo del rechazo...',
+        recibos_proc_sin_obs: 'Sin observaciones',
+        recibos_proc_si: 'Sí',
+        recibos_proc_no: 'No',
+        recibos_proc_col_descripcion: 'Descripción',
+        recibos_proc_col_timeinmilis: 'TimeInMilis',
+
+        recibos_proc_exito_envio: 'Recibos enviados correctamente.',
+        recibos_proc_error_procesar: 'Error al procesar el archivo. Verifique el formato.',
+        recibos_proc_error_envio: 'Error al enviar los recibos.',
+        recibos_proc_resultados_titulo: 'Vista Previa del Procesamiento'
+    }
+};
+
+--- FILE: app/resources/recibos_procesamiento/navigation/recibos_procesamiento.nav.ts ---
+
+import { NavigationDef } from "@fwk/model/component-def/navigation-def";
+
+export const RECIBOS_PROCESAMIENTO_NAV_DEF: NavigationDef = {
+    id: 'recibosProcesamiento',
+    translateKey: 'recibos_procesamiento_nav_def',
+    url: '/recibos-procesamiento',
+    icon: 'heroicons_outline:document-arrow-up',
+    group: null,
+    showInMenu: true,
+    order: 5
+};
+
+--- FILE: app/resources/recibos_procesamiento/recibos-procesamiento.models.ts ---
+
+export interface ReciboProcesarRequest {
+    archivo: string;
+    tipo: string;
+}
+
+export interface ReciboProcesarResponse {
+    legajo: number;
+    neto: number;
+    nombreCompleto: string;
+    periodo: string;
+    tipo: string;
+    descripcion: string;
+    timeInMilis: string;
+}
+
+export interface RecibosProcesarApiResponse {
+    status: string;
+    data: ReciboProcesarResponse[];
+}
+
+export interface ReciboTabla extends ReciboProcesarResponse {
+    aprobado: boolean;
+    observaciones: string;
+}
+
+export interface ReciboAprobarRechazarRequest extends ReciboProcesarResponse {
+    aprobado: boolean;
+    observaciones: string;
+}
+
+--- FILE: app/resources/recibos_procesamiento/recibos-procesamiento.service.ts ---
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { PREFIX_DOMAIN_API } from 'environments/environment';
+import { ReciboAprobarRechazarRequest, ReciboProcesarRequest, RecibosProcesarApiResponse } from './recibos-procesamiento.models';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RecibosProcesamientoService {
+  private _http = inject(HttpClient);
+  
+  private readonly API_URL_PROCESS = `${PREFIX_DOMAIN_API}procesarRecibos`;
+  private readonly API_URL_APPROVE_REJECT = `${PREFIX_DOMAIN_API}aprobarRechazarRecibos`;
+
+  processRecibos(request: ReciboProcesarRequest): Observable<RecibosProcesarApiResponse> {
+    return this._http.post<RecibosProcesarApiResponse>(this.API_URL_PROCESS, request);
+  }
+
+  approveRejectRecibos(request: ReciboAprobarRechazarRequest[]): Observable<any> {
+    return this._http.post(this.API_URL_APPROVE_REJECT, request);
+  }
+}
+
+--- FILE: app/resources/recibos_procesamiento/recibos_procesamiento.def.ts ---
+
+import { PageComponentDef } from '@fwk/model/component-def/page-component-def';
+import { RECIBOS_PROCESAMIENTO_SECURITY_DEF } from './security/recibos_procesamiento.security';
+import { RECIBOS_PROCESAMIENTO_NAV_DEF } from './navigation/recibos_procesamiento.nav';
+import { RECIBOS_PROCESAMIENTO_I18N_DEF } from './i18n/recibos_procesamiento.i18n';
+import { RecibosProcesamientoComponent } from './components/recibos-procesamiento.component';
+
+export const RECIBOS_PROCESAMIENTO_DEF: PageComponentDef = {
+    name: 'RECIBOS_PROCESAMIENTO',
+    component: RecibosProcesamientoComponent,
+    i18n: RECIBOS_PROCESAMIENTO_I18N_DEF,
+    navigation: RECIBOS_PROCESAMIENTO_NAV_DEF,
+    security: RECIBOS_PROCESAMIENTO_SECURITY_DEF,
+    backButton: false,
+    actions: [
+        {
+            actionNameKey: 'recibos_proc_enviar_action',
+            actionType: 'recibos_proc_enviar',
+            icon: 'heroicons_outline:paper-airplane',
+            actionSecurity: RECIBOS_PROCESAMIENTO_SECURITY_DEF.updateAccess,
+            hidden: true,
+            appearance: 'flat'
+        }
+    ]
+};
+
+--- FILE: app/resources/recibos_procesamiento/security/recibos_procesamiento.security.ts ---
+
+import { SecurityDef } from "@fwk/model/component-def/security-def";
+
+export const RECIBOS_PROCESAMIENTO_SECURITY_DEF: SecurityDef = {
+    readAccess: 'RECIBOS_PROCESAMIENTO_READ',
+    updateAccess: 'RECIBOS_PROCESAMIENTO_UPDATE',
+    createAccess: 'RECIBOS_PROCESAMIENTO_CREATE',
+    deleteAccess: 'RECIBOS_PROCESAMIENTO_DELETE'
+};
 
 --- FILE: app/resources/reporte_horas_maquina/form/reporte_horas_maquina.create.fields.ts ---
 
@@ -29122,7 +31357,8 @@ export const REPORTE_HORAS_MAQUINA_NAV_DEF: NavigationDef = {
   url: '/reporteHorasMaquina',
   icon: 'heroicons_outline:document-text',
   group: null,
-  showInMenu: true
+  showInMenu: true,
+  order: 2
 };
 
 
@@ -29178,13 +31414,6 @@ export const REPORTE_HORAS_MAQUINA_SECURITY_DEF: SecurityDef = {
 import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
 
 export const SEGURIDAD_GRUPO_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
-  // {
-  //   key: 'id',
-  //   labelKey: 'seguridad_grupo_create_form_fields_def_field_id',
-  //   label: 'Id',
-  //   type: 'number',
-  //   controlType: 'number'
-  // },
   {
     key: 'name',
     labelKey: 'seguridad_grupo_create_form_fields_def_field_nombre',
@@ -29200,13 +31429,6 @@ export const SEGURIDAD_GRUPO_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
 import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
 
 export const SEGURIDAD_GRUPO_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
-  // {
-  //   key: 'id',
-  //   labelKey: 'SEGURIDAD_GRUPO_FILTER_FORM_FIELDS_DEF_FIELD_id',
-  //   label: 'Id',
-  //   type: 'number',
-  //   controlType: 'number'
-  // },
   {
     key: 'nombre',
     labelKey: 'SEGURIDAD_GRUPO_FILTER_FORM_FIELDS_DEF_FIELD_nombre',
@@ -29961,13 +32183,6 @@ export const SEGURIDAD_GRUPO_USUARIO_DEF: CrudDef = {
 import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
 
 export const USUARIOS_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
-  // {
-  //   key: 'id',
-  //   labelKey: 'usuarios_create_form_fields_def_field_id',
-  //   label: 'Id',
-  //   type: 'number',
-  //   controlType: 'number'
-  // },
   {
     key: 'username',
     labelKey: 'usuarios_create_form_fields_def_field_username',

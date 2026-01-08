@@ -1,6 +1,6 @@
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common'; 
-import localeEs from '@angular/common/locales/es';
+import localeEsAr from '@angular/common/locales/es';
 
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -15,7 +15,7 @@ import { provideFwkCore } from '@fwk/providers/core.provider';
 import { provideAppNavigation } from '@fwk/navigation/navigation.provider';
 import { provideFwkBranding } from '@fwk/providers/config.provider';
 
-registerLocaleData(localeEs, 'es');
+registerLocaleData(localeEsAr, 'es-AR');
 
 function getInitialScheme(): Scheme {
     const storedScheme = localStorage.getItem('fuse-theme-scheme');
@@ -27,7 +27,7 @@ function getInitialScheme(): Scheme {
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        { provide: LOCALE_ID, useValue: 'es' }, 
+        { provide: LOCALE_ID, useValue: 'es-AR' },
 
         provideAnimations(),
         provideHttpClient(withInterceptorsFromDi()),

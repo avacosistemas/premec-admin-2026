@@ -33,6 +33,14 @@
             <fuse-fullscreen class="block"></fuse-fullscreen>
         </div>
 
+        <ng-container *ngIf="showChangePassword">
+            <mat-divider class="my-2"></mat-divider>
+            <button mat-menu-item (click)="changePassword()">
+                <mat-icon [svgIcon]="'heroicons_outline:key'"></mat-icon>
+                <span>{{ 'change_password' | translate }}</span>
+            </button>
+        </ng-container>
+
         <mat-divider class="my-2"></mat-divider>
         
         <button mat-menu-item (click)="signOut()" class="text-red-500 dark:text-red-400">

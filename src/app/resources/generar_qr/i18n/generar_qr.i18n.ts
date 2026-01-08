@@ -6,6 +6,7 @@ export const GENERAR_QR_I18N_DEF: I18n = {
     words: {
         page_title: 'Generar QR de Servicio',
         generar_qr_nav_def: 'Generar QR',
+        ID_DE_SERVICIO: 'ID de Servicio',
         GENERAR_QR_TITULO: 'Generar QR de Servicio',
         GENERAR_QR_INGRESE_ID: 'Ingrese un ID',
         GENERAR_QR_GENERAR: 'Generar QR',

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { User } from '@fwk/auth/user.types';
@@ -6,6 +6,8 @@ import { UserService } from '@fwk/auth/user.service';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { WELCOME_DATA } from './welcome.data';
+import { WelcomeSection } from './welcome.types';
+import { AuthService } from '@fwk/auth/auth.service';
 
 @Component({
     selector: 'welcome',
@@ -16,12 +18,36 @@ import { WELCOME_DATA } from './welcome.data';
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WelcomeComponent {
+export class WelcomeComponent implements OnInit {
     user$: Observable<User>;
-    sections = WELCOME_DATA;
+    sections: WelcomeSection[] = [];
+
     private _userService = inject(UserService);
+    private _authService = inject(AuthService);
 
     constructor() {
         this.user$ = this._userService.user$;
+    }
+
+    ngOnInit(): void {
+        this.filterSectionsByPermission();
+    }
+
+    private filterSectionsByPermission(): void {
+        const filteredSections = WELCOME_DATA.map(section => {
+            const allowedItems = section.items.filter(item => {
+                if (!item.permission) {
+                    return true;
+                }
+                return this._authService.hasPermission(item.permission);
+            });
+
+            return {
+                ...section,
+                items: allowedItems
+            };
+        });
+
+        this.sections = filteredSections.filter(section => section.items.length > 0);
     }
 }

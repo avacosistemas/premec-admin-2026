@@ -7,6 +7,10 @@ import { Navigation, NavigationGroup } from './navigation.types';
 import { FWK_CRUD_MODULES_LOADER, FWK_NAVIGATION_GROUPS } from './navigation.tokens';
 import { AbstractAuthService } from '@fwk/auth/abstract-auth.service';
 
+interface ExtendedNavigationItem extends FuseNavigationItem {
+    order?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NavigationService {
     private _navigation: ReplaySubject<Navigation> = new ReplaySubject<Navigation>(1);
@@ -47,11 +51,21 @@ export class NavigationService {
         }).filter(Boolean) as CrudDef[];
     }
 
-    private sortNavigationItems = (a: FuseNavigationItem, b: FuseNavigationItem): number => {
+    private sortNavigationItems = (a: ExtendedNavigationItem, b: ExtendedNavigationItem): number => {
+        if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+        }
+        if (a.order !== undefined && b.order === undefined) {
+            return -1;
+        }
+        if (b.order !== undefined && a.order === undefined) {
+            return 1;
+        }
+
         const typeWeights = {
-            'basic': 1,
+            'group': 1,
             'collapsable': 2,
-            'group': 3
+            'basic': 3
         };
 
         const aWeight = typeWeights[a.type] || 10;
@@ -61,27 +75,30 @@ export class NavigationService {
             return aWeight - bWeight;
         }
 
-        return a.title.localeCompare(b.title);
+        return (a.title || '').localeCompare(b.title || '');
     };
 
     private async buildDynamicNavigation(): Promise<FuseNavigationItem[]> {
         const crudDefs = await this.loadAllCrudDefs();
 
-        const menuGeneralGroup: FuseNavigationItem = {
+        const menuGeneralGroup: ExtendedNavigationItem = {
             id: 'menu-general',
             title: 'Menú General',
             type: 'group',
             children: [],
+            order: 0
         };
 
-        const collapsibleMenus = new Map<string, FuseNavigationItem>();
-        this.navigationGroups.forEach((groupDef: NavigationGroup) => {
+        const collapsibleMenus = new Map<string, ExtendedNavigationItem>();
+        
+          this.navigationGroups.forEach((groupDef: NavigationGroup) => {
             collapsibleMenus.set(groupDef.id, {
                 id: groupDef.id,
                 title: groupDef.title,
-                type: 'collapsable',
+                type: groupDef.type || 'collapsable', 
                 icon: groupDef.icon,
                 children: [],
+                order: (groupDef as any).order 
             });
         });
 
@@ -101,12 +118,13 @@ export class NavigationService {
                 }
             }
 
-            const navItem: FuseNavigationItem = {
+            const navItem: ExtendedNavigationItem = {
                 id: navDef.id,
                 title: translatedTitle,
                 type: 'basic',
                 icon: navDef.icon,
                 link: navDef.url,
+                order: navDef.order
             };
 
             if (navDef.group) {
@@ -115,7 +133,8 @@ export class NavigationService {
                 let parentMenu = collapsibleMenus.get(rootGroupId);
 
                 if (!parentMenu) {
-                    console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado.`);
+                    console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado para ${navDef.id}.`);
+                    menuGeneralGroup.children?.push(navItem);
                     return;
                 }
 
@@ -131,7 +150,7 @@ export class NavigationService {
                         };
                         parentMenu.children?.push(subGroup);
                     }
-                    parentMenu = subGroup;
+                    parentMenu = subGroup as ExtendedNavigationItem;
                 }
                 parentMenu.children?.push(navItem);
 
@@ -140,16 +159,22 @@ export class NavigationService {
             }
         });
 
+        const rootItems: ExtendedNavigationItem[] = [];
+
         collapsibleMenus.forEach(menu => {
             if (menu.children && menu.children.length > 0) {
-                menuGeneralGroup.children?.push(menu);
+                menu.children.sort(this.sortNavigationItems);
+                rootItems.push(menu);
             }
         });
 
-        if (menuGeneralGroup.children) {
+        if (menuGeneralGroup.children && menuGeneralGroup.children.length > 0) {
             menuGeneralGroup.children.sort(this.sortNavigationItems);
+            rootItems.push(menuGeneralGroup);
         }
 
-        return [menuGeneralGroup];
+        rootItems.sort(this.sortNavigationItems);
+
+        return rootItems;
     }
 }

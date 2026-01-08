@@ -115,3 +115,13 @@ color-piker {
 button mat-icon.mat-icon {
     color: inherit !important;
 }
+
+.mat-mdc-tab-label-container {
+    background-color: white !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.dark .mat-mdc-tab-label-container {
+    background-color: #111827 !important;
+}

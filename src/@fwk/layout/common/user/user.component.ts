@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FuseFullscreenComponent } from '@fuse/components/fullscreen';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
+import { environment } from 'environments/environment';
 
 @Component({
     selector: 'user',
@@ -43,7 +44,8 @@ export class UserComponent implements OnInit, OnDestroy {
     @Input() showAvatar: boolean = true;
     user: User;
     config: FuseConfig;
-    
+    showChangePassword = false;
+
     private readonly THEME_STORAGE_KEY = 'fuse-theme-scheme';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -70,6 +72,8 @@ export class UserComponent implements OnInit, OnDestroy {
                 this.config = config;
                 this._changeDetectorRef.markForCheck();
             });
+
+        this.showChangePassword = !!environment.auth.changePassword && environment.auth.changePassword.trim() !== '';
     }
 
     ngOnDestroy(): void {
@@ -92,5 +96,9 @@ export class UserComponent implements OnInit, OnDestroy {
         } catch (e) {
             console.error('No se pudo guardar la preferencia de tema en localStorage.', e);
         }
+    }
+
+    changePassword(): void {
+        this._router.navigate(['/change-password']); 
     }
 }

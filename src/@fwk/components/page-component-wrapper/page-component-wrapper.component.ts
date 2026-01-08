@@ -47,10 +47,16 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
     private injector = inject(Injector);
 
     ngOnInit(): void {
-        this.definition = this.route.snapshot.data['definition'];
-        if (!this.definition) {
+        const defData = this.route.snapshot.data['definition'];
+
+        if (!defData) {
             console.error('[PageComponentWrapper] No se encontró la definición de página en los datos de la ruta.');
             return;
+        }
+
+        this.definition = { ...defData };
+        if (defData.actions) {
+            this.definition.actions = defData.actions.map(action => ({ ...action }));
         }
 
         const i18n = this.i18nService.getDictionary(this.definition.i18n.name);

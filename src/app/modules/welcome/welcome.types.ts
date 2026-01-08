@@ -3,7 +3,8 @@ export interface WelcomeCard {
     description: string;
     icon: string;
     route: string;
-    color: 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate'; 
+    color: 'red' | 'pink' | 'gray' | 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate'; 
+    permission?: string;
 }
 
 export interface WelcomeSection {

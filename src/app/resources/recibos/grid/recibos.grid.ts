@@ -25,6 +25,14 @@ export const RECIBOS_GRID_DEF: GridDef = {
             columnDef: 'tipo',
             columnNameKey: 'recibos_grid_column_tipo'
         },
+        {
+            columnDef: 'descripcion',
+            columnNameKey: 'recibos_grid_column_descripcion'
+        },
+        {
+            columnDef: 'filePath',
+            columnNameKey: 'recibos_grid_column_filepath'
+        },
     ],
 
     displayedColumns: [
@@ -32,6 +40,7 @@ export const RECIBOS_GRID_DEF: GridDef = {
         'year',
         'monthString',
         'tipo',
+        'descripcion',
     ],
     sortAllColumns: true,
 
@@ -40,7 +49,6 @@ export const RECIBOS_GRID_DEF: GridDef = {
             actionNameKey: 'recibos_grid_action_download_receipt',
             actionType: 'file-download',
             icon: 'file_download',
-
             ws: {
                 key: 'DOWNLOAD_RECIBO_WS',
                 url: PREFIX_DOMAIN_API + 'descargarRecibo',
@@ -50,7 +58,9 @@ export const RECIBOS_GRID_DEF: GridDef = {
                     year: 'year',
                     month: 'month',
                     monthString: 'monthString',
-                    tipo: 'tipo'
+                    tipo: 'tipo',
+                    descripcion: 'descripcion',
+                    filePath: 'filePath'
                 }
             }
         },

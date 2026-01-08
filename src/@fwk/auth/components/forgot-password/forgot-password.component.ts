@@ -13,6 +13,7 @@ import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { finalize } from 'rxjs';
 import { LogoComponent } from '@fwk/components/logo/logo.component';
+import { FWK_CONFIG } from '@fwk/model/fwk-config';
 
 interface ForgotPasswordForm {
     email: FormControl<string>;
@@ -28,6 +29,8 @@ interface ForgotPasswordForm {
 })
 export class AuthForgotPasswordComponent implements OnInit {
     @ViewChild('forgotPasswordNgForm') forgotPasswordNgForm: NgForm;
+
+    public fwkConfig = inject(FWK_CONFIG);
 
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',

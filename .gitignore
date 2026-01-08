@@ -46,3 +46,14 @@ bundle_code.cjs
 .DS_Store
 Thumbs.db
 .logs
+
+# .gitignore
+/node_modules
+/dist
+/tmp
+/out-tsc
+/bazel-out
+/.idea
+/.vscode
+/.angular
+.DS_Store

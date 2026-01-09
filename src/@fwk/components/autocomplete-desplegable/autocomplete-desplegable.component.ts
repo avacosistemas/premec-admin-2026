@@ -1,6 +1,6 @@
-﻿import { Component, OnInit, Input, forwardRef, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, Input, forwardRef, OnDestroy, ViewChild, ChangeDetectorRef, Optional, Host, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, Validator, FormControl, AbstractControl, ValidationErrors, NG_VALIDATORS, ReactiveFormsModule, FormGroupDirective, NgForm } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, Validator, FormControl, AbstractControl, ValidationErrors, NG_VALIDATORS, ReactiveFormsModule, FormGroupDirective, NgForm, ControlContainer, FormGroup } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,7 +16,7 @@ import { TranslatePipe } from '../../pipe/translate.pipe';
 import { AutocompleteOptions } from '@fwk/model/dynamic-form/dynamic-field-options.interface';
 
 @Component({
-     selector: 'fwk-autocomplete-desplegable',
+    selector: 'fwk-autocomplete-desplegable',
     templateUrl: './autocomplete-desplegable.component.html',
     styleUrls: ['./autocomplete-desplegable.component.scss'],
     standalone: true,
@@ -43,6 +43,13 @@ import { AutocompleteOptions } from '@fwk/model/dynamic-form/dynamic-field-optio
             useExisting: forwardRef(() => AutocompleteDesplegableComponent),
             multi: true
         }
+    ],
+    viewProviders: [
+        {
+            provide: ControlContainer,
+            useFactory: (container: ControlContainer) => container,
+            deps: [[new Optional(), new SkipSelf(), ControlContainer]]
+        }
     ]
 })
 export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
@@ -50,7 +57,7 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
     @Input() config!: ApiAutocompleteConfiguration;
     @Input() searchTermInterface!: AutocompleteSearchTerm;
     @Input() errorMessage: string | null = null;
-    
+
     @ViewChild('autoCompleteInput', { read: MatAutocompleteTrigger }) autoCompleteTrigger!: MatAutocompleteTrigger;
 
     autocompleteControl = new FormControl<string | object | null>(null);
@@ -69,7 +76,10 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
     onChange: (value: any) => void = () => { };
     onTouched: () => void = () => { };
 
-    constructor(private cdr: ChangeDetectorRef) {}
+    constructor(
+        private cdr: ChangeDetectorRef,
+        @Optional() @Host() @SkipSelf() private controlContainer: ControlContainer
+    ) { }
 
     ngOnInit() {
         if (!this.searchTermInterface) {
@@ -84,8 +94,34 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
             .subscribe(value => {
                 if (typeof value !== 'string') {
                     this.onChange(value);
+                    this.updateSiblingField(value);
+                } else {
+                    if (!this.isOptionSelected) {
+                        this.updateSiblingField(null);
+                    }
                 }
             });
+    }
+
+    private updateSiblingField(value: any): void {
+        const options = this.config?.options as AutocompleteOptions;
+
+        if (options?.transferIdToField && this.controlContainer && this.controlContainer.control) {
+            const formGroup = this.controlContainer.control as FormGroup;
+            const targetControl = formGroup.get(options.transferIdToField);
+
+            if (targetControl) {
+                let valToSet = null;
+                if (value && typeof value === 'object') {
+                    valToSet = options.elementValue ? value[options.elementValue] : value.id;
+                }
+
+                if (targetControl.value !== valToSet) {
+                    targetControl.setValue(valToSet);
+                    targetControl.markAsDirty();
+                }
+            }
+        }
     }
 
     ngOnDestroy() {
@@ -124,6 +160,9 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
 
     writeValue(value: any): void {
         this.autocompleteControl.setValue(value, { emitEvent: false });
+        if (value) {
+            this.updateSiblingField(value);
+        }
         this.cdr.markForCheck();
     }
 

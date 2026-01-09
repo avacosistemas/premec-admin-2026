@@ -31,7 +31,7 @@
     </mat-card>
 
 
-    <div *ngIf="dataSource.data.length > 0" class="flex-auto overflow-auto container-table dark:bg-transparent">
+    <div *ngIf="dataSource.data.length > 0" class="flex-auto overflow-auto container-table dark:bg-transparent pb-20">
         <table mat-table [dataSource]="dataSource" matSort class="w-full bg-transparent">
 
             <ng-container matColumnDef="legajo">
@@ -92,17 +92,15 @@
                 <td mat-cell *matCellDef="let element">
                     <mat-form-field *ngIf="!element.aprobado" appearance="outline" subscriptSizing="dynamic"
                         class="w-full dense-form-field my-1">
-                        <textarea matInput [(ngModel)]="element.observaciones"
+                        <input matInput [(ngModel)]="element.observaciones"
                             [placeholder]="'recibos_proc_obs_placeholder' | translate:i18nName"
-                            (blur)="onObservationsChange()" rows="1"></textarea>
+                            (blur)="onObservationsChange()" autocomplete="off">
                     </mat-form-field>
                     <span *ngIf="element.aprobado" class="text-gray-400 italic text-xs">
                         {{ 'recibos_proc_sin_obs' | translate:i18nName }}
                     </span>
                 </td>
             </ng-container>
-
-            
 
             <!-- <ng-container matColumnDef="timeInMilis">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'recibos_proc_col_timeinmilis' | translate:i18nName

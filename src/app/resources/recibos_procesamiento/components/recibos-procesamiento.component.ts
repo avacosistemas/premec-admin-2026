@@ -183,9 +183,10 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
                     setTimeout(() => {
                         if (this.paginator) this.dataSource.paginator = this.paginator;
                         if (this.sort) this.dataSource.sort = this.sort;
+
+                        this.checkSendValidity();
                     });
 
-                    this.toggleSendButton(true);
                     this.isLoadingProcess = false;
                     this._cdr.markForCheck();
                 },
@@ -204,6 +205,7 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
         }
     }
 
+
     onApprovalChange(row: ReciboTabla, event: any): void {
         row.aprobado = event.checked;
         if (row.aprobado) {
@@ -217,10 +219,13 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
     }
 
     checkSendValidity(): void {
-        const isValid = this.dataSource.data.length > 0 && this.dataSource.data.every(row =>
-            row.aprobado || (!row.aprobado && row.observaciones.trim() !== '')
+        const hasData = this.dataSource.data && this.dataSource.data.length > 0;
+
+        const isValid = hasData && this.dataSource.data.every(row =>
+            row.aprobado || (!row.aprobado && row.observaciones && row.observaciones.trim() !== '')
         );
-        this.toggleSendButton(isValid);
+
+        this.toggleSendButton(hasData, !isValid);
     }
 
     sendRecibos(): void {
@@ -259,12 +264,12 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
         this._cdr.markForCheck();
     }
 
-    private toggleSendButton(enable: boolean): void {
+    private toggleSendButton(show: boolean, disabled: boolean = false): void {
         this.actionStateChange.emit({
             key: 'recibos_proc_enviar_action',
             changes: {
-                hidden: !enable,
-                disabled: false
+                hidden: !show,
+                disabled: disabled
             }
         });
     }

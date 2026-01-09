@@ -25,6 +25,57 @@ export class ComponentDefService {
         private formService: FormService
     ) { }
 
+    getUserPermisos(): string[] {
+        const user = this.localStorageService.getUserLocalStorage();
+        const permisos = user?.permisos;
+
+        if (!permisos) {
+            return [];
+        }
+
+        if (Array.isArray(permisos)) {
+            return permisos;
+        }
+
+        if (typeof permisos === 'string') {
+            return permisos.split(';');
+        }
+
+        return [];
+    }
+
+    hasAccess(security?: string): boolean {
+        if (security == null) {
+            return true;
+        }
+        const userPermisos = this.getUserPermisos();
+        return userPermisos.includes(security);
+    }
+
+    applySecurity(component: any): void {
+        const userPermisos = new Set(this.getUserPermisos());
+
+        if (component.security?.createAccess && !userPermisos.has(component.security.createAccess)) {
+            delete component.formsDef?.create;
+            if (component.forms) delete component.forms.create;
+        }
+        if (component.security?.updateAccess && !userPermisos.has(component.security.updateAccess)) {
+            delete component.formsDef?.update;
+            if (component.forms) delete component.forms.update;
+        }
+        if (component.security?.deleteAccess && !userPermisos.has(component.security.deleteAccess)) {
+            if (component.grid) {
+                component.grid.deleteAction = false;
+                delete component.grid.deleteColumn;
+            }
+        }
+        if (component.grid?.actions) {
+            component.grid.actions = component.grid.actions.filter((action: any) =>
+                !action.actionSecurity || userPermisos.has(action.actionSecurity)
+            );
+        }
+    }
+
     create(componentDef: ComponentDef): void {
         this.getByName(componentDef.name).pipe(take(1)).subscribe(existing => {
             if (!existing) {
@@ -159,40 +210,6 @@ export class ComponentDefService {
 
     private findComponentInMemory(byName: string): ComponentDef | undefined {
         return this.copyComps?.find(e => e.name === byName);
-    }
-
-    getUserPermisos(): string[] {
-        const permisos = this.localStorageService.getUserLocalStorage()?.permisos;
-        return permisos ? String(permisos).split(";") : [];
-    }
-
-    hasAccess(security?: string): boolean {
-        if (security == null) {
-            return true;
-        }
-        const userPermisos = this.getUserPermisos();
-        return userPermisos.includes(security);
-    }
-
-    applySecurity(component: any): void {
-        const userPermisos = new Set(this.getUserPermisos());
-        if (component.security?.createAccess && !userPermisos.has(component.security.createAccess)) {
-            delete component.formsDef?.create;
-        }
-        if (component.security?.updateAccess && !userPermisos.has(component.security.updateAccess)) {
-            delete component.formsDef?.update;
-        }
-        if (component.security?.deleteAccess && !userPermisos.has(component.security.deleteAccess)) {
-            if (component.grid) {
-                component.grid.deleteAction = false;
-                delete component.grid.deleteColumn;
-            }
-        }
-        if (component.grid?.actions) {
-            component.grid.actions = component.grid.actions.filter((action: any) =>
-                !action.actionSecurity || userPermisos.has(action.actionSecurity)
-            );
-        }
     }
 
     filterNavArrayBySecurity(navArray: any[], allowedSecurityValues: string[]): any[] {

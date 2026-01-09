@@ -41,13 +41,22 @@ export class AuthService implements AbstractAuthService {
 
                 const emailNotSpecified = this._i18nService.getDictionary('fwk')?.translate?.('auth_email_not_specified') ?? 'auth_email_not_specified';
 
+                let permisosProcesados: string[] = [];
+                if (responseFromApi.permisos) {
+                    if (Array.isArray(responseFromApi.permisos)) {
+                        permisosProcesados = responseFromApi.permisos;
+                    } else if (typeof responseFromApi.permisos === 'string') {
+                        permisosProcesados = responseFromApi.permisos.split(';');
+                    }
+                }
+
                 const userForFuse: User = {
                     id: responseFromApi.guid,
                     name: responseFromApi.username,
                     email: responseFromApi.email || emailNotSpecified,
                     avatar: null,
                     status: 'online',
-                    permisos: responseFromApi.permisos ? responseFromApi.permisos.split(';') : [],
+                    permisos: permisosProcesados, 
                     refreshToken: refreshTokenValue || accessToken
                 };
 
@@ -97,9 +106,21 @@ export class AuthService implements AbstractAuthService {
             return of(false);
         }
 
+        let permisosSet = new Set<string>();
+        
+        if (user.permisos) {
+            if (Array.isArray(user.permisos)) {
+                permisosSet = new Set(user.permisos);
+            } else if (typeof user.permisos === 'string') {
+                const strPermisos = user.permisos as string;
+                permisosSet = new Set(strPermisos.split(';'));
+            }
+        }
+
         this._authenticated.next(true);
         this._userService.user = user;
-        this._userPermissions = new Set(user.permisos || []);
+        this._userPermissions = permisosSet;
+
         return of(true);
     }
 
@@ -162,9 +183,7 @@ export class AuthService implements AbstractAuthService {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_DATA_KEY);
         this._authenticated.next(false);
-        if (this._userService) {
-            this._userService.user = null;
-        }
+        this._userService.user = { id: '', name: '', email: '' }; 
         this._userPermissions.clear();
     }
 
@@ -191,8 +210,15 @@ export class AuthService implements AbstractAuthService {
     getToken(): string | null { return localStorage.getItem(this.TOKEN_KEY); }
     private setToken(token: string): void { localStorage.setItem(this.TOKEN_KEY, token); }
     private setUser(user: User): void { localStorage.setItem(this.USER_DATA_KEY, JSON.stringify(user)); }
+    
     getUserFromLocalStorage(): User | null {
         const userData = localStorage.getItem(this.USER_DATA_KEY);
-        return userData ? JSON.parse(userData) : null;
+        if (!userData) return null;
+        try {
+            return JSON.parse(userData);
+        } catch (e) {
+            console.error('Error al leer datos de usuario de localStorage', e);
+            return null;
+        }
     }
 }

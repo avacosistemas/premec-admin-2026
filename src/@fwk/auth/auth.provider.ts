@@ -9,7 +9,7 @@ export const provideAppAuth = (): Array<Provider | EnvironmentProviders> =>
     return [
         {
             provide: AbstractAuthService,
-            useClass: AuthService
+            useExisting: AuthService
         }
     ];
 };

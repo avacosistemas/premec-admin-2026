@@ -47,7 +47,7 @@ export const RECIBOS_GRID_DEF: GridDef = {
     actions: [
         {
             actionNameKey: 'recibos_grid_action_download_receipt',
-            actionType: 'file-download',
+            actionType: 'file_download',
             icon: 'heroicons_outline:arrow-down-tray',
             ws: {
                 key: 'DOWNLOAD_RECIBO_WS',

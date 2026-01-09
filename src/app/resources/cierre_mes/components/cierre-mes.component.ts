@@ -12,17 +12,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-
 import { NotificationService } from '@fwk/services/notification/notification.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { CustomPageComponent } from '@fwk/model/page-component.interface';
 import { ActionDef } from '@fwk/model/component-def/action-def';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
+import { DialogService } from '@fwk/services/dialog-service/dialog.service';
 
 import { CierreMesService } from '../cierre-mes.service';
 
@@ -45,6 +45,7 @@ import { CierreMesService } from '../cierre-mes.service';
         MatProgressBarModule,
         MatExpansionModule,
         MatTooltipModule,
+        MatCheckboxModule,
         TranslatePipe
     ],
     templateUrl: './cierre-mes.component.html',
@@ -67,6 +68,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
     private _i18nService = inject(I18nService);
     private _cdr = inject(ChangeDetectorRef);
     private _fuseMediaWatcherService = inject(FuseMediaWatcherService);
+    private _dialogService = inject(DialogService);
 
     cierreForm: FormGroup;
     meses: { value: number, viewValue: string }[];
@@ -77,13 +79,14 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
     i18nName = 'CIERRE_MES_I18N_DEF';
 
     dataSource = new MatTableDataSource<any>();
+
     columnsToDisplay = ['legajo', 'usuarioSap', 'nombre', 'facturablesHora', 'ociosasHora', 'fichadoHora', 'efectividad', 'cumplimientoObjetivo'];
-    columnsToDisplayWithExpand = ['expand', ...this.columnsToDisplay];
+    columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
+
     expandedElement: any | null;
-
     isMobile: boolean = false;
-
     panelOpenState = true;
+
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
     ngOnInit(): void {
@@ -128,6 +131,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
         }
         return value;
     }
+
     limpiarFiltros(): void {
         const currentDate = new Date();
         this.cierreForm.patchValue({
@@ -137,6 +141,29 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
         this.dataSource.data = [];
         this.toggleSaveButton(false);
         this.panelOpenState = true;
+    }
+
+    isIndeterminate(): boolean {
+        const numRows = this.dataSource.data.length;
+        if (numRows === 0) return false;
+        const numSelected = this.dataSource.data.filter(i => i.selected).length;
+        return numSelected > 0 && numSelected < numRows;
+    }
+
+    isAllSelected(): boolean {
+        const numRows = this.dataSource.data.length;
+        if (numRows === 0) return false;
+        const numSelected = this.dataSource.data.filter(i => i.selected).length;
+        return numSelected === numRows;
+    }
+
+    masterToggle(): void {
+        const isAll = this.isAllSelected();
+        this.dataSource.data.forEach(row => row.selected = !isAll);
+    }
+
+    toggleSelection(row: any): void {
+        row.selected = !row.selected;
     }
 
     vistaPrevia(): void {
@@ -165,8 +192,11 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
                     viaticos: item.viaticos || 0,
                     adelanto: item.adelanto || 0,
                     prestamo: item.prestamo || 0,
-                    premioAsistencia: item.premioAsistencia || false,
-                    gratificacionesAumentos: item.gratificacionesAumentos || ''
+                    
+                    premioAsistencia: item.premioAsistencia !== undefined && item.premioAsistencia !== null ? item.premioAsistencia : true,
+
+                    gratificacionesAumentos: item.gratificacionesAumentos || '',
+                    selected: false
                 }));
 
                 this.dataSource.data = processedData;
@@ -174,7 +204,6 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
 
                 this.toggleSaveButton(true);
                 this.loading = false;
-
                 this.panelOpenState = false;
 
                 this._cdr.markForCheck();
@@ -190,13 +219,40 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
     }
 
     guardarCierres(): void {
-        if (!this.dataSource.data || this.dataSource.data.length === 0) {
-            this._notificationService.notify('No hay datos para guardar. Genere una vista previa primero.');
+        const selectedItems = this.dataSource.data.filter(i => i.selected);
+
+        if (selectedItems.length === 0) {
+            this._notificationService.notifyError('Debe seleccionar al menos un registro para procesar el cierre.');
             return;
         }
 
         if (this.saving) return;
 
+        let messageHtml = `<p>Vas a cerrar el mes para los siguientes <b>${selectedItems.length}</b> empleados:</p>`;
+        messageHtml += `<ul class="list-disc list-inside mt-2 max-h-40 overflow-y-auto bg-gray-50 dark:bg-gray-800 p-2 rounded text-sm">`;
+        selectedItems.forEach(item => {
+            messageHtml += `<li>${item.nombre || item.usuarioSap || 'Sin Nombre'}</li>`;
+        });
+        messageHtml += `</ul>`;
+        messageHtml += `<p class="mt-3 text-xs text-secondary">Los registros no seleccionados serán ignorados.</p>`;
+
+        const dialogRef = this._dialogService.showGenericModal({
+            title: 'Confirmar Cierre de Mes',
+            message: messageHtml,
+            type: 'info',
+            icon: 'check-circle',
+            confirmButtonText: 'Sí, procesar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        dialogRef.afterClosed().subscribe(confirmed => {
+            if (confirmed) {
+                this.procesarEnvio(selectedItems);
+            }
+        });
+    }
+
+    private procesarEnvio(itemsToSend: any[]): void {
         this.saving = true;
         this._cdr.markForCheck();
 
@@ -207,7 +263,7 @@ export class CierreMesComponent implements OnInit, CustomPageComponent {
             changes: { disabled: true }
         });
 
-        this._cierreMesService.saveCierres(this.dataSource.data, anio, mes).subscribe({
+        this._cierreMesService.saveCierres(itemsToSend, anio, mes).subscribe({
             next: () => {
                 this._notificationService.notifySuccess(this.translate('cierre_mes_exito_guardado'));
                 this.saving = false;

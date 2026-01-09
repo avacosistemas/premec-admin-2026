@@ -5,7 +5,7 @@
             <button *ngIf="currentView !== 'main'" mat-icon-button (click)="changeView('main')" class="mr-2">
                 <mat-icon [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
             </button>
-            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" class="text-primary-500 mr-2"></mat-icon>
+            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" class="text-accent-500 mr-2"></mat-icon>
             {{ data.title }}
         </h2>
         <button mat-icon-button (click)="onCancel()" matTooltip="Cerrar">
@@ -19,7 +19,7 @@
                 <h3 class="text-sm font-medium text-secondary mb-2">{{ 'Seleccionar fecha' }}</h3>
                 <div class="flex gap-3 w-full">
                     <button type="button" (click)="changeView('day')"
-                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-primary-400 hover:bg-gray-200"
+                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200"
                         [ngClass]="{'border-red-500': form.get('day').invalid && form.get('day').touched, 'border-gray-200': !form.get('day').invalid || !form.get('day').touched}">
                         <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'day_label' | translate }}</span>
                         <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('day').value || '--'
@@ -27,14 +27,14 @@
                     </button>
 
                     <button type="button" (click)="changeView('month')"
-                        class="flex flex-grow flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-primary-400 hover:bg-gray-200">
+                        class="flex flex-grow flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
                         <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'month_label' | translate }}</span>
                         <span class="text-xl font-medium text-gray-800 dark:text-white capitalize">{{
                             getMonthName(form.get('month').value) || '----' }}</span>
                     </button>
 
                     <button type="button" (click)="changeView('year')"
-                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-primary-400 hover:bg-gray-200">
+                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
                         <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'year_label' | translate }}</span>
                         <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('year').value ||
                             '----' }}</span>
@@ -47,14 +47,14 @@
                 <div *ngIf="data.withHourAndMin" class="mt-4">
                     <div class="flex gap-3 w-full">
                         <button type="button" (click)="changeView('hour')"
-                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-primary-400 hover:bg-gray-200">
+                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
                             <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'hour_label' | translate
                                 }}</span>
                             <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('hour').value |
                                 number: '2.0' }}</span>
                         </button>
                         <button type="button" (click)="changeView('minute')"
-                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-primary-400 hover:bg-gray-200">
+                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
                             <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'minute_label' | translate
                                 }}</span>
                             <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('minute').value
@@ -79,7 +79,7 @@
                     <button *ngFor="let day of calendarDays" type="button" (click)="selectDay(day)"
                         class="flex h-10 w-full items-center justify-center rounded-lg text-sm transition-colors"
                         [ngClass]="{
-                            'bg-primary-600 text-white font-semibold hover:bg-primary-700': day.day === form.get('day').value && day.isCurrentMonth,
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': day.day === form.get('day').value && day.isCurrentMonth,
                             'hover:bg-gray-200 dark:hover:bg-gray-700': day.isCurrentMonth && day.day !== form.get('day').value,
                             'text-gray-400 dark:text-gray-700 cursor-default': !day.isCurrentMonth
                         }">
@@ -93,7 +93,7 @@
                     <button *ngFor="let m of months" type="button" (click)="selectValue('month', m.value)"
                         class="flex h-12 items-center justify-center rounded-lg text-sm capitalize transition-colors"
                         [ngClass]="{
-                            'bg-primary-600 text-white font-semibold hover:bg-primary-700': m.value === form.get('month').value,
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': m.value === form.get('month').value,
                             'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': m.value !== form.get('month').value
                         }">
                         {{ m.label }}
@@ -105,7 +105,7 @@
                 <div class="grid max-h-52 grid-cols-4 gap-2 overflow-y-auto pr-2">
                     <button *ngFor="let y of years" type="button" (click)="selectValue('year', y)"
                         class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
-                            'bg-primary-600 text-white font-semibold hover:bg-primary-700': y === form.get('year').value,
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': y === form.get('year').value,
                             'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': y !== form.get('year').value
                         }">
                         {{ y }}
@@ -123,7 +123,7 @@
                 <div class="grid grid-cols-6 gap-2">
                     <button *ngFor="let h of hours" type="button" (click)="selectValue('hour', h)"
                         class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
-                            'bg-primary-600 text-white font-semibold hover:bg-primary-700': h === form.get('hour').value,
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': h === form.get('hour').value,
                             'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': h !== form.get('hour').value
                         }">
                         {{ h | number: '2.0' }}
@@ -134,7 +134,7 @@
                 <div class="grid grid-cols-4 gap-2">
                     <button *ngFor="let min of minuteOptions" type="button" (click)="selectValue('minute', min)"
                         class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
-                            'bg-primary-600 text-white font-semibold hover:bg-primary-700': min === form.get('minute').value,
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': min === form.get('minute').value,
                             'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': min !== form.get('minute').value
                         }">
                         {{ min | number: '2.0' }}

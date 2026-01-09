@@ -23,8 +23,11 @@ export const RECIBOS_DEF: CrudDef = {
     },
     backButton: false,
     security: RECIBOS_SECURITY_DEF,
+    filterInMemory: true,
+    serverPagination: false,
     pagination: {
         page: 0,
         pageSize: 10
     },
+    cancelInitSearch: false
 };

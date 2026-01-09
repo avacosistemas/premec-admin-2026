@@ -76,6 +76,27 @@ export const WELCOME_DATA: WelcomeSection[] = [
         ]
     },
     {
+        title: 'Tableros de Gestión',
+        items: [
+            {
+                title: 'Mis Indicadores',
+                description: 'Tablero de rendimiento y objetivos mensuales.',
+                icon: 'heroicons_outline:chart-bar',
+                route: '/indicadores-mensuales',
+                color: 'amber',
+                permission: 'INDICADORES_MENSUALES_READ'
+            },
+            {
+                title: 'Indicadores Generales',
+                description: 'Vista global de indicadores y estadísticas.',
+                icon: 'heroicons_outline:chart-pie',
+                route: '/indicadores-mensuales-general',
+                color: 'indigo',
+                permission: 'INDICADORES_GENERAL_READ'
+            }
+        ]
+    },
+    {
         title: 'Seguridad y Usuarios',
         items: [
             {

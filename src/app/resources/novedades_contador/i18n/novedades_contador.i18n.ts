@@ -7,7 +7,7 @@ export const NOVEDADES_CONTADOR_I18N_DEF: I18n = {
         page_title: 'Novedades del Contador',
         novedades_contador_nav_def: 'Novedades Contador',
 
-        novedades_contador_busqueda: 'Búsqueda',
+        novedades_contador_busqueda: 'Selección de Período',
         novedades_contador_mes: 'Mes',
         novedades_contador_anio: 'Año',
         novedades_contador_vista_previa: 'Vista Previa',

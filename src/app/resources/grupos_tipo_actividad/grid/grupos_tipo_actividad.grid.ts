@@ -43,7 +43,7 @@ export const GRUPOS_TIPO_ACTIVIDAD_GRID_DEF: GridDef = {
   actions: [ 
     {
       actionNameKey: 'grupos_tipo_actividad_grid_def_button_action_items',
-      icon: 'format_list_bulleted',
+      icon: 'heroicons_outline:list-bullet',
       actionType: 'redirect',
       redirect: {
         url: ITEM_CHECKLIST_GRUPO_NAV_DEF.url,

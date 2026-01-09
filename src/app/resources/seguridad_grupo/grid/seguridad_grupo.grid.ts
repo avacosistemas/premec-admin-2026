@@ -28,7 +28,7 @@ export const SEGURIDAD_GRUPO_GRID_DEF: GridDef = {
           parentTitle: 'name'
         }
       },
-      icon: 'lock'
+      icon: 'heroicons_outline:lock-closed'
     },
   ]
 };

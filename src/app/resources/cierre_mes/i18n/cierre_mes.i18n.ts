@@ -15,7 +15,7 @@ export const CIERRE_MES_I18N_DEF: I18n = {
         cierre_mes_cargando: 'Cargando...',
         cierre_mes_sin_resultados: 'Sin resultados',
         cierre_mes_sin_resultados_descripcion: 'Seleccione el período y genere una vista previa para comenzar.',
-        cierre_mes_busqueda: 'Búsqueda',
+        cierre_mes_busqueda: 'Selección de Período',
         cierre_mes_limpiar: 'Limpiar',
 
         cierre_mes_exito_guardado: 'Los cierres se han guardado correctamente.',

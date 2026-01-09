@@ -22,10 +22,11 @@ export const REPORTE_HORAS_MAQUINA_DEF: CrudDef = {
     dialogConfig: {
         width: '400px'
     },
-    cancelInitSearch: true,
-    filterInMemory: false,
+    filterInMemory: true,
+    serverPagination: false,
     pagination: {
         page: 0,
-        pageSize: 100
-    }
+        pageSize: 10
+    },
+    cancelInitSearch: false
 };

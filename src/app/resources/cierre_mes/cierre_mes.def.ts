@@ -17,6 +17,7 @@ export const CIERRE_MES_DEF: PageComponentDef = {
             actionType: 'custom_save_cierres',
             icon: 'heroicons_outline:check-circle',
             actionSecurity: CIERRE_MES_SECURITY_DEF.updateAccess,
+            appearance: 'flat',
             hidden: true
         }
     ]

@@ -7,9 +7,9 @@
         </mat-panel-title>
         <mat-panel-description class="flex items-center justify-end">
             <span *ngIf="activeFilterCount === 0">{{ 'search_panel_placeholder' | translate }}</span>
-            <span *ngIf="activeFilterCount > 0" class="flex items-center font-medium text-primary-400">
+            <span *ngIf="activeFilterCount > 0" class="flex items-center font-medium text-accent-400">
                 {{ activeFilterCount | i18nPlural: activeFilterCountMapping }}
-                <mat-icon class="ml-1 text-primary-400" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                <mat-icon class="ml-1 text-accent-400" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
             </span>
         </mat-panel-description>
     </mat-expansion-panel-header>

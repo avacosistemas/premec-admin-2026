@@ -15,13 +15,13 @@ export class CrudDef extends ComponentDef {
   forceGetDetail?: boolean;
   crudActions?: ActionDef[];
   displayGlobalActions?: DisplayActionsCondition[];
-  filterInMemory?: boolean;
-  pagination?: {
+  filterInMemory: boolean;
+  pagination: {
     page: number,
     pageSize: number
   };
-  cancelInitSearch?: boolean;
-  serverPagination?: boolean;
+  cancelInitSearch: boolean;
+  serverPagination: boolean;
   initFilter?: boolean;
   openLink?: string;
   openLinkTitle?: string;

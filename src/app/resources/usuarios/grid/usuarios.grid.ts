@@ -70,7 +70,7 @@ export const USUARIOS_GRID_DEF: GridDef = {
             parentTitle: 'username'
           }
         },
-        icon: 'vpn_key'
+        icon: 'heroicons_outline:key'
       },
     ]
 };

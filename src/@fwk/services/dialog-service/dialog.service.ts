@@ -7,6 +7,7 @@ import { HtmlModalComponent } from '../../components/crud/html-modal/html-modal.
 import { QuestionModalComponent, QuestionModalData } from '../../components/question-modal/question-modal.component';
 import { ModalPreviewComponent } from '../../components/modal-preview/modal-preview.component';
 import { GridModalComponent, GridModalData } from '../../components/grid-modal/grid-modal.component';
+import { GenericModalComponent, GenericDialogData } from '../../components/generic-modal/generic-modal.component';
 
 interface FilePreviewData {
     url: string;
@@ -89,6 +90,15 @@ export class DialogService {
             maxHeight: '95vh',
             panelClass: 'control-mat-dialog',
             data: fileData
+        });
+    }
+
+    showGenericModal<T = any>(data: GenericDialogData): MatDialogRef<GenericModalComponent, T> {
+        return this.dialog.open<GenericModalComponent, any, T>(GenericModalComponent, {
+            width: '500px',
+            maxWidth: '90vw',
+            panelClass: 'generic-modal-panel',
+            data: data
         });
     }
 }

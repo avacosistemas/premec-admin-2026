@@ -11,7 +11,7 @@
                     <input matInput id="qr-id" type="number" [(ngModel)]="id" placeholder="Ej: 12345" (keyup.enter)="generateQR()"/>
                 </mat-form-field>
 
-                <button mat-flat-button color="primary" class="flex items-center" (click)="generateQR()" [disabled]="loading || !id">
+                <button mat-flat-button color="accent" class="flex items-center" (click)="generateQR()" [disabled]="loading || !id">
                     <ng-container *ngIf="loading; else defaultButton">
                         <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
                     </ng-container>

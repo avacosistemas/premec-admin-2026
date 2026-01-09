@@ -3,7 +3,7 @@
 
     <mat-expansion-panel-header class="px-4 sm:px-6">
         <mat-panel-title class="flex items-center space-x-3">
-            <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" style="color: inherit;"></mat-icon>
             <span class="font-semibold">{{ 'cierre_mes_busqueda' | translate:i18nName }}</span>
         </mat-panel-title>
         <mat-panel-description class="flex items-center justify-end">
@@ -66,27 +66,44 @@
             <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:circle-stack"></mat-icon>
             <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">{{ 'cierre_mes_sin_resultados' |
                 translate:i18nName }}</div>
-            <div class="text-secondary mt-1 max-w-sm">{{ 'cierre_mes_sin_resultados_descripcion' | translate:i18nName }}
+            <div class="text-secondary mt-1 max-w-sm">{{ 'cierre_mes_sin_resultados_descripcion' | translate:i18nName
+                }}
             </div>
         </div>
 
         <div *ngIf="dataSource.data.length > 0"
             class="flex-auto overflow-auto container-table pb-20 dark:bg-transparent">
             <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full">
-
-                <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-                    <th mat-header-cell *matHeaderCellDef class="text-sm">
-                        {{ ('cierre_mes_' + column.toLowerCase()) | translate:i18nName }}
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef class="w-4">
+                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="dataSource.data.length > 0 && isAllSelected()"
+                            [indeterminate]="isIndeterminate()" color="primary">
+                        </mat-checkbox>
                     </th>
-                    <td mat-cell *matCellDef="let element">
-                        {{element[column]}}
+                    <td mat-cell *matCellDef="let row" class=" w-4"
+                        (click)="$event.stopPropagation()">
+                        <mat-checkbox (click)="$event.stopPropagation()" (change)="toggleSelection(row)"
+                            [checked]="row.selected" color="primary">
+                        </mat-checkbox>
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+                    <ng-container *ngIf="column !== 'select'">
+                        <th mat-header-cell *matHeaderCellDef class="text-sm">
+                            {{ ('cierre_mes_' + column.toLowerCase()) | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element">
+                            {{element[column]}}
+                        </td>
+                    </ng-container>
+                </ng-container>
+
                 <ng-container matColumnDef="expand">
-                    <th mat-header-cell *matHeaderCellDef class="w-10 px-2 border-b">
+                    <th mat-header-cell *matHeaderCellDef class="w-4">
                     </th>
-                    <td mat-cell *matCellDef="let element" class="px-2 border-b text-center w-10">
+                    <td mat-cell *matCellDef="let element" class="w-4">
                         <button mat-icon-button
                             (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
                             <mat-icon
@@ -98,7 +115,7 @@
                 <ng-container matColumnDef="expandedDetail">
                     <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"
                         class="p-0 border-0">
-                        <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50/50 dark:bg-gray-900 border-l-4 border-l-primary-500"
+                        <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50/50 dark:bg-gray-900 border-l-4 border-l-accent-500"
                             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
 
                             <div class="p-4 grid gap-6">
@@ -184,9 +201,12 @@
 
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"></tr>
                 <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-                    class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-800/50 transition-colors"
-                    [class.bg-primary-50]="expandedElement === element"
-                    [class.dark:bg-gray-800]="expandedElement === element"
+                    class="element-row cursor-pointer transition-colors border-b dark:border-gray-700"
+                    [class.bg-green-100]="element.selected" [class.dark:bg-green-950]="element.selected"
+                    [class.bg-white]="!element.selected && expandedElement !== element"
+                    [class.dark:bg-gray-900]="!element.selected && expandedElement !== element"
+                    [class.hover:bg-gray-50]="!element.selected"
+                    [class.bg-accent-50]="expandedElement === element && !element.selected"
                     (click)="expandedElement = expandedElement === element ? null : element">
                 </tr>
                 <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row h-0"></tr>
@@ -194,7 +214,7 @@
         </div>
     </div>
 
-    <mat-paginator *ngIf="dataSource.data.length > 0" class="border-t bottom-0 fixed print:hidden w-full z-30"
+    <mat-paginator [hidden]="dataSource.data.length === 0" class="border-t bottom-0 fixed print:hidden w-full z-30"
         [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
     </mat-paginator>
 </div>

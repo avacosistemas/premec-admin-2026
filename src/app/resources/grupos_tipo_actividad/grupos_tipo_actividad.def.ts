@@ -28,8 +28,11 @@ export const GRUPOS_TIPO_ACTIVIDAD_DEF: CrudDef = {
     dialogConfig: {
         width: '400px'
     },
+    filterInMemory: true,
+    serverPagination: false,
     pagination: {
         page: 0,
-        pageSize: 100
-    }
+        pageSize: 10
+    },
+    cancelInitSearch: false
 };

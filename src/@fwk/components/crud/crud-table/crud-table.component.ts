@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, Input, ViewChild, Output, EventEmitter, Injector, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, Input, ViewChild, Output, EventEmitter, Injector, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -58,7 +58,7 @@ const GENERAL_ACTION_COLUMN = '_general_action';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CrudTableComponent extends AbstractComponent implements OnInit, AfterViewInit {
+export class CrudTableComponent extends AbstractComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @Input() isLoading: boolean = false;
     @Input() crud: any;
@@ -71,6 +71,15 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     @Input() canDelete: boolean = false;
     @Input() containerClass: string = '';
     @Input() searchPerformed: boolean = false;
+
+     @ViewChild('tableContainer') tableContainer!: ElementRef;
+
+    canScrollLeft: boolean = false;
+    canScrollRight: boolean = false;
+    private scrollInterval: any;
+    
+    private readonly SCROLL_SPEED = 15;
+    private readonly SCROLL_STEP_TIME = 20;
 
     public repeatSkeleton = new Array(9).fill(0);
 
@@ -98,6 +107,10 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
             this.statustable.rows = this.rows;
 
             this._cdr.markForCheck();
+
+            setTimeout(() => {
+                this.checkScrollVisibility();
+            }, 100);
         }
     }
     get datasource(): MatTableDataSource<any> {
@@ -178,12 +191,60 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
         this.onInit();
     }
 
+    ngOnDestroy(): void {
+        this.stopScrolling();
+        super.ngOnDestroy();
+    }
+
     ngAfterViewInit(): void {
         if (this.paginator) {
             this.paginator._intl = new MatPaginatorIntl();
             this.paginator._intl.itemsPerPageLabel = this.translate('table_items_per_page');
         }
         this.wireUpDataSource();
+
+        setTimeout(() => {
+            this.checkScrollVisibility();
+        }, 500);
+    }
+
+    checkScrollVisibility(): void {
+        if (!this.tableContainer) return;
+        const el = this.tableContainer.nativeElement;
+        
+        if (el.scrollWidth <= el.clientWidth) {
+            this.canScrollLeft = false;
+            this.canScrollRight = false;
+        } else {
+            this.canScrollLeft = el.scrollLeft > 0;
+            this.canScrollRight = Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth;
+        }
+        
+        this._cdr.markForCheck();
+    }
+
+    startScrolling(direction: 'left' | 'right'): void {
+        this.stopScrolling();
+
+        this.scrollInterval = setInterval(() => {
+            if (!this.tableContainer) return;
+            const el = this.tableContainer.nativeElement;
+            
+            if (direction === 'left') {
+                el.scrollLeft -= this.SCROLL_SPEED;
+            } else {
+                el.scrollLeft += this.SCROLL_SPEED;
+            }
+            
+            this.checkScrollVisibility();
+        }, this.SCROLL_STEP_TIME);
+    }
+
+    stopScrolling(): void {
+        if (this.scrollInterval) {
+            clearInterval(this.scrollInterval);
+            this.scrollInterval = null;
+        }
     }
 
     onInit(): void {

@@ -185,3 +185,11 @@ app-cierre-mes {
 .dark .mat-mdc-table .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
     background-color: #111827 !important;
 }
+
+.bg-green-strong-selection {
+    background-color: #dcfce7 !important;
+}
+
+.dark .bg-green-strong-selection {
+    background-color: rgba(20, 83, 45, 0.3) !important;
+}

@@ -1,0 +1,211 @@
+<mat-expansion-panel class="shadow-none border-b rounded-none dark:bg-transparent z-20" [expanded]="panelOpenState"
+    (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+
+    <mat-expansion-panel-header class="px-4 sm:px-6">
+        <mat-panel-title class="flex items-center space-x-3">
+            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" style="color: inherit;"></mat-icon>
+            <span class="font-semibold">{{ 'indicadores_busqueda' | translate:i18nName }}</span>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="filterForm" (ngSubmit)="buscar()" class="w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'indicadores_mes' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="mes">
+                    <mat-option *ngFor="let mes of meses" [value]="mes.value">
+                        {{ mes.viewValue }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                <mat-label>{{ 'indicadores_anio' | translate:i18nName }}</mat-label>
+                <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
+            </mat-form-field>
+        </div>
+        <button type="submit" hidden></button>
+    </form>
+
+    <mat-action-row class="p-4 sm:px-6">
+        <div class="flex items-center justify-end w-full space-x-2">
+            <button mat-stroked-button type="button" (click)="limpiar()">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'indicadores_limpiar' | translate:i18nName }}</span>
+            </button>
+
+            <button mat-flat-button color="accent" type="button" (click)="buscar()"
+                [disabled]="filterForm.invalid || loading">
+                <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!loading" class="icon-size-5"
+                    [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                <span class="ml-2 hidden sm:inline" *ngIf="!loading">
+                    {{ 'indicadores_buscar' | translate:i18nName }}
+                </span>
+            </button>
+        </div>
+    </mat-action-row>
+</mat-expansion-panel>
+
+<div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+    
+    <div *ngIf="!data && !loading" class="flex flex-col items-center p-12 text-center h-full">
+        <mat-icon class="icon-size-24 text-gray-300 dark:text-gray-700 mb-4" svgIcon="heroicons_outline:chart-bar-square"></mat-icon>
+        <div class="text-2xl font-bold text-secondary">{{ 'indicadores_sin_datos_titulo' | translate:i18nName }}</div>
+        <div class="text-secondary mt-2">{{ 'indicadores_sin_datos_desc' | translate:i18nName }}</div>
+    </div>
+
+    <div *ngIf="data" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
+        
+        <div class="flex items-center gap-4">
+            <div class="h-14 w-14 rounded-full bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center text-accent-600 dark:text-accent-400 font-bold text-2xl">
+                {{ data.nombre?.charAt(0) }}
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white">{{ data.nombre }}</h1>
+                <!-- <p class="text-secondary font-mono text-sm">Legajo: {{ data.legajo }} | SAP: {{ data.usuarioSap }}</p> -->
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            <mat-card class="overflow-hidden rounded-2xl shadow-xl">
+                <div class="bg-blue-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:clock" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_horas' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6 grid grid-cols-1 gap-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <span class="text-secondary font-medium">{{ 'lbl_fichado_hora' | translate:i18nName }}</span>
+                        <span class="text-3xl font-bold text-gray-800 dark:text-white">{{ data.fichadoHora }}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_facturables_hora' | translate:i18nName }}</span>
+                            <span class="text-xl font-semibold text-green-600">{{ data.facturablesHora }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_ociosas_hora' | translate:i18nName }}</span>
+                            <span class="text-xl font-semibold text-amber-600">{{ data.ociosasHora }}</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
+            <mat-card class="overflow-hidden rounded-2xl shadow-xl">
+                <div class="bg-indigo-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:presentation-chart-line" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_desempeno' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6 grid gap-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <span class="text-secondary font-medium">{{ 'lbl_efectividad' | translate:i18nName }}</span>
+                        <span class="text-3xl font-bold text-indigo-600">{{ data.efectividad }}</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_actividades' | translate:i18nName }}</span>
+                            <span class="text-lg font-medium">{{ data.cantidadActividades }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_objetivo' | translate:i18nName }}</span>
+                            <span class="text-lg font-medium">{{ data.objetivoActividades }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_cumplimiento' | translate:i18nName }}</span>
+                            <span class="text-lg font-medium text-gray-800 dark:text-white">{{ data.cumplimientoObjetivo || '-' }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_valoracion' | translate:i18nName }}</span>
+                            <span class="text-lg font-bold text-green-600">{{ data.porcentajeValoracion }}</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
+            <mat-card class="overflow-hidden rounded-2xl shadow-xl">
+                <div class="bg-orange-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:star" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_calidad' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-2">
+                        <div class="flex flex-col items-center p-2 rounded bg-green-50 dark:bg-green-900/20">
+                            <span class="text-2xl font-bold text-green-600">{{ data.cantMB }}</span>
+                            <span class="text-xs font-bold text-center text-green-800 dark:text-green-400 mt-1">MB</span>
+                        </div>
+                        <div class="flex flex-col items-center p-2 rounded bg-blue-50 dark:bg-blue-900/20">
+                            <span class="text-2xl font-bold text-blue-600">{{ data.cantB }}</span>
+                            <span class="text-xs font-bold text-center text-blue-800 dark:text-blue-400 mt-1">B</span>
+                        </div>
+                        <div class="flex flex-col items-center p-2 rounded bg-yellow-50 dark:bg-yellow-900/20">
+                            <span class="text-2xl font-bold text-yellow-600">{{ data.cantR }}</span>
+                            <span class="text-xs font-bold text-center text-yellow-800 dark:text-yellow-400 mt-1">R</span>
+                        </div>
+                        <div class="flex flex-col items-center p-2 rounded bg-red-50 dark:bg-red-900/20">
+                            <span class="text-2xl font-bold text-red-600">{{ data.cantM }}</span>
+                            <span class="text-xs font-bold text-center text-red-800 dark:text-red-400 mt-1">M</span>
+                        </div>
+                        <div class="flex flex-col items-center p-2 rounded bg-gray-100 dark:bg-gray-800">
+                            <span class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ data.cantSV }}</span>
+                            <span class="text-xs font-bold text-center text-gray-600 dark:text-gray-400 mt-1">SV</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
+            <mat-card class="overflow-hidden rounded-2xl shadow-xl md:col-span-2 xl:col-span-2">
+                <div class="bg-green-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:currency-dollar" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_economico' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div class="flex flex-col border-r last:border-r-0 border-gray-100 dark:border-gray-700 px-2">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_salario' | translate:i18nName }}</span>
+                        <div class="flex items-baseline">
+                            <span class="text-2xl font-bold text-gray-800 dark:text-white">$ {{ data.salario | number:'1.2-2' }}</span>
+                            <!-- <span class="ml-1 text-sm text-secondary">{{ data.unidadSalario }}</span> -->
+                        </div>
+                    </div>
+                    <div class="flex flex-col border-r last:border-r-0 border-gray-100 dark:border-gray-700 px-2">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_viaticos' | translate:i18nName }}</span>
+                        <span class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ data.viaticos ? ('$ ' + (data.viaticos | number:'1.2-2')) : '-' }}</span>
+                    </div>
+                    <div class="flex flex-col border-r last:border-r-0 border-gray-100 dark:border-gray-700 px-2">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_premio' | translate:i18nName }}</span>
+                        <span class="text-lg font-medium text-green-600">{{ data.premioAsistencia ? ('$ ' + (data.premioAsistencia | number:'1.2-2')) : '-' }}</span>
+                    </div>
+                    <div class="flex flex-col border-r last:border-r-0 border-gray-100 dark:border-gray-700 px-2">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_adelanto' | translate:i18nName }}</span>
+                        <span class="text-lg font-medium text-red-500">{{ data.adelanto ? ('$ ' + (data.adelanto | number:'1.2-2')) : '-' }}</span>
+                    </div>
+                    <div class="flex flex-col border-r last:border-r-0 border-gray-100 dark:border-gray-700 px-2">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_prestamo' | translate:i18nName }}</span>
+                        <span class="text-lg font-medium text-red-500">{{ data.prestamo ? ('$ ' + (data.prestamo | number:'1.2-2')) : '-' }}</span>
+                    </div>
+                    <div class="flex flex-col px-2 md:col-span-2 lg:col-span-1">
+                        <span class="text-xs text-secondary uppercase mb-1">{{ 'lbl_gratificaciones' | translate:i18nName }}</span>
+                        <span class="text-sm text-gray-800 dark:text-gray-200">{{ data.gratificacionesAumentos || '-' }}</span>
+                    </div>
+                </div>
+            </mat-card>
+
+            <mat-card class="overflow-hidden rounded-2xl shadow-xl md:col-span-2 xl:col-span-1">
+                <div class="bg-gray-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:chat-bubble-left-ellipsis" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_novedades' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6 h-full min-h-[100px] flex items-center">
+                    <p class="text-gray-700 dark:text-gray-300 italic w-full text-center" *ngIf="!data.novedades">
+                        Sin novedades registradas.
+                    </p>
+                    <p class="text-gray-800 dark:text-gray-200" *ngIf="data.novedades">
+                        {{ data.novedades }}
+                    </p>
+                </div>
+            </mat-card>
+
+        </div>
+    </div>
+</div>

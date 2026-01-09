@@ -9,6 +9,8 @@
         "ng": "ng",
         "start": "ng serve",
         "build": "ng build",
+        "build-test": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --configuration test",
+        "build-prod": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --prod --aot=true",
         "watch": "ng build --watch --configuration development",
         "test": "ng test",
         "dev-tools": "node src/@fwk/_scripts/dev-server.js",

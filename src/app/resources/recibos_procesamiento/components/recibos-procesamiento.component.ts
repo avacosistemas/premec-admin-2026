@@ -122,7 +122,7 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
     }
 
     onAction(action: ActionDef): void {
-        if (action.actionType === 'recibos_proc_enviar_action') {
+        if (action.actionNameKey === 'recibos_proc_enviar_action') {
             this.sendRecibos();
         }
     }

@@ -40,6 +40,11 @@
                                 "input": "node_modules/tinymce",
                                 "output": "/tinymce/"
                             },
+                            {
+                                "glob": "**/*",
+                                "input": "src/WEB-INF",
+                                "output": "/WEB-INF"
+                            },
                             "src/favicon-16x16.png",
                             "src/favicon-32x32.png",
                             "src/assets",
@@ -66,6 +71,7 @@
                     },
                     "configurations": {
                         "test": {
+                            "baseHref": "/test/",
                             "budgets": [
                                 {
                                 "type": "anyComponentStyle",

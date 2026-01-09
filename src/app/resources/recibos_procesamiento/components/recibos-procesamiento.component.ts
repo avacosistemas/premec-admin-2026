@@ -76,7 +76,7 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
     fileName: string = '';
 
     dataSource = new MatTableDataSource<ReciboTabla>([]);
-    displayedColumns = ['legajo', 'nombreCompleto', 'periodo', 'neto', 'tipo', 'aprobado', 'observaciones', 'descripcion', 'timeInMilis'];
+    displayedColumns = ['legajo', 'nombreCompleto', 'periodo', 'neto', 'tipo', 'aprobado', 'observaciones', 'descripcion'];
 
     ngOnInit(): void {
         this.processingForm = this._fb.group({

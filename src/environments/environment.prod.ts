@@ -15,7 +15,7 @@ export const environment = {
     SITE_DOMAIN_WEB: 'http://localhost:4200/',
 
     auth: {
-        signIn: PREFIX_DOMAIN_API + 'authAdmin',
+        signIn: PREFIX_DOMAIN_API + 'auth',
         signOut: PREFIX_DOMAIN_API + 'user/logout',
         refreshToken: PREFIX_DOMAIN_API + 'refresh',
         forgotPassword: PREFIX_DOMAIN_API + 'auth/forgot-password',

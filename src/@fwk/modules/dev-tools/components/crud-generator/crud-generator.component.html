@@ -173,9 +173,9 @@
                             class="mt-0.5 flex-shrink-0 text-accent-600"></mat-icon>
                         <span class="text-sm" *ngIf="step3Form.get('customize')?.value">{{
                             'dev_tools_crud_gen_step3_hint' | translate }}</span>
-                        <span class="text-sm" *ngIf="!step3Form.get('customize')?.value">{{
+                        <!-- <span class="text-sm" *ngIf="!step3Form.get('customize')?.value">{{
                             'dev_tools_crud_gen_step3_auto_message' | translate:{prefix:
-                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span>
+                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span> -->
                     </div>
                 </form>
             </div>

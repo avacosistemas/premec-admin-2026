@@ -357,7 +357,10 @@ app.post('/api/dev/scan-endpoint', async (req, res) => {
     if (!endpoint || !token || !apiPrefix) { return res.status(400).json({ message: 'Faltan parámetros: endpoint, token, apiPrefix' }); }
     try {
         const cleanEndpoint = endpoint.replace(/{\w+}/g, '');
-        const urlWithParams = `${apiPrefix}${cleanEndpoint.replace('/api/', '')}?page=0&pageSize=1`;
+        const pathWithoutPrefix = cleanEndpoint.replace(/^\/?(api\/)?/, '');
+        const base = apiPrefix.endsWith('/') ? apiPrefix : `${apiPrefix}/`;
+        const urlWithParams = `${base}${pathWithoutPrefix}?page=0&pageSize=1`;
+        console.log(urlWithParams);
         const config = { headers: { 'Authorization': `Bearer ${token}` } };
         const response = await axios.get(urlWithParams, config);
         const data = response.data.data || response.data;

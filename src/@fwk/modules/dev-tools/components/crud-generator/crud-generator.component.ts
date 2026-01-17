@@ -204,6 +204,7 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
 
     createFieldGroup(field: any): FormGroup {
         const fg = this._fb.group({
+            key: [field.key],
             label: [field.label, Validators.required],
             controlType: [field.controlType, Validators.required],
             required: [false],
@@ -218,7 +219,13 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
                 minLength: [null], maxLength: [null], min: [null], max: [null], pattern: [null]
             }),
             options: this._fb.group({
-                dataSourceType: ['none'], fromData: [''], fromWsUrl: [''], elementLabel: [''], elementValue: ['']
+                 dataSourceType: ['none'],
+                fromData: [''],
+                fromWsUrl: [''], 
+                elementLabel: [''],
+                elementValue: [''],
+                titleFrom: [''],
+                titleTo: ['']   
             })
         });
         const inFilterControl = fg.get('inFilter');
@@ -254,7 +261,17 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
     }
 
     openFieldOptions(fieldRow: FieldTableRow): void {
-        const currentControlValue = fieldRow.control.getRawValue();
+        const rawValue = fieldRow.control.getRawValue();
+        const entityForModal = {
+            ...rawValue,
+            key: fieldRow.key, 
+            'options.dataSourceType': rawValue.options?.dataSourceType,
+            'options.fromData': rawValue.options?.fromData,
+            'options.fromWsUrl': rawValue.options?.fromWsUrl,
+            'options.elementLabel': rawValue.options?.elementLabel,
+            'options.elementValue': rawValue.options?.elementValue,
+            'validations.pattern': rawValue.validations?.pattern
+        };
 
         const formFields: DynamicField<any>[] = [
             { key: 'general_header', controlType: 'header', label: 'Configuración General' },
@@ -268,34 +285,42 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
             { key: 'maxValue', label: 'Valor Máximo (maxValue)', controlType: 'number' },
             { key: 'length', label: 'Largo Exacto (length)', controlType: 'number' },
 
-            { key: 'complex_validations_header', controlType: 'header', label: 'Validaciones Complejas (ValidationDef[])' },
+            { key: 'complex_validations_header', controlType: 'header', label: 'Validaciones Complejas' },
             {
                 key: 'validations.pattern', label: 'Regex Key (ej: REGEX_KEY_ONLY_NUMBERS)', controlType: 'textbox', cssClass: 'sm:col-span-2',
                 labelKey: 'Este valor se guardará como { key: "pattern", input: ... }'
             },
 
-            { key: 'messages_header', controlType: 'header', label: 'Mensajes de Error Personalizados' },
-            { key: 'requiredMessage', label: 'Mensaje para "Requerido"', controlType: 'textbox' },
-            { key: 'minLengthMessage', label: 'Mensaje para "Largo Mínimo"', controlType: 'textbox' },
-            { key: 'maxLengthMessage', label: 'Mensaje para "Largo Máximo"', controlType: 'textbox' },
-            { key: 'minValueMessage', label: 'Mensaje para "Valor Mínimo"', controlType: 'textbox' },
-            { key: 'maxValueMessage', label: 'Mensaje para "Valor Máximo"', controlType: 'textbox' },
-            { key: 'lengthMessage', label: 'Mensaje para "Largo Exacto"', controlType: 'textbox' },
-
-            { key: 'grid_header', controlType: 'header', label: 'Opciones de Grilla' },
-            { key: 'columnType', label: 'Tipo de Formato', controlType: 'select', options: { fromData: ['text', 'date', 'datehour', 'boolean'].map(v => ({ value: v, label: v })), elementLabel: 'label', elementValue: 'value' } },
-            { key: 'headerClass', label: 'Clase CSS (Cabecera)', controlType: 'textbox' },
-            { key: 'cellClass', label: 'Clase CSS (Celda)', controlType: 'textbox' },
-
-            { key: 'options_header', controlType: 'header', label: 'Fuente de Datos (para Select/Autocomplete)' },
-            { key: 'options.dataSourceType', label: 'Tipo de Fuente', controlType: 'select', options: { fromData: ['none', 'static', 'api'].map(v => ({ value: v, label: v })), elementLabel: 'label', elementValue: 'value' } },
+            { key: 'messages_header', controlType: 'header', label: 'Mensajes de Error' },
+            { key: 'requiredMessage', label: 'Mensaje "Requerido"', controlType: 'textbox' },
+            { key: 'minLengthMessage', label: 'Mensaje "Largo Mínimo"', controlType: 'textbox' },
+            { key: 'maxLengthMessage', label: 'Mensaje "Largo Máximo"', controlType: 'textbox' },
+            
+            { key: 'options_header', controlType: 'header', label: 'Fuente de Datos (Select/PickList)' },
+            { 
+                key: 'options.dataSourceType', 
+                label: 'Tipo de Fuente', 
+                controlType: 'select', 
+                options: { 
+                    fromData: [
+                        { value: 'none', label: 'Ninguna' }, 
+                        { value: 'static', label: 'Estática (JSON)' }, 
+                        { value: 'api', label: 'API (Web Service)' }
+                    ], 
+                    elementLabel: 'label', 
+                    elementValue: 'value' 
+                } 
+            },
             { key: 'options.fromData', label: 'Lista Estática (JSON)', controlType: 'textarea' },
-            { key: 'options.fromWsUrl', label: 'URL de API', controlType: 'textbox' },
-            { key: 'options.elementLabel', label: 'Campo para Etiqueta (ej: nombre)', controlType: 'textbox' },
-            { key: 'options.elementValue', label: 'Campo para Valor (ej: id)', controlType: 'textbox' },
+            { key: 'options.fromWsUrl', label: 'URL de API (sin prefijo)', controlType: 'textbox' },
+            { key: 'options.elementLabel', label: 'Campo Etiqueta (ej: nombre)', controlType: 'textbox' },
+            { key: 'options.elementValue', label: 'Campo Valor (ej: id)', controlType: 'textbox' },
+            
+            { key: 'grid_header', controlType: 'header', label: 'Opciones de Grilla' },
+            { key: 'columnType', label: 'Tipo de Columna', controlType: 'select', options: { fromData: ['text', 'date', 'datehour', 'boolean'].map(v => ({ value: v, label: v })), elementLabel: 'label', elementValue: 'value' } },
+            { key: 'headerClass', label: 'Clase CSS Header', controlType: 'textbox' },
+            { key: 'cellClass', label: 'Clase CSS Celda', controlType: 'textbox' },
         ];
-
-        const entityForModal = { ...fieldRow.control.getRawValue() };
 
         this._dialog.open(BasicModalComponent, {
             width: '800px',
@@ -308,8 +333,33 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
                     submitButtonKey: 'Guardar'
                 },
                 submit: {
-                    onSubmitModal: (entity: any, modal: MatDialogRef<any>) => {
-                        fieldRow.control.patchValue(entity);
+                    onSubmitModal: (resultEntity: any, modal: MatDialogRef<any>) => {
+                        console.log('Datos recibidos del modal:', resultEntity);
+
+                        const patchData: any = {
+                            ...resultEntity,
+                            options: {
+                                dataSourceType: resultEntity['options.dataSourceType'],
+                                fromData: resultEntity['options.fromData'],
+                                fromWsUrl: resultEntity['options.fromWsUrl'],
+                                elementLabel: resultEntity['options.elementLabel'],
+                                elementValue: resultEntity['options.elementValue']
+                            },
+                            validations: {
+                                pattern: resultEntity['validations.pattern']
+                            }
+                        };
+
+                        delete patchData['options.dataSourceType'];
+                        delete patchData['options.fromData'];
+                        delete patchData['options.fromWsUrl'];
+                        delete patchData['options.elementLabel'];
+                        delete patchData['options.elementValue'];
+                        delete patchData['options.titleFrom'];
+                        delete patchData['options.titleTo'];
+                        delete patchData['validations.pattern'];
+                        
+                        fieldRow.control.patchValue(patchData);
                         this._cdr.markForCheck();
                         modal.close(true);
                     }
@@ -496,7 +546,12 @@ export class CrudGeneratorComponent implements OnInit, OnDestroy {
                 if (this.isGenerating) { this.isGenerating = false; this._cdr.markForCheck(); }
             })
         ).subscribe({
-            next: res => { this._devToolsStateService.show(res.message || 'CRUD generado exitosamente.'); },
+            next: res => { 
+                this._devToolsStateService.show(res.message || 'CRUD generado exitosamente.'); 
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            },
             error: err => this._notificationService.notifyError(err.error?.message || 'Error al generar el CRUD.')
         });
     }

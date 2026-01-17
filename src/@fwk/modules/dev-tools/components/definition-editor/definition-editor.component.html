@@ -92,10 +92,10 @@
                     <div *ngFor="let section of availableSections"
                         class="bg-white rounded-2xl p-6 dark:bg-gray-900 flex flex-col items-start cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border"
                         (click)="selectSection(section.id)">
-                        <mat-icon class="icon-size-10 text-primary" [svgIcon]="section.icon"></mat-icon>
+                        <mat-icon class="icon-size-10 text-accent" [svgIcon]="section.icon"></mat-icon>
                         <h3 class="text-xl font-semibold mt-4">{{ section.title | translate }}</h3>
                         <p class="text-secondary mt-1 text-sm flex-auto">{{ section.description | translate }}</p>
-                        <div class="text-primary font-medium mt-4 flex items-center">
+                        <div class="text-accent font-medium mt-4 flex items-center">
                             <span>{{ 'dev_tools_def_editor_section_edit_button' | translate }}</span>
                             <mat-icon class="ml-1" svgIcon="heroicons_outline:arrow-right"></mat-icon>
                         </div>
@@ -109,7 +109,7 @@
                         <button mat-icon-button (click)="goBackToOverview()" [matTooltip]="'dev_tools_def_editor_back_to_overview_tooltip' | translate">
                             <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
                         </button>
-                        <mat-icon class="icon-size-6 text-primary" [svgIcon]="section.icon"></mat-icon>
+                        <mat-icon class="icon-size-6 text-accent" [svgIcon]="section.icon"></mat-icon>
                         <h3 class="text-xl font-semibold">{{ section.title | translate }}</h3>
                     </div>
                     

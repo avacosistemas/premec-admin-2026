@@ -125,3 +125,7 @@ button mat-icon.mat-icon {
 .dark .mat-mdc-tab-label-container {
     background-color: #111827 !important;
 }
+
+.mat-step-icon-content {
+    color: white !important;
+}

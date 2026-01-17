@@ -9,7 +9,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:cloud-arrow-down" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:cloud-arrow-down" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step1_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step1_subtitle' | translate }}</p>
@@ -53,7 +53,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:identification" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:identification" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step2_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step2_subtitle' | translate }}</p>
@@ -130,7 +130,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:shield-check" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:shield-check" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step3_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step3_subtitle' | translate }}</p>
@@ -173,9 +173,9 @@
                             class="mt-0.5 flex-shrink-0 text-accent-600"></mat-icon>
                         <span class="text-sm" *ngIf="step3Form.get('customize')?.value">{{
                             'dev_tools_crud_gen_step3_hint' | translate }}</span>
-                        <!-- <span class="text-sm" *ngIf="!step3Form.get('customize')?.value">{{
+                        <span class="text-sm" *ngIf="!step3Form.get('customize')?.value">{{
                             'dev_tools_crud_gen_step3_auto_message' | translate:{prefix:
-                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span> -->
+                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span>
                     </div>
                 </form>
             </div>
@@ -199,7 +199,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:list-bullet" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:list-bullet" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step4_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step4_subtitle' | translate }}</p>
@@ -291,7 +291,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:bolt" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:bolt" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step5_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step5_subtitle' | translate }}</p>
@@ -520,7 +520,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:cog-6-tooth" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:cog-6-tooth" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step6_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step6_subtitle' | translate }}
@@ -586,7 +586,7 @@
         <ng-template matStepContent>
             <div class="p-6 border rounded-lg bg-card">
                 <div class="flex items-center gap-3">
-                    <mat-icon svgIcon="heroicons_outline:document-check" class="text-primary"></mat-icon>
+                    <mat-icon svgIcon="heroicons_outline:document-check" class="text-accent"></mat-icon>
                     <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step7_title' | translate }}</h2>
                 </div>
                 <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step7_subtitle' | translate }}</p>

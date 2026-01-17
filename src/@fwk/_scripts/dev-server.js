@@ -13,6 +13,10 @@ const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const t = require('@babel/types');
+const splitPascalCase = (str) => {
+    if (!str) return '';
+    return str.replace(/([a-z0-9])([A-Z])/g, '$1 $2').trim();
+};
 
 let chalk;
 let ora;
@@ -360,7 +364,6 @@ app.post('/api/dev/scan-endpoint', async (req, res) => {
         const pathWithoutPrefix = cleanEndpoint.replace(/^\/?(api\/)?/, '');
         const base = apiPrefix.endsWith('/') ? apiPrefix : `${apiPrefix}/`;
         const urlWithParams = `${base}${pathWithoutPrefix}?page=0&pageSize=1`;
-        console.log(urlWithParams);
         const config = { headers: { 'Authorization': `Bearer ${token}` } };
         const response = await axios.get(urlWithParams, config);
         const data = response.data.data || response.data;
@@ -410,6 +413,10 @@ app.post('/api/dev/generate-crud', async (req, res) => {
         }
 
         await fs.copy(templatesPath, targetPath);
+
+        const hasFilterBehavior = fieldsBehavior && fieldsBehavior.filter && fieldsBehavior.filter.length > 0;
+        const hasCreateBehavior = fieldsBehavior && fieldsBehavior.create && fieldsBehavior.create.length > 0;
+        const hasUpdateBehavior = fieldsBehavior && fieldsBehavior.update && fieldsBehavior.update.length > 0;
 
         const finalActions = (actionsConfig.actions || []).map((action, index) => {
             const safeName = action.name.toLowerCase().replace(/[\s-]/g, '_').replace(/[^\w]/g, '');
@@ -479,6 +486,32 @@ app.post('/api/dev/generate-crud', async (req, res) => {
             const filePath = path.join(targetPath, file);
             if ((await fs.stat(filePath)).isDirectory()) continue;
 
+            if (file.endsWith('.fields.ts')) {
+                const isCreate = file.includes('.create.');
+                const isUpdate = file.includes('.update.');
+                const isRead = file.includes('.read.');
+
+                if ((isCreate && !useCreate) ||
+                    (isUpdate && !useUpdate) ||
+                    (isRead && !useRead)) {
+                    await fs.remove(filePath);
+                    continue;
+                }
+            }
+
+            if (file.endsWith('.behavior.ts')) {
+                const isCreate = file.includes('.create.');
+                const isUpdate = file.includes('.update.');
+                const isFilter = file.includes('.filter.');
+
+                if ((isCreate && (!hasCreateBehavior || !useCreate)) ||
+                    (isUpdate && (!hasUpdateBehavior || !useUpdate)) ||
+                    (isFilter && !hasFilterBehavior)) {
+                    await fs.remove(filePath);
+                    continue;
+                }
+            }
+
             let content = await fs.readFile(filePath, 'utf8');
             const newFilePath = path.join(path.dirname(filePath), path.basename(filePath).replace(/__fileName__/g, fileName));
 
@@ -487,21 +520,34 @@ app.post('/api/dev/generate-crud', async (req, res) => {
                 .replace(/__fileName__/g, fileName);
 
             if (file.endsWith('.def.ts')) {
+                if (!hasCreateBehavior || !useCreate) content = content.replace(/import .*_CREATE_FORM_BEHAVIOR_DEF.*;\r?\n/g, '');
+                if (!hasUpdateBehavior || !useUpdate) content = content.replace(/import .*_UPDATE_FORM_BEHAVIOR_DEF.*;\r?\n/g, '');
+                if (!hasFilterBehavior) content = content.replace(/import .*_FILTER_FORM_BEHAVIOR_DEF.*;\r?\n/g, '');
+
+                if (!useCreate) content = content.replace(/import .*_CREATE_FORM_FIELDS_DEF.*;\r?\n/g, '');
+                if (!useUpdate) content = content.replace(/import .*_UPDATE_FORM_FIELDS_DEF.*;\r?\n/g, '');
+                if (!useRead) content = content.replace(/import .*_READ_FORM_FIELDS_DEF.*;\r?\n/g, '');
+
                 let exportCsvString = '';
                 if (advancedConfig.exportCsv === 'client') {
                     exportCsvString = `exportCsv: {\n        csvExportFileName: \`\${'${pluralName}'.replace(/\\s/g, '_')}.csv\`\n    },`;
                 } else if (advancedConfig.exportCsv === 'server') {
-                    exportCsvString = `exportCsv: {\n        csvExportFileName: \`\${'${pluralName}'.replace(/\\s/g, '_')}.csv\`,\n        ws: \`\${PREFIX_DOMAIN_API}${(apiEndpoint || camelName).replace(/^\/api\//, '')}/export\`\n    },`;
+                    exportCsvString = `exportCsv: {\n        csvExportFileName: \`\${'${pluralName}'.replace(/\\s/g, '_')}.csv\`,\n        ws: \`\${PREFIX_DOMAIN_API}${(apiEndpoint || camelName).replace(/^\/api\//, '').replace(/^\//, '')}/export\`\n    },`;
                 }
 
+                const rawEndpoint = (apiEndpoint || camelName);
+                const cleanEndpoint = rawEndpoint
+                    .replace(/^\/api\//, '')
+                    .replace(/^\//, '');
+
                 content = content
-                    .replace(/__apiEndpoint__/g, (apiEndpoint || camelName).replace(/^\/api\//, ''))
+                    .replace(/__apiEndpoint__/g, cleanEndpoint)
                     .replace(/__formCreate__/g, useCreate ? `create: ${constName}_CREATE_FORM_FIELDS_DEF,` : '')
-                    .replace(/__createBehavior__/g, useCreate ? `createBehavior: ${constName}_CREATE_FORM_BEHAVIOR_DEF,` : '')
+                    .replace(/__createBehavior__/g, (useCreate && hasCreateBehavior) ? `createBehavior: ${constName}_CREATE_FORM_BEHAVIOR_DEF,` : '')
                     .replace(/__formUpdate__/g, useUpdate ? `update: ${constName}_UPDATE_FORM_FIELDS_DEF,` : '')
-                    .replace(/__updateBehavior__/g, useUpdate ? `updateBehavior: ${constName}_UPDATE_FORM_BEHAVIOR_DEF,` : '')
+                    .replace(/__updateBehavior__/g, (useUpdate && hasUpdateBehavior) ? `updateBehavior: ${constName}_UPDATE_FORM_BEHAVIOR_DEF,` : '')
                     .replace(/__formRead__/g, useRead ? `read: ${constName}_READ_FORM_FIELDS_DEF` : '')
-                    .replace(/__filterBehavior__/g, fields.some(f => f.inFilter) ? `filterBehavior: ${constName}_FILTER_FORM_BEHAVIOR_DEF,` : '')
+                    .replace(/__filterBehavior__/g, (fields.some(f => f.inFilter) && hasFilterBehavior) ? `filterBehavior: ${constName}_FILTER_FORM_BEHAVIOR_DEF,` : '')
                     .replace(/__filterInMemory__/g, advancedConfig.filterInMemory)
                     .replace(/__serverPagination__/g, advancedConfig.serverPagination)
                     .replace(/__cancelInitSearch__/g, advancedConfig.cancelInitSearch)
@@ -509,11 +555,6 @@ app.post('/api/dev/generate-crud', async (req, res) => {
                     .replace('width: \'600px\'', `width: '${advancedConfig.dialogWidth}'`)
                     .replace(/__exportCsv__/g, exportCsvString);
 
-            } else if (file.includes(path.join('form', '')) && file.endsWith('.behavior.ts')) {
-                const formType = path.basename(file).split('.')[1];
-                const behaviorString = generateBehaviorString(fieldsBehavior, fields, formType, constName);
-                content = `import { DynamicFieldBehavior } from "@fwk/model/dynamic-form/dynamic-field-behavior";\n${content}`;
-                content = content.replace('= []', behaviorString);
             } else if (file.endsWith('.grid.ts')) {
                 const gridFields = fields.filter(f => f.inGrid);
                 const displayedColumnsString = gridFields.map(c => `'${c.key}'`).join(',\n    ');
@@ -558,18 +599,21 @@ app.post('/api/dev/generate-crud', async (req, res) => {
                     case 'update': case 'read': relevantFields = fields; break;
                     default: relevantFields = [];
                 }
-                content = content.replace('[]', generateFieldsString(relevantFields, constName, formType));
-
-                if (content.includes('PREFIX_DOMAIN_API')) {
-                    content = `import { PREFIX_DOMAIN_API } from "environments/environment";\n${content}`;
-                }
 
                 const fieldsString = generateFieldsString(relevantFields, constName, formType);
 
-                content = `import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";\n${content}`;
-                content = content.replace('= []', fieldsString);
+                let imports = `import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";\n`;
+
+                if (content.includes('PREFIX_DOMAIN_API') || fieldsString.includes('PREFIX_DOMAIN_API')) {
+                    imports += `import { PREFIX_DOMAIN_API } from "environments/environment";\n`;
+                }
+
+                content = imports + content;
+                content = content.replace(/\s*=\s*\[\]/, fieldsString);
+
             } else if (file.endsWith('.i18n.ts')) {
                 content = content.replace(/__i18nWords__/g, generateI18nWords(fields, pluralName, fileName, constName, finalActions));
+
             } else if (file.endsWith('.nav.ts')) {
                 const iconString = navIcon ? `'${'heroicons_outline:' + navIcon}'` : 'null';
                 content = content
@@ -647,6 +691,7 @@ function generateFieldsString(fields, constName, formType) {
     const fieldObjects = fields.map(f => {
         let finalControlType = f.controlType;
         let finalDisabled = formType === 'read';
+        
         if (f.key.toLowerCase() === 'id') {
             if (formType === 'create') return null;
             if (formType === 'update' || formType === 'read') finalControlType = 'hidden';
@@ -671,9 +716,7 @@ function generateFieldsString(fields, constName, formType) {
         });
 
         ['requiredMessage', 'minLengthMessage', 'maxLengthMessage', 'minValueMessage', 'maxValueMessage', 'lengthMessage'].forEach(key => {
-            if (f[key]) {
-                fieldDef[key] = f[key];
-            }
+            if (f[key]) fieldDef[key] = f[key];
         });
 
         if (f.validations && f.validations.pattern) {
@@ -684,6 +727,7 @@ function generateFieldsString(fields, constName, formType) {
         }
 
         const options = {};
+        
         if (formType === 'filter' && f.isBaseFilter) {
             options.baseFilter = true;
         }
@@ -697,11 +741,22 @@ function generateFieldsString(fields, constName, formType) {
                     options.fromData = f.options.fromData;
                 }
             }
-            if (f.options.dataSourceType === 'api' && f.options.fromWsUrl) {
-                options.fromWs = { key: `${f.key}_ws`, url: `%%PREFIX_DOMAIN_API + '${f.options.fromWsUrl}'%%` };
+            
+            if (f.options.fromWsUrl) {
+                let cleanUrl = f.options.fromWsUrl
+                    .replace(/PREFIX_DOMAIN_API\s*\+\s*/g, '') 
+                    .replace(/['"`]/g, '')
+                    .trim();
+
+                options.fromWs = { 
+                    key: `${constName}_${f.key.toUpperCase()}_URL`, 
+                    url: `%%PREFIX_DOMAIN_API + '${cleanUrl}'%%` 
+                };
             }
-            if (f.options.elementLabel) options.elementLabel = f.options.elementLabel;
-            if (f.options.elementValue) options.elementValue = f.options.elementValue;
+
+            ['elementLabel', 'elementValue', 'titleFrom', 'titleTo', 'placeholder', 'matLabel'].forEach(prop => {
+                if (f.options[prop]) options[prop] = f.options[prop];
+            });
         }
 
         if (Object.keys(options).length > 0) {
@@ -736,18 +791,19 @@ function generateGridColumnsString(fields, constName) {
 }
 
 function generateI18nWords(fields, pluralName, fileName, constName, actions) {
-    const pageTitle = `'page_title': '${pluralName}'`;
-    const navDef = `'${fileName.replace(/-/g, '_')}_nav_def': '${pluralName}'`;
+    const humanPluralName = splitPascalCase(pluralName);
+
+    const pageTitle = `'page_title': '${humanPluralName}'`;
+    const navDef = `'${fileName}_nav_def': '${humanPluralName}'`; 
+
     const gridWords = fields.filter(f => f.inGrid).map(field => `    '${constName.toLowerCase()}_grid_def_column_${field.key.toLowerCase()}': '${field.label}'`).join(',\n');
+    
     const formTypes = ['create', 'update', 'read', 'filter'];
     const formWords = fields.flatMap(field => formTypes.map(type => `'${constName.toUpperCase()}_${type.toUpperCase()}_FORM_FIELDS_DEF_FIELD_${field.key.toLowerCase()}': '${field.label}'`)).join(',\n    ');
 
     const actionWords = (actions || []).map((action) => {
-        if (!action.name) {
-            return null;
-        }
-        const actionKey = `${constName}_grid_action_${action.name.toLowerCase().replace(/[\s-]/g, '_')}`;
-        return `    '${actionKey}': '${action.name}'`;
+        if (!action.actionNameValue) return null;
+        return `    '${action.actionNameKey}': '${action.actionNameValue}'`;
     }).filter(Boolean).join(',\n');
 
     return [pageTitle, navDef, gridWords, formWords, actionWords].filter(Boolean).join(',\n    ');
@@ -895,22 +951,37 @@ app.post('/api/dev/generate-dashboard', async (req, res) => {
 
         exec('npm run generate:registries', async (error, stdout, stderr) => {
             if (error) {
-                spinner.fail(chalk.red('Dashboard generado, pero falló la regeneración del registro.'));
-                return res.status(500).json({ message: 'Dashboard generado, pero falló la regeneración del registro.', error: stderr });
+                spinner.fail(chalk.red('CRUD generado, pero falló la regeneración del registro.'));
+                console.error(`[DEV-API] Error: ${stderr}`);
+                return res.status(500).json({ message: 'Error en registros.', error: stderr });
             }
 
             spinner.succeed(chalk.green('Registros actualizados.'));
-            console.log(stdout);
-
+            
             try {
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                const now = new Date();
+
                 const appRoutesPath = path.join(__dirname, '..', '..', '..', 'src', 'app', 'app.routes.ts');
-                fs.utimesSync(appRoutesPath, new Date(), new Date());
-                spinner.succeed(chalk.green('Servidor de Angular notificado para recargar.'));
-                res.json({ success: true, message: `Dashboard "${pageTitle}" generado. Recargando la aplicación...` });
+                if (await fs.pathExists(appRoutesPath)) {
+                    await fs.utimes(appRoutesPath, now, now);
+                    console.log(chalk.gray('   -> app.routes.ts actualizado (touch).'));
+                }
+
+                const angularJsonPath = path.join(__dirname, '..', '..', '..', 'angular.json');
+                if (await fs.pathExists(angularJsonPath)) {
+                    await fs.utimes(angularJsonPath, now, now);
+                    console.log(chalk.gray('   -> angular.json actualizado (touch - forzando rebuild profundo).'));
+                }
+
+                spinner.succeed(chalk.green('Recompilación forzada enviada al CLI de Angular.'));
+
+                res.json({ success: true, message: `CRUD "${pluralName}" generado. La aplicación se recargará en breve.` });
+
             } catch (touchError) {
-                spinner.fail(chalk.red('No se pudo notificar al servidor de Angular para recargar.'));
-                res.status(500).json({ message: 'Dashboard generado, pero falló la recarga automática.', error: touchError.message });
+                console.error(`[DEV-API] Error al forzar recarga:`, touchError);
+                res.json({ success: true, message: 'CRUD generado (pero deberás reiniciar ng serve manualmente).' });
             }
         });
 

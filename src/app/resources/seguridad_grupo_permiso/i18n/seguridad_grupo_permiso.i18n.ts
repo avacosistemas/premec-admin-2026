@@ -20,6 +20,7 @@ export const SEGURIDAD_GRUPO_PERMISO_I18N_DEF: I18n = {
     seguridad_grupo_permiso_filter_form_fields_def_field_idpermiso: 'Permiso',
     seguridad_grupo_permiso_grid_def_column_id: 'Id',
     seguridad_grupo_permiso_grid_def_column_idgrupo: 'Grupo',
-    seguridad_grupo_permiso_grid_def_column_idpermiso: 'Permiso'
+    seguridad_grupo_permiso_grid_def_column_idpermiso: 'Permiso',
+    seguridad_grupo_permiso_grid_def_delete: 'Borrar'
   }
 };

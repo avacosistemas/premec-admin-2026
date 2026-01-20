@@ -15,7 +15,6 @@ export class GridDef {
     columnName?: string;
     sortAllColumns?: boolean;
     deleteAction?: boolean;
-    showDeleteAction?: boolean;
     actions?: ActionDef[];
     fromArrayField?: string;
     deleteTernaria?: boolean;

@@ -16,7 +16,7 @@ export const SEGURIDAD_GRUPO_GRID_DEF: GridDef = {
   displayedColumns: [
     'name'
   ],
-  showDeleteAction: true,
+  deleteAction: true,
   actions: [
     {
       actionNameKey: 'Permisos',

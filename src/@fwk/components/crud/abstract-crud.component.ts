@@ -2,7 +2,7 @@
 import { MatDialog } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
-import { Observable, of, Subject } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { tap, finalize, takeUntil } from 'rxjs/operators';
 
 import { AbstractComponent } from '../abstract-component.component';
@@ -281,14 +281,15 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
                 return this.service.deleteAllTernario(entities, singleIdKey, multiIdKey);
             }
         }
+        const deleteRequests: Observable<any>[] = entities.map(entity => {
+            const idKey = this.crudDef.grid?.columnsDef.find(c => c.id)?.columnDef;
+            if (idKey) {
+                entity.id = (entity as any)[idKey];
+            }
+            return this.service.delete(entity);
+        });
 
-        const idKey = this.crudDef.grid?.columnsDef.find(c => c.id)?.columnDef;
-        if (idKey) {
-            entities.forEach(element => {
-                element.id = (element as any)[idKey];
-            });
-        }
-        return this.service.deleteAll(entities);
+        return forkJoin(deleteRequests);
     }
 
     filterSearchEntity(filterEntity: any): void {

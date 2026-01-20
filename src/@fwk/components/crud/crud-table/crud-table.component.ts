@@ -72,12 +72,12 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     @Input() containerClass: string = '';
     @Input() searchPerformed: boolean = false;
 
-     @ViewChild('tableContainer') tableContainer!: ElementRef;
+    @ViewChild('tableContainer') tableContainer!: ElementRef;
 
     canScrollLeft: boolean = false;
     canScrollRight: boolean = false;
     private scrollInterval: any;
-    
+
     private readonly SCROLL_SPEED = 15;
     private readonly SCROLL_STEP_TIME = 20;
 
@@ -211,7 +211,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     checkScrollVisibility(): void {
         if (!this.tableContainer) return;
         const el = this.tableContainer.nativeElement;
-        
+
         if (el.scrollWidth <= el.clientWidth) {
             this.canScrollLeft = false;
             this.canScrollRight = false;
@@ -219,7 +219,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
             this.canScrollLeft = el.scrollLeft > 0;
             this.canScrollRight = Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth;
         }
-        
+
         this._cdr.markForCheck();
     }
 
@@ -229,13 +229,13 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
         this.scrollInterval = setInterval(() => {
             if (!this.tableContainer) return;
             const el = this.tableContainer.nativeElement;
-            
+
             if (direction === 'left') {
                 el.scrollLeft -= this.SCROLL_SPEED;
             } else {
                 el.scrollLeft += this.SCROLL_SPEED;
             }
-            
+
             this.checkScrollVisibility();
         }, this.SCROLL_STEP_TIME);
     }
@@ -523,13 +523,37 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     }
 
     masterToggle(): void {
-        this.selects = !this.isAllSelected();
+        if (this.isAllSelected() || this.statustable.selects.length >= 10) {
+            this.rows.forEach(r => {
+                if (r.selectable) r.select = false;
+            });
+        } else {
+            let count = 0;
+            const maxSelection = 10;
+
+            this.rows.forEach(r => {
+                if (r.selectable && count < maxSelection) {
+                    r.select = true;
+                    count++;
+                } else {
+                    r.select = false;
+                }
+            });
+
+            if (this.rows.length > maxSelection) {
+                this.notificationService.notify('Se han seleccionado los primeros 10 elementos (máximo permitido).');
+            }
+        }
     }
 
     isAllSelected(): boolean {
         const selectableRows = this.rows.filter(r => r.selectable);
         if (!selectableRows.length) return false;
-        return selectableRows.every(r => r.select);
+
+        const allSelected = selectableRows.every(r => r.select);
+        const maxSelected = this.statustable.selects.length >= 10;
+
+        return allSelected || maxSelected;
     }
 
     onPageFired(event: any): void {

@@ -8,7 +8,7 @@ import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material
 import { MatOptionModule, ErrorStateMatcher } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, Observable, of } from 'rxjs';
+import { Subject, Observable, of, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil, startWith, filter } from "rxjs/operators";
 import { ApiAutocompleteConfiguration, AutocompleteSearchTerm } from '../autocomplete/autocomplete.interface';
 import { environment } from '../../../environments/environment';
@@ -72,6 +72,7 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
 
     private destroy$ = new Subject<void>();
     private isOptionSelected: boolean = false;
+    private searchTrigger$ = new Subject<any>();
 
     onChange: (value: any) => void = () => { };
     onTouched: () => void = () => { };
@@ -133,15 +134,18 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
         const options = this.config?.options as AutocompleteOptions;
         const searchOnFocus = options?.searchOnFocus !== false;
 
-        this.filteredOptions$ = of(null).pipe(
-            switchMap(() => this.autocompleteControl.valueChanges.pipe(
-                startWith(searchOnFocus ? '' : null),
-            )),
+        const inputChanges$ = this.autocompleteControl.valueChanges.pipe(
+            startWith(searchOnFocus ? '' : null)
+        );
+
+        this.filteredOptions$ = merge(inputChanges$, this.searchTrigger$).pipe(
             takeUntil(this.destroy$),
-            filter(value => value !== null),
             debounceTime(environment.AUTOCOMPLETE_WAITING_TIME ?? 300),
-            distinctUntilChanged(),
             switchMap(value => {
+                if (typeof value === 'object' && value !== null) {
+                    return of([]);
+                }
+
                 if (this.isOptionSelected) {
                     this.isOptionSelected = false;
                     return of([]);
@@ -160,9 +164,19 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
 
     writeValue(value: any): void {
         this.autocompleteControl.setValue(value, { emitEvent: false });
+
         if (value) {
             this.updateSiblingField(value);
+        } else {
+            this.isOptionSelected = false;
+
+            this.autocompleteControl.setValue('', { emitEvent: false });
+
+            this.autocompleteControl.markAsPristine();
+            this.autocompleteControl.markAsUntouched();
+            this.autocompleteControl.setErrors(null);
         }
+
         this.cdr.markForCheck();
     }
 
@@ -213,8 +227,33 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
         this.onTouched();
     }
 
+    onInputFocus(): void {
+        if (!this.autocompleteControl.disabled) {
+            const val = this.autocompleteControl.value;
+
+            if (typeof val !== 'object') {
+                this.autocompleteControl.setValue(val || '', { emitEvent: true });
+            }
+        }
+    }
+
+    triggerSearch(): void {
+        if (!this.autocompleteControl.disabled) {
+            const val = this.autocompleteControl.value;
+
+            if (typeof val !== 'object') {
+                this.searchTrigger$.next(val || '');
+
+                setTimeout(() => {
+                    this.autoCompleteTrigger.openPanel();
+                });
+            }
+        }
+    }
+
     openDropdown(): void {
         if (this.autoCompleteTrigger) {
+            this.autocompleteControl.setValue(this.autocompleteControl.value, { emitEvent: true });
             this.autoCompleteTrigger.openPanel();
         }
     }

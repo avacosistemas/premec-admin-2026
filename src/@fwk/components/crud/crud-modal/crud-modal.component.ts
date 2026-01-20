@@ -177,7 +177,7 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
     }
   }
 
-   onSubmit(andContinue: boolean = false): void {
+  onSubmit(andContinue: boolean = false): void {
     if (this.form.invalid) {
       this.notificationService.notifyError(this.translate('form_error_correct_errors'));
       return;
@@ -193,6 +193,8 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
       this.entity = { ...this.entity, ...formValues };
     } else {
       console.error('Error: No se encontró el subForm en CrudModal');
+      this.submitting = false;
+      return;
     }
 
     const operation = this.isAdd ? 'add' : 'edit';
@@ -204,58 +206,74 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
       next: () => {
         this.data.crud[operation](this.entity).pipe(
           finalize(() => {
-            this.submitting = false;
-            this._cdr.markForCheck();
+            if (!andContinue) {
+              this.submitting = false;
+              this._cdr.markForCheck();
+            }
           })
         ).subscribe({
           next: (response: any) => {
 
-            if (!response) {
-              this.notificationService.notifySuccess(this.translate('success_message'));
-              this.dialogRef.close(true);
-              return;
-            }
-
-            if (response.ok === false && response.error) {
+            if (response && response.ok === false && response.error) {
               this.notificationService.notifyError(response.error.message || 'Error en el servidor');
+              this.submitting = false;
+              this._cdr.markForCheck();
               return;
             }
 
-            const isSuccess = response.success === true ||
-              typeof response.success === 'undefined' ||
-              response.id ||
-              response.ok === true;
+            const isSuccess = !response ||
+              response === true ||
+              response.success === true ||
+              (typeof response.success === 'undefined' && (response.id || response.ok === true));
 
             if (isSuccess) {
               this.notificationService.notifySuccess(this.translate('success_message'));
-              
+
               if (andContinue) {
                 const persistentValues: any = {};
                 this.fields.forEach(f => {
                   if (f.mappingQuerystring || f.controlType === 'hidden') {
-                    persistentValues[f.key] = this.entity[f.key];
+                    const controlValue = subForm?.get(f.key)?.value;
+                    if (controlValue !== undefined) {
+                      persistentValues[f.key] = controlValue;
+                    }
                   }
                 });
 
                 this.entity = { ...this.newObjectEntity(), ...persistentValues };
-                
-                this.form.reset();
+                delete this.entity.id;
 
                 if (subForm) {
-                    subForm.patchValue(persistentValues);
+                  subForm.reset();
+                  subForm.patchValue(persistentValues);
+                }
+
+                if (this.dynamicForm) {
+                  this.dynamicForm.entity = this.entity;
+                  this.dynamicForm.updateInitialState();
                 }
 
                 this.isObjectModified = false;
                 this.isAdd = true;
+                this._isEdit = false;
+
+                this.submitting = false;
                 this._cdr.markForCheck();
+
               } else {
-                this.dialogRef.close(response);
+                this.dialogRef.close(response || true);
               }
             } else {
-              this.notificationService.notifyError(response.message || 'Ocurrió un error desconocido.');
+              this.notificationService.notifyError(response?.message || 'Ocurrió un error desconocido.');
+              this.submitting = false;
+              this._cdr.markForCheck();
             }
           },
-          error: (error: any) => this.handlerError(error)
+          error: (error: any) => {
+            this.handlerError(error);
+            this.submitting = false;
+            this._cdr.markForCheck();
+          }
         });
       },
       error: (error: any) => {

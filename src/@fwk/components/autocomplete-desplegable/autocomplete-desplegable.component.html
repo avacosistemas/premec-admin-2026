@@ -9,7 +9,9 @@
         [matAutocomplete]="auto"
         [required]="config?.required"
         [errorStateMatcher]="matcher"
-        (blur)="onTouched()">
+        (blur)="onTouched()"
+        (focus)="onInputFocus()"
+        (click)="triggerSearch()">
 
     <button
         mat-icon-button

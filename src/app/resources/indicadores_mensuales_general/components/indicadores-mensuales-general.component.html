@@ -8,20 +8,56 @@
         </mat-panel-title>
     </mat-expansion-panel-header>
 
-    <form [formGroup]="filterForm" (ngSubmit)="buscar()" class="w-full">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+    <form [formGroup]="filterForm" (ngSubmit)="buscar()" class="w-full p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-2">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>{{ 'indicadores_mes' | translate:i18nName }}</mat-label>
                 <mat-select formControlName="mes">
-                    <mat-option *ngFor="let mes of meses" [value]="mes.value">
-                        {{ mes.viewValue }}
+                    <mat-option *ngFor="let mes of meses" [value]="mes.value">{{ mes.viewValue }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'indicadores_anio' | translate:i18nName }}</mat-label>
+                <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'indicadores_tipo_reporte' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="tipoReporte">
+                    <mat-option value="TODOS">{{ 'opt_todos' | translate:i18nName }}</mat-option>
+                    <mat-option value="GRUPO">{{ 'opt_grupo' | translate:i18nName }}</mat-option>
+                    <mat-option value="EMPLEADOS">{{ 'opt_empleados' | translate:i18nName }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <div class="flex items-center h-full" *ngIf="filterForm.get('tipoReporte')?.value !== 'TODOS'">
+                <mat-checkbox formControlName="agrupado" color="accent">
+                    {{ 'indicadores_agrupado' | translate:i18nName }}
+                </mat-checkbox>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2"
+            *ngIf="filterForm.get('tipoReporte')?.value !== 'TODOS'">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                *ngIf="filterForm.get('tipoReporte')?.value === 'GRUPO'">
+                <mat-label>{{ 'indicadores_grupo' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="idGrupo">
+                    <mat-option *ngFor="let g of listaGrupos" [value]="g.id">
+                        {{ g.description || g.descripcion || g.nombre }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
-                <mat-label>{{ 'indicadores_anio' | translate:i18nName }}</mat-label>
-                <input matInput type="number" formControlName="anio" min="2001" [max]="currentYear">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm:col-span-2"
+                *ngIf="filterForm.get('tipoReporte')?.value === 'EMPLEADOS'">
+                <mat-label>{{ 'indicadores_empleados' | translate:i18nName }}</mat-label>
+                <mat-select formControlName="idsEmpleados" multiple>
+                    <mat-option *ngFor="let emp of listaEmpleados" [value]="emp.id">
+                        {{ emp.usuario }}
+                    </mat-option>
+                </mat-select>
             </mat-form-field>
         </div>
         <button type="submit" hidden></button>
@@ -48,26 +84,161 @@
 </mat-expansion-panel>
 
 <div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-    
-    <div *ngIf="!data && !loading" class="flex flex-col items-center p-12 text-center h-full">
-        <mat-icon class="icon-size-24 text-gray-300 dark:text-gray-700 mb-4" svgIcon="heroicons_outline:chart-pie"></mat-icon>
+
+    <div *ngIf="!dashboardData && (!dataSource.data || dataSource.data.length === 0) && !loading"
+        class="flex flex-col items-center p-12 text-center h-full">
+        <mat-icon class="icon-size-24 text-gray-300 dark:text-gray-700 mb-4"
+            svgIcon="heroicons_outline:chart-pie"></mat-icon>
         <div class="text-2xl font-bold text-secondary">{{ 'indicadores_sin_datos_titulo' | translate:i18nName }}</div>
         <div class="text-secondary mt-2">{{ 'indicadores_sin_datos_desc' | translate:i18nName }}</div>
     </div>
 
-    <div *ngIf="data" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
-        
-        <div *ngIf="data.nombre" class="flex items-center gap-4 border-b pb-6 border-gray-200 dark:border-gray-700">
-            <div class="h-12 w-12 rounded-full bg-accent-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-                {{ data.nombre?.charAt(0) }}
+    <div *ngIf="showGrid && dataSource.data.length > 0" class="flex-auto h-full w-full overflow-auto pb-20">
+        <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full">
+
+            <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+                <th mat-header-cell *matHeaderCellDef class="text-sm font-semibold text-secondary pl-6">
+                    {{ getColumnLabel(column) | translate:i18nName }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="pl-6 text-default">
+                    {{ element[column] }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expand">
+                <th mat-header-cell *matHeaderCellDef class="w-12"></th>
+                <td mat-cell *matCellDef="let element" class="w-12 pr-4 text-right">
+                    <button mat-icon-button
+                        (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+                        <mat-icon class="text-secondary"
+                            [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
+                        </mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expandedDetail">
+                <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"
+                    class="p-0 border-0">
+                    <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50 dark:bg-gray-800 border-l-4 border-l-accent-500 shadow-inner"
+                        [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+
+                        <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                            <div class="space-y-4">
+                                <h3 class="text-base font-semibold text-primary flex items-center">
+                                    <mat-icon class="icon-size-5 mr-2"
+                                        svgIcon="heroicons_outline:presentation-chart-line"></mat-icon>
+                                    {{ 'group_desempeno' | translate:i18nName }}
+                                </h3>
+                                <div
+                                    class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_actividades' |
+                                            translate:i18nName }}</span>
+                                        <span class="text-lg font-medium">{{ element.cantidadActividades }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_objetivo' |
+                                            translate:i18nName }}</span>
+                                        <span class="text-lg font-medium">{{ element.objetivoActividades }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_cumplimiento' |
+                                            translate:i18nName }}</span>
+                                        <span class="text-lg font-medium">{{ element.cumplimientoObjetivo || '-'
+                                            }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_valoracion' |
+                                            translate:i18nName }}</span>
+                                        <span class="text-lg font-bold text-green-600">{{ element.porcentajeValoracion
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h3 class="text-base font-semibold text-primary flex items-center">
+                                    <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:star"></mat-icon>
+                                    {{ 'group_calidad' | translate:i18nName }}
+                                </h3>
+                                <div
+                                    class="bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 gap-4 grid grid-cols-2 p-4 rounded-lg shadow-sm sm:grid-cols-5">
+                                    <div
+                                        class="flex items-center px-3 py-2 rounded bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
+                                        <span class="text-xs font-bold text-green-800 dark:text-green-300 mr-2">{{
+                                            'lbl_mb' | translate:i18nName }}</span>
+                                        <span class="text-base font-bold text-green-700 dark:text-green-400">{{
+                                            element.cantMB }}</span>
+                                    </div>
+                                    <div
+                                        class="flex items-center px-3 py-2 rounded bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800">
+                                        <span class="text-xs font-bold text-blue-800 dark:text-blue-300 mr-2">{{ 'lbl_b'
+                                            | translate:i18nName }}</span>
+                                        <span class="text-base font-bold text-blue-700 dark:text-blue-400">{{
+                                            element.cantB }}</span>
+                                    </div>
+                                    <div
+                                        class="flex items-center px-3 py-2 rounded bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-100 dark:border-yellow-800">
+                                        <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300 mr-2">{{
+                                            'lbl_r' | translate:i18nName }}</span>
+                                        <span class="text-base font-bold text-yellow-700 dark:text-yellow-400">{{
+                                            element.cantR }}</span>
+                                    </div>
+                                    <div
+                                        class="flex items-center px-3 py-2 rounded bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800">
+                                        <span class="text-xs font-bold text-red-800 dark:text-red-300 mr-2">{{ 'lbl_m' |
+                                            translate:i18nName }}</span>
+                                        <span class="text-base font-bold text-red-700 dark:text-red-400">{{
+                                            element.cantM }}</span>
+                                    </div>
+                                    <div
+                                        class="flex items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                                        <span class="text-xs font-bold text-gray-600 dark:text-gray-300 mr-2">{{
+                                            'lbl_sv' | translate:i18nName }}</span>
+                                        <span class="text-base font-bold text-gray-700 dark:text-gray-400">{{
+                                            element.cantSV }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"
+                class="bg-gray-50 dark:bg-gray-900"></tr>
+
+            <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+                class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b dark:border-gray-800"
+                [class.bg-accent-50]="expandedElement === element"
+                [class.dark:bg-accent-900]="expandedElement === element"
+                (click)="expandedElement = expandedElement === element ? null : element">
+            </tr>
+
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row h-0"></tr>
+
+        </table>
+
+        <mat-paginator [hidden]="dataSource.data.length === 0" class="border-t bottom-0 fixed print:hidden w-full z-30"
+            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+        </mat-paginator>
+    </div>
+
+    <div *ngIf="!showGrid && dashboardData" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
+        <div *ngIf="dashboardData.nombre"
+            class="flex items-center gap-4 border-b pb-6 border-gray-200 dark:border-gray-700">
+            <div
+                class="h-12 w-12 rounded-full bg-accent-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+                {{ dashboardData.nombre?.charAt(0) }}
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ data.nombre }}</h1>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ dashboardData.nombre }}</h1>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
             <mat-card class="overflow-hidden rounded-2xl shadow hover:shadow-md transition-shadow">
                 <div class="bg-blue-600 p-4 text-white flex items-center gap-2">
                     <mat-icon svgIcon="heroicons_outline:clock" style="color: inherit;"></mat-icon>
@@ -76,16 +247,20 @@
                 <div class="p-6 grid grid-cols-1 gap-6">
                     <div class="flex items-center justify-between border-b pb-4 border-gray-100 dark:border-gray-700">
                         <span class="text-secondary font-medium">{{ 'lbl_fichado_hora' | translate:i18nName }}</span>
-                        <span class="text-3xl font-bold text-gray-800 dark:text-white">{{ data.fichadoHora }}</span>
+                        <span class="text-3xl font-bold text-gray-800 dark:text-white">{{ dashboardData.fichadoHora
+                            }}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_facturables_hora' | translate:i18nName }}</span>
-                            <span class="text-xl font-semibold text-green-600">{{ data.facturablesHora }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_facturables_hora' |
+                                translate:i18nName }}</span>
+                            <span class="text-xl font-semibold text-green-600">{{ dashboardData.facturablesHora
+                                }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_ociosas_hora' | translate:i18nName }}</span>
-                            <span class="text-xl font-semibold text-amber-600">{{ data.ociosasHora }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_ociosas_hora' |
+                                translate:i18nName }}</span>
+                            <span class="text-xl font-semibold text-amber-600">{{ dashboardData.ociosasHora }}</span>
                         </div>
                     </div>
                 </div>
@@ -99,25 +274,31 @@
                 <div class="p-6 grid gap-6">
                     <div class="flex items-center justify-between border-b pb-4 border-gray-100 dark:border-gray-700">
                         <span class="text-secondary font-medium">{{ 'lbl_efectividad' | translate:i18nName }}</span>
-                        <span class="text-3xl font-bold text-indigo-600">{{ data.efectividad }}</span>
+                        <span class="text-3xl font-bold text-indigo-600">{{ dashboardData.efectividad }}</span>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_actividades' | translate:i18nName }}</span>
-                            <span class="text-lg font-medium">{{ data.cantidadActividades }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_actividades' |
+                                translate:i18nName }}</span>
+                            <span class="text-lg font-medium">{{ dashboardData.cantidadActividades }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_objetivo' | translate:i18nName }}</span>
-                            <span class="text-lg font-medium">{{ data.objetivoActividades }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_objetivo' |
+                                translate:i18nName }}</span>
+                            <span class="text-lg font-medium">{{ dashboardData.objetivoActividades }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_cumplimiento' | translate:i18nName }}</span>
-                            <span class="text-lg font-medium text-gray-800 dark:text-white">{{ data.cumplimientoObjetivo || '-' }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_cumplimiento' |
+                                translate:i18nName }}</span>
+                            <span class="text-lg font-medium text-gray-800 dark:text-white">{{
+                                dashboardData.cumplimientoObjetivo || '-' }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_valoracion' | translate:i18nName }}</span>
-                            <span class="text-lg font-bold text-green-600">{{ data.porcentajeValoracion }}</span>
+                            <span class="text-xs text-secondary uppercase font-semibold">{{ 'lbl_valoracion' |
+                                translate:i18nName }}</span>
+                            <span class="text-lg font-bold text-green-600">{{ dashboardData.porcentajeValoracion
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -130,28 +311,31 @@
                 </div>
                 <div class="p-6">
                     <div class="flex flex-col space-y-3">
-                        
+
                         <div class="flex items-center justify-between p-2 rounded bg-green-50 dark:bg-green-900/20">
-                            <span class="text-sm font-semibold text-green-800 dark:text-green-400">{{ 'lbl_mb' | translate:i18nName }}</span>
-                            <span class="text-xl font-bold text-green-600">{{ data.cantMB }}</span>
+                            <span class="text-sm font-semibold text-green-800 dark:text-green-400">{{ 'lbl_mb' |
+                                translate:i18nName }}</span>
+                            <span class="text-xl font-bold text-green-600">{{ dashboardData.cantMB }}</span>
                         </div>
 
                         <div class="flex items-center justify-between p-2 rounded bg-blue-50 dark:bg-blue-900/20">
-                            <span class="text-sm font-semibold text-blue-800 dark:text-blue-400">{{ 'lbl_b' | translate:i18nName }}</span>
-                            <span class="text-xl font-bold text-blue-600">{{ data.cantB }}</span>
+                            <span class="text-sm font-semibold text-blue-800 dark:text-blue-400">{{ 'lbl_b' |
+                                translate:i18nName }}</span>
+                            <span class="text-xl font-bold text-blue-600">{{ dashboardData.cantB }}</span>
                         </div>
 
                         <div class="grid grid-cols-3 gap-2">
                             <div class="flex flex-col items-center p-2 rounded bg-yellow-50 dark:bg-yellow-900/20">
-                                <span class="text-lg font-bold text-yellow-600">{{ data.cantR }}</span>
+                                <span class="text-lg font-bold text-yellow-600">{{ dashboardData.cantR }}</span>
                                 <span class="text-xs font-bold text-yellow-800 dark:text-yellow-400">REG</span>
                             </div>
                             <div class="flex flex-col items-center p-2 rounded bg-red-50 dark:bg-red-900/20">
-                                <span class="text-lg font-bold text-red-600">{{ data.cantM }}</span>
+                                <span class="text-lg font-bold text-red-600">{{ dashboardData.cantM }}</span>
                                 <span class="text-xs font-bold text-red-800 dark:text-red-400">MAL</span>
                             </div>
                             <div class="flex flex-col items-center p-2 rounded bg-gray-100 dark:bg-gray-800">
-                                <span class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ data.cantSV }}</span>
+                                <span class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ dashboardData.cantSV
+                                    }}</span>
                                 <span class="text-xs font-bold text-gray-600 dark:text-gray-400">S/V</span>
                             </div>
                         </div>
@@ -159,7 +343,6 @@
                     </div>
                 </div>
             </mat-card>
-
         </div>
     </div>
 </div>

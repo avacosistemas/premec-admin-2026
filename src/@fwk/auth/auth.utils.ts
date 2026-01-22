@@ -83,7 +83,7 @@ export class AuthUtils
         return JSON.parse(decoded);
     }
 
-    private static _getTokenExpirationDate(token: string): Date | null
+    static _getTokenExpirationDate(token: string): Date | null
     {
         const decodedToken = this._decodeToken(token);
         if ( !decodedToken.hasOwnProperty('exp') ) {

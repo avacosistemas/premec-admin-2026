@@ -1,5 +1,7 @@
 import { SEGURIDAD_GRUPO_USUARIO_NAV_DEF } from "../../seguridad_grupo_usuario/navigation/seguridad_grupo_usuario.nav";
 import { GridDef } from "@fwk/model/component-def/grid-def";
+import { PREFIX_DOMAIN_API } from "environments/environment";
+import { HTTP_METHODS } from "@fwk/model/ws-def";
 
 export const USUARIOS_GRID_DEF: GridDef = {
   columnsDef: [
@@ -72,5 +74,18 @@ export const USUARIOS_GRID_DEF: GridDef = {
         },
         icon: 'heroicons_outline:key'
       },
+      {
+        actionNameKey: 'usuarios_action_reset_password',
+        actionType: 'normal',
+        icon: 'heroicons_outline:lock-closed',
+        confirm: {
+          messageKey: 'usuarios_action_reset_password_confirm'
+        },
+        ws: {
+          key: 'RESET_PASSWORD_USER',
+          url: PREFIX_DOMAIN_API + 'password/reset', 
+          method: HTTP_METHODS.post
+        }
+      }
     ]
 };

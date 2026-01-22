@@ -11,9 +11,7 @@
         <span class="ml-2 text-2xl font-semibold">{{ data.title }}</span>
     </div>
 
-    <div mat-dialog-content class="py-6 text-secondary">
-        {{ data.message }}
-    </div>
+    <div mat-dialog-content class="py-6 text-secondary" [innerHTML]="data.message"></div>
 
     <div mat-dialog-actions class="flex items-center justify-end space-x-2">
         <button *ngIf="data.actions?.cancel?.show" mat-button [disabled]="isSubmitting" (click)="onReject()">

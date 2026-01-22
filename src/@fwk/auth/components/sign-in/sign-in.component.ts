@@ -18,6 +18,7 @@ import { inject } from '@angular/core';
 import { LogoComponent } from '@fwk/components/logo/logo.component';
 import { LocalStorageService } from '@fwk/services/local-storage/local-storage.service';
 import { environment } from 'environments/environment';
+import { UserService } from '@fwk/auth/user.service';
 
 interface SignInForm {
     username: FormControl<string>;
@@ -39,6 +40,7 @@ export class AuthSignInComponent implements OnInit {
     public fwkConfig = inject(FWK_CONFIG);
 
     private _localStorageService = inject(LocalStorageService);
+    private _userService = inject(UserService);
     private readonly REMEMBER_KEY = 'remembered_user';
 
     alert: { type: FuseAlertType; message: string } = {
@@ -83,8 +85,14 @@ export class AuthSignInComponent implements OnInit {
                     localStorage.removeItem(this.REMEMBER_KEY);
                 }
 
-                const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
-                this._router.navigateByUrl(redirectURL);
+                const currentUser = this._userService.userValue;
+
+                if (currentUser?.passwordExpired) {
+                    this._router.navigate(['/change-password']);
+                } else {
+                    const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+                    this._router.navigateByUrl(redirectURL);
+                }
             },
             (error) => {
                 this.signInForm.enable();

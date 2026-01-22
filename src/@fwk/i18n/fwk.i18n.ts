@@ -76,7 +76,7 @@ export const FWK_I18N_DEF = {
     email_address_required_error: 'La dirección de email es requerida',
     forgot_password_error_message: '¡Correo electrónico no encontrado! ¿Estás seguro de que ya eres miembro?',
     forgot_password_subtitle: 'Rellena el formulario para restablecer tu contraseña',
-    forgot_password_success_message: '¡Restablecimiento de contraseña enviado! Recibirás un correo electrónico si estás registrado en nuestro sistema.',
+    forgot_password_success_message: '¡Enlace enviado! Serás redirigido al inicio de sesión en {{countdown}} segundos.',
     forgot_password_title: '¿Olvidaste tu contraseña?',
     password_confirm_label: 'Contraseña (Confirmar)',
     password_confirm_required_error: 'La confirmación de la contraseña es requerida',

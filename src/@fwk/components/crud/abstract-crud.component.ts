@@ -215,6 +215,11 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
         });
         grid.actions?.forEach(action => {
             if (action.actionNameKey) { action.actionName = i18n?.translate?.(action.actionNameKey); }
+
+            if (action.confirm && action.confirm.messageKey) {
+                action.confirm.message = i18n?.translate?.(action.confirm.messageKey);
+            }
+            
             if (action.form && this.i18nComponent) {
                 this.formService.setUpFieldTextFromI18n(this.i18nComponent, action.form);
             }

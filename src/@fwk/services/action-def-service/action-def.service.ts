@@ -157,7 +157,15 @@ export class ActionDefService {
   }
 
   private handleConfirmAction(action: ActionDef, entity: any): Observable<any> {
-    const message = typeof action.confirm === 'object' ? action.confirm.message : undefined;
+    let message = typeof action.confirm === 'object' ? action.confirm.message : undefined;
+
+    if (message && entity) {
+        Object.keys(entity).forEach(key => {
+            const value = entity[key] !== undefined && entity[key] !== null ? entity[key] : '';
+            const regex = new RegExp(`{{${key}}}|{${key}}`, 'g');
+            message = message.replace(regex, String(value));
+        });
+    }
 
     return this.dialogService.showQuestionModal({
       title: action.actionName,

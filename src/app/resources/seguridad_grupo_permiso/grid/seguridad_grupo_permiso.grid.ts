@@ -4,11 +4,13 @@ export const SEGURIDAD_GRUPO_PERMISO_GRID_DEF: GridDef = {
   columnsDef: [
     {
       columnDef: 'id',
-      columnNameKey: 'seguridad_grupo_permiso_grid_def_column_id'
+      columnNameKey: 'seguridad_grupo_permiso_grid_def_column_id',
+      multiId: true
     },
     {
       columnDef: 'idGrupo',
-      columnNameKey: 'seguridad_grupo_permiso_grid_def_column_idgrupo'
+      columnNameKey: 'seguridad_grupo_permiso_grid_def_column_idgrupo',
+      singleId: true
     },
     {
       columnDef: 'idPermiso',

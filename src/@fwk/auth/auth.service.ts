@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, switchMap, of, BehaviorSubject, throwError, catchError, tap, finalize, take, filter } from 'rxjs';
+import { Observable, of, BehaviorSubject, throwError, catchError, tap, finalize, filter, take, map, shareReplay } from 'rxjs';
 import { User } from '@fwk/auth/user.types';
 import { UserService } from '@fwk/auth/user.service';
 import { environment } from 'environments/environment';
-import { AuthUtils } from '@fwk/auth/auth.utils';
 import { AbstractAuthService, SignInData } from '@fwk/auth/abstract-auth.service';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 
@@ -18,9 +17,11 @@ export class AuthService implements AbstractAuthService {
 
     private _authenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private _userPermissions: Set<string> = new Set<string>();
+    private _checkRequest$: Observable<boolean> | null = null;
 
     private isRefreshing = false;
     private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+    private _refreshTimeout: any;
 
     private readonly TOKEN_KEY = 'accessToken';
     private readonly USER_DATA_KEY = 'currentUser';
@@ -30,98 +31,49 @@ export class AuthService implements AbstractAuthService {
     signIn(credentials: SignInData): Observable<any> {
         return this._httpClient.post(environment.auth.signIn, credentials, { responseType: 'json' }).pipe(
             tap((responseFromApi: any) => {
-
-                const accessToken = responseFromApi.token;
-                const refreshTokenValue = responseFromApi.refreshToken;
-
-                if (!accessToken || typeof accessToken !== 'string') {
-                    console.error('La respuesta de la API de login no contiene un "token" válido.', responseFromApi);
-                    throw new Error('Respuesta de autenticación inválida.');
-                }
-
-                const emailNotSpecified = this._i18nService.getDictionary('fwk')?.translate?.('auth_email_not_specified') ?? 'auth_email_not_specified';
-
-                let permisosProcesados: string[] = [];
-                if (responseFromApi.permisos) {
-                    if (Array.isArray(responseFromApi.permisos)) {
-                        permisosProcesados = responseFromApi.permisos;
-                    } else if (typeof responseFromApi.permisos === 'string') {
-                        permisosProcesados = responseFromApi.permisos.split(';');
-                    }
-                }
-
-                const userForFuse: User = {
-                    id: responseFromApi.guid,
-                    name: responseFromApi.username,
-                    email: responseFromApi.email || emailNotSpecified,
-                    avatar: null,
-                    status: 'online',
-                    permisos: permisosProcesados, 
-                    refreshToken: refreshTokenValue || accessToken
-                };
-
-                this.setToken(accessToken);
-                this.setUser(userForFuse);
-
-                this._authenticated.next(true);
-                this._userService.user = userForFuse;
-                this._userPermissions = new Set(userForFuse.permisos);
+                this.handleAuthenticationSuccess(responseFromApi);
             }),
-            catchError((error) => throwError(() => error))
+            catchError((error) => {
+                if (error.status === 409 && error.error && error.error.token && error.error.passwordExpired) {
+                    this.handleAuthenticationSuccess(error.error);
+                    return of(error.error);
+                }
+                return throwError(() => error);
+            })
         );
     }
 
     signOut(): Observable<any> {
+        this.clearRefreshTimeout();
         this.clearLocalStorageAndState();
         return of(true);
     }
 
     check(): Observable<boolean> {
-        if (this._authenticated.value) {
-            return of(true);
+        if (this._checkRequest$) {
+            return this._checkRequest$;
         }
 
         const token = this.getToken();
+
         if (!token) {
+            this.signOut();
             return of(false);
         }
 
-        if (AuthUtils.isTokenExpired(token, 60)) {
-            return this.refreshToken().pipe(
-                switchMap(() => this.checkUserAndPermissions()),
-                catchError(() => {
-                    this.clearLocalStorageAndState();
-                    return of(false);
-                })
-            );
-        }
+        this._checkRequest$ = this.refreshToken().pipe(
+            map(() => true),
+            catchError(() => {
+                this.signOut();
+                return of(false);
+            }),
+            shareReplay(1),
+            finalize(() => {
+                this._checkRequest$ = null;
+            })
+        );
 
-        return this.checkUserAndPermissions();
-    }
-
-    private checkUserAndPermissions(): Observable<boolean> {
-        const user = this.getUserFromLocalStorage();
-        if (!user || !user.id || !user.name) {
-            this.clearLocalStorageAndState();
-            return of(false);
-        }
-
-        let permisosSet = new Set<string>();
-        
-        if (user.permisos) {
-            if (Array.isArray(user.permisos)) {
-                permisosSet = new Set(user.permisos);
-            } else if (typeof user.permisos === 'string') {
-                const strPermisos = user.permisos as string;
-                permisosSet = new Set(strPermisos.split(';'));
-            }
-        }
-
-        this._authenticated.next(true);
-        this._userService.user = user;
-        this._userPermissions = permisosSet;
-
-        return of(true);
+        return this._checkRequest$;
     }
 
     refreshToken(): Observable<any> {
@@ -134,32 +86,13 @@ export class AuthService implements AbstractAuthService {
             this.isRefreshing = true;
             this.refreshTokenSubject.next(null);
 
-            const user = this.getUserFromLocalStorage();
-            const refreshToken = user?.refreshToken;
-
-            if (!refreshToken) {
-                this.isRefreshing = false;
-                return throwError(() => new Error('No refresh token available.'));
-            }
-
-            return this._httpClient.post<any>(environment.auth.refreshToken, { token: refreshToken }).pipe(
+            return this._httpClient.post<any>(environment.auth.refreshToken, {}).pipe(
                 tap((response: any) => {
-                    const newAccessToken = response.token;
-                    if (!newAccessToken || typeof newAccessToken !== 'string') {
-                        console.error('La respuesta de la API de refresh token no contiene un "token" válido.', response);
-                        throw new Error('Respuesta de refresh token inválida.');
-                    }
-
-                    this.setToken(newAccessToken);
-
-                    if (response.refreshToken && user) {
-                        user.refreshToken = response.refreshToken;
-                        this.setUser(user);
-                    }
-                    this.refreshTokenSubject.next(newAccessToken);
+                    this.handleAuthenticationSuccess(response);
+                    this.refreshTokenSubject.next(response.token);
                 }),
                 catchError((error) => {
-                    this.signOut().subscribe();
+                    this.signOut();
                     return throwError(() => error);
                 }),
                 finalize(() => {
@@ -177,14 +110,6 @@ export class AuthService implements AbstractAuthService {
             return true;
         }
         return this._userPermissions.has(permission);
-    }
-
-    private clearLocalStorageAndState(): void {
-        localStorage.removeItem(this.TOKEN_KEY);
-        localStorage.removeItem(this.USER_DATA_KEY);
-        this._authenticated.next(false);
-        this._userService.user = { id: '', name: '', email: '' }; 
-        this._userPermissions.clear();
     }
 
     forgotPassword(email: string): Observable<any> {
@@ -207,10 +132,118 @@ export class AuthService implements AbstractAuthService {
         return this._httpClient.post(environment.auth.changePassword, data);
     }
 
+    private handleAuthenticationSuccess(responseFromApi: any): void {
+        const accessToken = responseFromApi.token;
+        const refreshTokenValue = responseFromApi.refreshToken;
+
+        if (!accessToken || typeof accessToken !== 'string') {
+            console.error('La respuesta de la API no contiene un "token" válido.', responseFromApi);
+            throw new Error('Respuesta de autenticación inválida.');
+        }
+
+        const emailNotSpecified = this._i18nService.getDictionary('fwk')?.translate?.('auth_email_not_specified') ?? 'auth_email_not_specified';
+
+        let permisosProcesados: string[] = [];
+
+        if (responseFromApi.permissions && Array.isArray(responseFromApi.permissions)) {
+            permisosProcesados = responseFromApi.permissions.map((p: any) => p.code || p);
+        } else if (responseFromApi.permisos) {
+            if (Array.isArray(responseFromApi.permisos)) {
+                permisosProcesados = responseFromApi.permisos;
+            } else if (typeof responseFromApi.permisos === 'string') {
+                permisosProcesados = responseFromApi.permisos.split(';');
+            }
+        }
+
+        const userForFuse: User = {
+            id: responseFromApi.guid,
+            name: responseFromApi.name || responseFromApi.username,
+            email: responseFromApi.email || emailNotSpecified,
+            avatar: null,
+            status: 'online',
+            permisos: permisosProcesados,
+            refreshToken: refreshTokenValue || accessToken,
+            username: responseFromApi.username,
+            passwordExpired: responseFromApi.passwordExpired
+        };
+
+        this.setToken(accessToken);
+        this.setUser(userForFuse);
+
+        this._authenticated.next(true);
+        this._userService.user = userForFuse;
+        this._userPermissions = new Set(userForFuse.permisos);
+
+        this.scheduleTokenRenewal(accessToken);
+    }
+
+    private clearLocalStorageAndState(): void {
+        localStorage.removeItem(this.TOKEN_KEY);
+        localStorage.removeItem(this.USER_DATA_KEY);
+        this._authenticated.next(false);
+        this._userService.user = { id: '', name: '', email: '' };
+        this._userPermissions.clear();
+    }
+    
+    private scheduleTokenRenewal(token: string): void {
+        this.clearRefreshTimeout();
+
+        const user = this.getUserFromLocalStorage();
+        if (user?.passwordExpired) {
+            return;
+        }
+
+        const expiryDate = this.getTokenExpirationDate(token);
+        if (!expiryDate) {
+            return;
+        }
+
+        const now = Date.now();
+        const expiresAt = expiryDate.valueOf();
+        const msUntilExpiry = expiresAt - now;
+
+        if (msUntilExpiry <= 5000) {
+            return;
+        }
+
+        let refreshDelay = msUntilExpiry - 60000;
+
+        if (refreshDelay <= 0) {
+            refreshDelay = msUntilExpiry / 2;
+        }
+
+        this._refreshTimeout = setTimeout(() => {
+            this.refreshToken().subscribe();
+        }, refreshDelay);
+    }
+
+    private clearRefreshTimeout(): void {
+        if (this._refreshTimeout) {
+            clearTimeout(this._refreshTimeout);
+            this._refreshTimeout = null;
+        }
+    }
+
+    private getTokenExpirationDate(token: string): Date | null {
+        try {
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (!payload.exp) return null;
+
+            const date = new Date(0);
+            date.setUTCSeconds(payload.exp);
+            return date;
+        } catch (e) {
+            return null;
+        }
+    }
+
     getToken(): string | null { return localStorage.getItem(this.TOKEN_KEY); }
     private setToken(token: string): void { localStorage.setItem(this.TOKEN_KEY, token); }
     private setUser(user: User): void { localStorage.setItem(this.USER_DATA_KEY, JSON.stringify(user)); }
-    
+
     getUserFromLocalStorage(): User | null {
         const userData = localStorage.getItem(this.USER_DATA_KEY);
         if (!userData) return null;

@@ -13,7 +13,8 @@ import { AuthService } from '@fwk/auth/auth.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
 import { LogoComponent } from '@fwk/components/logo/logo.component';
-import { finalize } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { UserService } from '@fwk/auth/user.service';
 
 @Component({
     selector: 'auth-change-password',
@@ -39,6 +40,7 @@ export class AuthChangePasswordComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
     private _router = inject(Router);
     private _i18nService = inject(I18nService);
+    private _userService = inject(UserService);
 
     constructor() { }
 
@@ -48,9 +50,9 @@ export class AuthChangePasswordComponent implements OnInit {
             newPassword: ['', Validators.required],
             passwordConfirm: ['', Validators.required],
         },
-        {
-            validators: this.passwordMatchValidator
-        });
+            {
+                validators: this.passwordMatchValidator
+            });
     }
 
     passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -69,25 +71,42 @@ export class AuthChangePasswordComponent implements OnInit {
         this.changePasswordForm.disable();
         this.showAlert = false;
 
-        const payload = {
+        const currentUser = this._userService.userValue;
+        const username = currentUser?.username || currentUser?.name || '';
+        const newPassword = this.changePasswordForm.get('newPassword').value;
+
+        const changePayload = {
             currentPassword: this.changePasswordForm.get('currentPassword').value,
-            newPassword: this.changePasswordForm.get('newPassword').value
+            newPassword: newPassword,
+            username: username
         };
 
-        this._authService.changePassword(payload)
-            .subscribe(
-                () => {
-                    this.isSuccess = true;
-                    this.showAlert = true;
-                    this.startCountdown();
+        this._authService.changePassword(changePayload)
+            .pipe(
+                switchMap(() => {
+                    return this._authService.signIn({
+                        username: username,
+                        password: newPassword
+                    });
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this._router.navigate(['/']);
                 },
-                (error) => {
+                error: (error) => {
                     this.changePasswordForm.enable();
-                    
+
                     let errorMsg = 'change_password_error_message';
+
                     if (error.status === 409 || error.error?.status === 'BAD_CREDENTIAL') {
                         errorMsg = 'current_password_invalid_error';
                         this.changePasswordForm.get('currentPassword').setErrors({ invalid: true });
+                    }
+
+                    else if (error.status === 401) {
+                        this._router.navigate(['/sign-in']);
+                        return;
                     }
 
                     this.alert = {
@@ -96,28 +115,6 @@ export class AuthChangePasswordComponent implements OnInit {
                     };
                     this.showAlert = true;
                 }
-            );
-    }
-
-    private startCountdown(): void {
-        const interval = setInterval(() => {
-            this.countdown--;
-            this.alert = {
-                type: 'success',
-                message: this._i18nService.translate('change_password_success_message').replace('{{countdown}}', this.countdown.toString())
-            };
-            
-            if (this.countdown <= 0) {
-                clearInterval(interval);
-                this._authService.signOut().subscribe(() => {
-                    this._router.navigate(['/sign-in']);
-                });
-            }
-        }, 1000);
-        
-        this.alert = {
-            type: 'success',
-            message: this._i18nService.translate('change_password_success_message').replace('{{countdown}}', this.countdown.toString())
-        };
+            });
     }
 }

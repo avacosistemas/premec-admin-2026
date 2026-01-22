@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from '@fwk/auth/auth.service';
@@ -38,7 +38,12 @@ export class AuthForgotPasswordComponent implements OnInit {
     };
     forgotPasswordForm: FormGroup<ForgotPasswordForm>;
     showAlert: boolean = false;
+    
+    isSuccess: boolean = false;
+    countdown: number = 5;
+
     private _i18nService = inject(I18nService);
+    private _router = inject(Router);
 
     constructor(
         private _authService: AuthService,
@@ -63,17 +68,16 @@ export class AuthForgotPasswordComponent implements OnInit {
         this._authService.forgotPassword(this.forgotPasswordForm.get('email').value)
             .pipe(
                 finalize(() => {
-                    this.forgotPasswordForm.enable();
-                    this.forgotPasswordNgForm.resetForm();
+                    if (!this.isSuccess) {
+                        this.forgotPasswordForm.enable();
+                    }
                     this.showAlert = true;
                 }),
             )
             .subscribe(
                 (response) => {
-                    this.alert = {
-                        type: 'success',
-                        message: this._i18nService.translate('forgot_password_success_message'),
-                    };
+                    this.isSuccess = true;
+                    this.startCountdown();
                 },
                 (response) => {
                     this.alert = {
@@ -82,5 +86,27 @@ export class AuthForgotPasswordComponent implements OnInit {
                     };
                 },
             );
+    }
+
+    private startCountdown(): void {
+        this.updateSuccessMessage();
+
+        const interval = setInterval(() => {
+            this.countdown--;
+            this.updateSuccessMessage();
+
+            if (this.countdown <= 0) {
+                clearInterval(interval);
+                this._router.navigate(['/sign-in']);
+            }
+        }, 1000);
+    }
+
+    private updateSuccessMessage(): void {
+        const message = this._i18nService.translate('forgot_password_success_message');
+        this.alert = {
+            type: 'success',
+            message: message.replace('{{countdown}}', this.countdown.toString())
+        };
     }
 }

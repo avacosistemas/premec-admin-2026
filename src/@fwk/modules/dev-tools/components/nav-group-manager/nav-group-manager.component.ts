@@ -20,7 +20,7 @@ import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 export interface NavigationGroup {
     id: string;
     title: string;
-    type: 'group';
+    type: 'group' | 'collapsable'; 
     icon?: string | null;
 }
 
@@ -43,7 +43,7 @@ export class NavGroupManagerComponent implements OnInit {
     isSaving = false;
     groups: NavigationGroup[] = [];
     dataSource = new MatTableDataSource<NavigationGroup>();
-    displayedColumns: string[] = ['icon', 'title', 'id', 'actions'];
+    displayedColumns: string[] = ['icon', 'title', 'id', 'type', 'actions'];
 
     ngOnInit(): void {
         this.loadGroups();
@@ -69,26 +69,50 @@ export class NavGroupManagerComponent implements OnInit {
     openGroupDialog(group?: NavigationGroup): void {
         const isEdit = !!group;
         const iconNamespace = 'heroicons_outline';
-        
+
         const formFields: DynamicField<any>[] = [
             {
-                key: 'id', label: 'ID (único, sin espacios)', controlType: 'textbox', required: true, disabled: isEdit,
+                key: 'id',
+                label: 'ID (único, sin espacios)',
+                controlType: 'textbox',
+                required: true,
+                disabled: isEdit,
                 validation: { regexKey: 'user', errorMessage: 'Solo letras, números y guiones bajos/medios.' }
             },
-            { key: 'title', label: 'Título (visible en el menú)', controlType: 'textbox', required: true },
-            { 
-                key: 'icon', 
-                label: 'Ícono (ej: heroicons_outline:users)', 
-                controlType: 'icon-picker',
-                options: { 
-                    namespace: iconNamespace
+            {
+                key: 'title',
+                label: 'Título (visible en el menú)',
+                controlType: 'textbox',
+                required: true
+            },
+            {
+                key: 'type',
+                label: 'Tipo de Menú',
+                controlType: 'select',
+                required: true,
+                options: {
+                    fromData: [
+                        { value: 'collapsable', label: 'Colapsable (Menú con hijos)' },
+                        { value: 'group', label: 'Grupo (Título separador)' }
+                    ],
+                    elementLabel: 'label',
+                    elementValue: 'value'
                 }
             },
-            { key: 'type', controlType: 'hidden', value: 'group' }
+            {
+                key: 'icon',
+                label: 'Ícono (ej: heroicons_outline:users)',
+                controlType: 'icon-picker',
+                options: {
+                    namespace: iconNamespace
+                }
+            }
         ];
 
-        const entityForModal: Partial<NavigationGroup> = group ? { ...group } : { type: 'group' };
-        
+        const entityForModal: Partial<NavigationGroup> = group
+            ? { ...group }
+            : { type: 'collapsable' };
+
         if (isEdit && entityForModal.icon && entityForModal.icon.startsWith(`${iconNamespace}:`)) {
             entityForModal.icon = entityForModal.icon.split(':')[1];
         }
@@ -96,7 +120,7 @@ export class NavGroupManagerComponent implements OnInit {
         const dialogRef = this._dialog.open(BasicModalComponent, {
             width: '450px',
             data: {
-                entity: entityForModal, 
+                entity: entityForModal,
                 config: {
                     titleKey: isEdit ? 'Editar Grupo' : 'Nuevo Grupo de Navegación',
                     form: formFields,

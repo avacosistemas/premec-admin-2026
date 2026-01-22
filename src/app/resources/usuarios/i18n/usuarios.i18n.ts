@@ -49,6 +49,8 @@ export const USUARIOS_I18N_DEF: I18n = {
     usuarios_grid_def_column_deposito: 'Depósito',
     usuarios_grid_def_column_legajo: 'Legajo',
     usuarios_create_form_fields_def_field_legajo: 'Legajo',
-    USUARIOS_UPDATE_FORM_FIELDS_DEF_FIELD_legajo: 'Legajo'
+    USUARIOS_UPDATE_FORM_FIELDS_DEF_FIELD_legajo: 'Legajo',
+    usuarios_action_reset_password: 'Restablecer Contraseña',
+      usuarios_action_reset_password_confirm: '¿Está seguro de que desea restablecer la contraseña del usuario <strong>{{username}}</strong>?'
   }
 };

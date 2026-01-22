@@ -6,4 +6,6 @@ export interface User {
     status?: string;
     permisos?: string[];
     refreshToken?: string;
+    passwordExpired?: boolean;
+    username?: string;
 }

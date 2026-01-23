@@ -38,7 +38,7 @@ export const PERMISO_DEF: CrudDef = {
     dialogConfig: {
         width: '600px'
     },
-    filterInMemory: true,
+    filterInMemory: false,
     serverPagination: false,
     pagination: {
         page: 0,

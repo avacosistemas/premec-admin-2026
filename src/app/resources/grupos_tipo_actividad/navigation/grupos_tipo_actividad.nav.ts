@@ -5,7 +5,7 @@ export const GRUPOS_TIPO_ACTIVIDAD_NAV_DEF: NavigationDef = {
   translateKey: 'grupos_tipo_actividad_nav_def',
   url: '/gruposTipoActividad',
   icon: 'heroicons_outline:list-bullet',
-  group: null,
+  group: 'menu_servicios',
   showInMenu: true,
   order: 1
 };

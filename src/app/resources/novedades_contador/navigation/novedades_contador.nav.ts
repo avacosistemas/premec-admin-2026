@@ -5,7 +5,7 @@ export const NOVEDADES_CONTADOR_NAV_DEF: NavigationDef = {
     translateKey: 'novedades_contador_nav_def',
     url: '/novedades-contador',
     icon: 'heroicons_outline:calculator',
-    group: null,
+    group: 'menu_rrhh',
     showInMenu: true,
     order: 8
 };

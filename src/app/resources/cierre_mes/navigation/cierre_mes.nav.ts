@@ -5,7 +5,7 @@ export const CIERRE_MES_NAV_DEF: NavigationDef = {
     translateKey: 'cierre_mes_nav_def',
     url: '/cierre-mes',
     icon: 'heroicons_outline:calendar-days',
-    group: null,
+    group: 'menu_rrhh',
     showInMenu: true,
     order: 6
 };

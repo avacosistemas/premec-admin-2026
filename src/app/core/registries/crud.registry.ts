@@ -19,6 +19,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/generar_qr/generar_qr.def')
     },
     {
+        path: 'grupoEmpleado',
+        loader: () => import('app/resources/grupo-empleado/grupo-empleado.def')
+    },
+    {
         path: 'gruposTipoActividad',
         loader: () => import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def')
     },
@@ -77,6 +81,7 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
         import('app/resources/cierre_mes/cierre_mes.def'),
         import('app/resources/fichado_procesamiento/fichado_procesamiento.def'),
         import('app/resources/generar_qr/generar_qr.def'),
+        import('app/resources/grupo-empleado/grupo-empleado.def'),
         import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def'),
         import('app/resources/indicadores_mensuales/indicadores_mensuales.def'),
         import('app/resources/indicadores_mensuales_general/indicadores_mensuales_general.def'),

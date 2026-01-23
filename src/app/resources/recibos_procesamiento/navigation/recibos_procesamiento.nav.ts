@@ -5,7 +5,7 @@ export const RECIBOS_PROCESAMIENTO_NAV_DEF: NavigationDef = {
     translateKey: 'recibos_procesamiento_nav_def',
     url: '/recibos-procesamiento',
     icon: 'heroicons_outline:document-arrow-up',
-    group: null,
+    group: 'menu_rrhh',
     showInMenu: true,
     order: 5
 };

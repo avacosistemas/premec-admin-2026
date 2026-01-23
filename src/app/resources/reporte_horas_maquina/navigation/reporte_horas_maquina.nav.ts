@@ -5,7 +5,7 @@ export const REPORTE_HORAS_MAQUINA_NAV_DEF: NavigationDef = {
   translateKey: 'reporte_horas_maquina_nav_def',
   url: '/reporteHorasMaquina',
   icon: 'heroicons_outline:document-text',
-  group: null,
+  group: 'menu_servicios',
   showInMenu: true,
   order: 2
 };

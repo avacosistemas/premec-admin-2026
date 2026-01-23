@@ -6,7 +6,7 @@ export const RECIBOS_I18N_DEF: I18n = {
     lang: 'es',
     words: {
         page_title: 'Listado de Recibos',
-        recibos_nav_def: 'Recibos',
+        recibos_nav_def: 'Mis Recibos',
         recibos_grid_column_attachmentEntry: 'Referencia',
         recibos_grid_column_year: 'Año',
         recibos_grid_column_month: 'Mes (Número)',

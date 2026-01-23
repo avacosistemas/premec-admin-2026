@@ -5,7 +5,7 @@ export const FICHADO_PROCESAMIENTO_NAV_DEF: NavigationDef = {
     translateKey: 'fichado_procesamiento_nav_def',
     url: '/fichado-procesamiento',
     icon: 'heroicons_outline:clock',
-    group: null,
+    group: 'menu_rrhh',
     showInMenu: true,
     order: 7
 };

@@ -18,9 +18,9 @@ export const environment = {
         signIn: PREFIX_DOMAIN_API + 'auth',
         signOut: PREFIX_DOMAIN_API + 'user/logout',
         refreshToken: PREFIX_DOMAIN_API + 'refresh',
-        forgotPassword: PREFIX_DOMAIN_API + 'auth/forgot-password',
+        forgotPassword: PREFIX_DOMAIN_API + 'password/reset',
+        changePassword: PREFIX_DOMAIN_API + 'password/update/', 
         resetPassword: PREFIX_DOMAIN_API + 'password/reset',
-        changePassword: PREFIX_DOMAIN_API + 'auth/change-password', 
         signUp: PREFIX_DOMAIN_API + 'auth/sign-up'
     },
 

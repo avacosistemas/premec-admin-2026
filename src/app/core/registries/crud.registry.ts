@@ -27,6 +27,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def')
     },
     {
+        path: 'horasMaquinaExcesoReseteo',
+        loader: () => import('app/resources/horas-maquina-exceso-reseteo/horas-maquina-exceso-reseteo.def')
+    },
+    {
         path: 'indicadores-mensuales',
         loader: () => import('app/resources/indicadores_mensuales/indicadores_mensuales.def')
     },
@@ -83,6 +87,7 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
         import('app/resources/generar_qr/generar_qr.def'),
         import('app/resources/grupo-empleado/grupo-empleado.def'),
         import('app/resources/grupos_tipo_actividad/grupos_tipo_actividad.def'),
+        import('app/resources/horas-maquina-exceso-reseteo/horas-maquina-exceso-reseteo.def'),
         import('app/resources/indicadores_mensuales/indicadores_mensuales.def'),
         import('app/resources/indicadores_mensuales_general/indicadores_mensuales_general.def'),
         import('app/resources/item_checklist_grupo/item_checklist_grupo.def'),

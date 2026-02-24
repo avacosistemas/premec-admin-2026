@@ -11,6 +11,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/cierre_mes/cierre_mes.def')
     },
     {
+        path: 'cliente',
+        loader: () => import('app/resources/cliente/cliente.def')
+    },
+    {
         path: 'fichado-procesamiento',
         loader: () => import('app/resources/fichado_procesamiento/fichado_procesamiento.def')
     },
@@ -51,6 +55,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/permiso/permiso.def')
     },
     {
+        path: 'problemaMaquina',
+        loader: () => import('app/resources/problema-maquina/problema-maquina.def')
+    },
+    {
         path: 'recibos',
         loader: () => import('app/resources/recibos/recibos.def')
     },
@@ -75,6 +83,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/seguridad_grupo_usuario/seguridad_grupo_usuario.def')
     },
     {
+        path: 'tipoProblemaMaquina',
+        loader: () => import('app/resources/tipo-problema-maquina/tipo-problema-maquina.def')
+    },
+    {
         path: 'users',
         loader: () => import('app/resources/usuarios/usuarios.def')
     },
@@ -83,6 +95,7 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
 export async function loadAllCrudDefs(): Promise<CrudDef[]> {
     const loaderPromises = [
         import('app/resources/cierre_mes/cierre_mes.def'),
+        import('app/resources/cliente/cliente.def'),
         import('app/resources/fichado_procesamiento/fichado_procesamiento.def'),
         import('app/resources/generar_qr/generar_qr.def'),
         import('app/resources/grupo-empleado/grupo-empleado.def'),
@@ -93,12 +106,14 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
         import('app/resources/item_checklist_grupo/item_checklist_grupo.def'),
         import('app/resources/novedades_contador/novedades_contador.def'),
         import('app/resources/permiso/permiso.def'),
+        import('app/resources/problema-maquina/problema-maquina.def'),
         import('app/resources/recibos/recibos.def'),
         import('app/resources/recibos_procesamiento/recibos_procesamiento.def'),
         import('app/resources/reporte_horas_maquina/reporte_horas_maquina.def'),
         import('app/resources/seguridad_grupo/seguridad_grupo.def'),
         import('app/resources/seguridad_grupo_permiso/seguridad_grupo_permiso.def'),
         import('app/resources/seguridad_grupo_usuario/seguridad_grupo_usuario.def'),
+        import('app/resources/tipo-problema-maquina/tipo-problema-maquina.def'),
         import('app/resources/usuarios/usuarios.def'),
     ];
     

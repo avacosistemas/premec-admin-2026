@@ -45,8 +45,10 @@
                             {{ def.columnName }}
                         </mat-header-cell>
 
-                        <mat-cell *matCellDef="let element" [ngClass]="[def.cellClass || '', getColumnStyles(def)]">
-                            <span>{{ getValue(element, def.columnDef, def) }}</span>
+                        <mat-cell *matCellDef="let element"
+                            [ngClass]="[def.cellClass || '', getColumnStyles(def), def.cellClassRender ? def.cellClassRender(element) : '']">
+                            <span *ngIf="!def.cellRender">{{ getValue(element, def.columnDef, def) }}</span>
+                            <span *ngIf="def.cellRender" [innerHTML]="getValue(element, def.columnDef, def)"></span>
                         </mat-cell>
                     </ng-container>
 

@@ -17,7 +17,15 @@ export class AutocompleteService {
     const apiOptions = configuration.apiOptions;
 
     if (!apiOptions?.url) {
-      return of(apiOptions?.fromData || []);
+      let data = apiOptions?.fromData || (configuration as any).options?.fromData || [];
+      if (term) {
+        const labelKey = configuration.options?.elementLabel || (configuration as any).apiOptions?.elementLabel;
+        data = data.filter((item: any) => {
+          const val = labelKey ? item[labelKey] : item;
+          return String(val).toLowerCase().includes(term.toLowerCase());
+        });
+      }
+      return of(data);
     }
 
     let params = new HttpParams();

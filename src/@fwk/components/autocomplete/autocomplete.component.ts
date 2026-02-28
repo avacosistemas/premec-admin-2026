@@ -11,7 +11,7 @@ import { AutocompleteConfiguration, AutocompleteSearchTerm } from './autocomplet
 import { TranslatePipe } from '../../pipe/translate.pipe';
 
 @Component({
-     selector: 'fwk-autocomplete',
+    selector: 'fwk-autocomplete',
     templateUrl: './autocomplete.component.html',
     styleUrls: ['./autocomplete.component.scss'],
     standalone: true,
@@ -54,12 +54,13 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     }(this);
 
     private destroy$ = new Subject<void>();
+    private focus$ = new Subject<string | null>();
     private isOptionSelected: boolean = false;
 
-    onChange: (value: any) => void = () => {};
-    onTouched: () => void = () => {};
+    onChange: (value: any) => void = () => { };
+    onTouched: () => void = () => { };
 
-    constructor(private cdr: ChangeDetectorRef) {}
+    constructor(private cdr: ChangeDetectorRef) { }
 
     ngOnInit() {
         if (!this.searchTermInterface) {
@@ -83,24 +84,45 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+        this.focus$.complete();
     }
 
     private setupFiltering(): void {
-        this.filteredOptions$ = this.autocompleteControl.valueChanges.pipe(
-            takeUntil(this.destroy$),
+        const valueChanges$ = this.autocompleteControl.valueChanges.pipe(
             debounceTime(500),
-            distinctUntilChanged(),
+            distinctUntilChanged()
+        );
+
+        const triggers$ = new Observable<string | null>(observer => {
+            this.focus$.subscribe(val => observer.next(val));
+            valueChanges$.subscribe(val => observer.next(typeof val === 'string' ? val : ''));
+        });
+
+        this.filteredOptions$ = triggers$.pipe(
+            takeUntil(this.destroy$),
             switchMap(value => {
+                const term = value || '';
                 if (this.isOptionSelected) {
                     this.isOptionSelected = false;
                     return of([]);
                 }
-                if (typeof value !== 'string' || !value || value.length < (this.config.options?.minTermLength ?? 3)) {
+
+                const minLength = this.config.options?.minTermLength ?? 1;
+                const searchOnFocus = this.config.options?.searchOnFocus ?? true;
+
+                if (term.length < minLength && !searchOnFocus) {
                     return of([]);
                 }
-                return this.searchTermInterface.search(value);
+
+                return this.searchTermInterface.search(term);
             })
         );
+    }
+
+    onFocus(): void {
+        const value = this.autocompleteControl.value;
+        this.focus$.next(typeof value === 'string' ? value : '');
+        this.onTouched();
     }
 
     writeValue(value: any): void {
@@ -132,7 +154,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
         if (typeof value === 'string' && value.trim() !== '') {
             return { selectOrCleanField: true };
         }
-        
+
         return null;
     }
 

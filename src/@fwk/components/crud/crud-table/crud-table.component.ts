@@ -443,6 +443,9 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     }
 
     getValue(element: any, attribute: string, def: any = null): any {
+        if (def?.cellRender) {
+            return def.cellRender(element);
+        }
         let obj = attribute.split('.').reduce((acc, part) => acc && acc[part], element);
 
         if (def?.columnType && obj != null && obj !== '') {

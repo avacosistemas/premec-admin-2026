@@ -62,8 +62,15 @@
                 <button *ngIf="showAddButton()" mat-stroked-button color="accent" [disabled]="isTableLoading"
                     (click)="openAddDialog()">
                     <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                    <span class="ml-2">{{ 'add_button' | translate }}</span>
+                    <span class="ml-2">{{ 'add_button' | translate:crudDef.i18n?.name }}</span>
                 </button>
+
+                <div *ngIf="!showAddButton() && (crudDef.forms?.create || crudDef.formsDef?.create)"
+                    class="ml-2 px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-md text-sm flex items-center max-w-64">
+                    <mat-icon [svgIcon]="'heroicons_outline:information-circle'"
+                        class="icon-size-5 mr-2 text-amber-500"></mat-icon>
+                    <span>{{ 'create_access_denied_message' | translate:crudDef.i18n?.name }}</span>
+                </div>
             </div>
         </div>
 
@@ -80,11 +87,10 @@
         <div class="relative overflow-hidden">
             <fwk-crud-table *ngIf="crudDef.grid" [containerClass]="isTableLoading ? 'h-[67vh]' : ''"
                 [onClickRow]="onClickRow" [datasource]="dataSource" [canDelete]="showDeleteButton()"
-                [searchPerformed]="searchPerformed"
-                [grid]="crudDef.grid" [crud]="this" [isLoading]="isTableLoading" [hasActiveFilters]="hasActiveFilters"
-                [canAdd]="showAddButton()" (status)="statusChanged($event)" (onChangePagination)="handlePageChange()"
-                (onAddClicked)="openAddDialog()" (onClearFiltersClicked)="clearFilters()"
-                (onRowClicked)="handleRowClick($event)">
+                [searchPerformed]="searchPerformed" [grid]="crudDef.grid" [crud]="this" [isLoading]="isTableLoading"
+                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()" (status)="statusChanged($event)"
+                (onChangePagination)="handlePageChange()" (onAddClicked)="openAddDialog()"
+                (onClearFiltersClicked)="clearFilters()" (onRowClicked)="handleRowClick($event)">
             </fwk-crud-table>
         </div>
     </div>

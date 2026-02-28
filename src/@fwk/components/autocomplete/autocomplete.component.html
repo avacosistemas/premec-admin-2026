@@ -1,13 +1,8 @@
 ﻿<mat-form-field class="w-full" appearance="outline">
     <mat-label>{{ config?.label }}</mat-label>
 
-    <input
-        type="text"
-        matInput
-        [formControl]="autocompleteControl"
-        [matAutocomplete]="auto"
-        [required]="config?.required"
-        [errorStateMatcher]="matcher">
+    <input type="text" matInput [formControl]="autocompleteControl" [matAutocomplete]="auto"
+        [required]="config?.required" (focus)="onFocus()" [errorStateMatcher]="matcher">
 
     <mat-error *ngIf="autocompleteControl.hasError('required') && !errorMessage">
         {{ config?.options?.requiredMessage || ('autocomplete_required_error' | translate) }}
@@ -19,9 +14,7 @@
     <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
 </mat-form-field>
 
-<mat-autocomplete #auto="matAutocomplete"
-                [displayWith]="displayWith"
-                (optionSelected)="onOptionSelected()">
+<mat-autocomplete #auto="matAutocomplete" [displayWith]="displayWith" (optionSelected)="onOptionSelected()">
     <mat-option *ngFor="let option of filteredOptions$ | async" [value]="option">
         <span>{{ config?.options?.elementLabel ? option[config.options.elementLabel] : option }}</span>
     </mat-option>

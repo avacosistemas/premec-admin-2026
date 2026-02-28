@@ -25,10 +25,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '../../pipe/translate.pipe';
 import { FormGridModalComponent } from '../form-grid-dialog/form-grid.dialog.component';
-import { BackButtonComponent } from '../back-button/backbutton.component'; 
+import { BackButtonComponent } from '../back-button/backbutton.component';
 
 @Component({
-   selector: 'fwk-crud',
+  selector: 'fwk-crud',
   templateUrl: './crud.component.html',
   styleUrls: ['./crud.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -199,7 +199,11 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
 
     const canUpdate = this.authService.hasPermission(this.crudDef.security?.updateAccess);
 
-    if (formUpdate && canUpdate) {
+    const forceRead = this.crudDef.readCondition
+      ? this.expressionService.evaluate(this.crudDef.readCondition, entity)
+      : false;
+
+    if (formUpdate && canUpdate && !forceRead) {
       data = {
         isEdit: true, entity: entity, formDef: formUpdate, formName: 'formUpdate',
         funcName: nameFunc, fields: this.localStorageService.clone(formUpdate.fields),

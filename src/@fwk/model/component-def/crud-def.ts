@@ -4,6 +4,7 @@ import { PageComponentDef } from './page-component-def';
 import { GridDef } from './grid-def';
 import { ActionDef } from './action-def';
 import { DisplayActionsCondition } from '../display-actions-condition';
+import { DynamicFieldConditionIf } from '../dynamic-form/dynamic-field-condition-if';
 
 export class CrudDef extends ComponentDef {
   grid?: GridDef;
@@ -16,6 +17,7 @@ export class CrudDef extends ComponentDef {
   crudActions?: ActionDef[];
   displayGlobalActions?: DisplayActionsCondition[];
   filterInMemory: boolean;
+  readCondition?: DynamicFieldConditionIf;
   pagination: {
     page: number,
     pageSize: number
@@ -35,4 +37,7 @@ export class CrudDef extends ComponentDef {
   searchFields?: any;
   initSearch?: boolean;
   wsGetDetail?: string;
+  
+  mock?: boolean;
+  mockData?: any;
 }

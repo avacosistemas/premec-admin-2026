@@ -20,7 +20,6 @@ export class GridDef {
     deleteTernaria?: boolean;
     columnsTernaria?: string[];
     groupActions?: boolean;
-    // Deprecated use delleteAction
     deleteColumn?: any;
     titleKey?: string;
     title?: string;
@@ -38,6 +37,8 @@ export interface ColumnDef {
     wrapText?: boolean;
     headerClass?: string;
     cellClass?: string;
+    cellRender?: (element: any) => any;
+    cellClassRender?: (element: any) => string;
 
     id?: boolean;
     sort?: {

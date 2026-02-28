@@ -8,7 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
 
 @Component({
-     selector: 'fwk-file',
+    selector: 'fwk-file',
     templateUrl: './file.component.html',
     styleUrls: ['./file.component.scss'],
     standalone: true,
@@ -44,26 +44,24 @@ import { TranslatePipe } from '../../../pipe/translate.pipe';
 export class FileComponent implements ControlValueAccessor, Validator {
 
     @Input() field!: any;
-    @Input() errorMessage: string | null = null; 
-    
+    @Input() errorMessage: string | null = null;
+
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-    fileName: string | null = null;
-    fileSize: string | null = null;
-    
+    files: { name: string, size: string, base64: string, byteArray: number[] }[] = [];
+
     isDisabled: boolean = false;
     isDragging: boolean = false;
     isLoading: boolean = false;
-    hasError: boolean = false;
+    hasErrorMessage: string | null = null;
 
-    onChange: (value: any) => void = () => {};
-    onTouch: () => void = () => {};
-    onValidatorChange: () => void = () => {};
+    onChange: (value: any) => void = () => { };
+    onTouch: () => void = () => { };
 
     constructor(
         private cdr: ChangeDetectorRef,
         @Optional() @Host() @SkipSelf() private controlContainer: ControlContainer
-    ) {}
+    ) { }
 
     @HostListener('dragover', ['$event']) onDragOver(evt: any) {
         evt.preventDefault();
@@ -85,34 +83,52 @@ export class FileComponent implements ControlValueAccessor, Validator {
 
         const files = evt.dataTransfer.files;
         if (files.length > 0) {
-            this.processFile(files[0]);
+            this.handleInputFiles(files);
         }
     }
 
     writeValue(value: any): void {
-        if (!value) {
-            this.clearState();
-        } else {
-            this.fileName = "Archivo actual en memoria";
-            this.fileSize = null;
+        this.files = [];
+        if (value) {
+            if (Array.isArray(value)) {
+                if (value.length > 0 && Array.isArray(value[0])) {
+                    this.files = value.map((v, i) => ({
+                        name: `Archivo ${i + 1}`,
+                        size: '',
+                        base64: this.byteArrayToBase64(v),
+                        byteArray: v
+                    }));
+                } else if (value.length > 0 && typeof value[0] === 'number') {
+                    this.files = [{
+                        name: "Archivo actual",
+                        size: '',
+                        base64: this.byteArrayToBase64(value),
+                        byteArray: value
+                    }];
+                }
+            } else if (typeof value === 'string') {
+                this.files = [{
+                    name: "Archivo actual",
+                    size: '',
+                    base64: value,
+                    byteArray: []
+                }];
+            }
         }
         this.cdr.markForCheck();
     }
 
     registerOnChange(fn: any): void { this.onChange = fn; }
     registerOnTouched(fn: any): void { this.onTouch = fn; }
-    
-    setDisabledState(isDisabled: boolean): void { 
+
+    setDisabledState(isDisabled: boolean): void {
         this.isDisabled = isDisabled;
         this.cdr.markForCheck();
     }
 
     validate(control: AbstractControl): ValidationErrors | null {
-        if (this.field?.required && !control.value) { 
-            return { required: true }; 
-        }
-        if (this.hasError) {
-            return { invalidFile: true };
+        if (this.field?.required && (!this.files || this.files.length === 0)) {
+            return { required: true };
         }
         return null;
     }
@@ -120,44 +136,82 @@ export class FileComponent implements ControlValueAccessor, Validator {
     onFileChange(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files.length > 0) {
-            this.processFile(input.files[0]);
+            this.handleInputFiles(input.files);
         }
     }
 
-    processFile(file: File): void {
-        if (this.acceptTypes && !this.checkFileType(file)) {
-            this.handleError('Tipo de archivo no permitido. Solo ' + this.acceptTypes);
+    private async handleInputFiles(fileList: FileList | File[]): Promise<void> {
+        const maxFiles = this.field?.options?.maxFiles ?? 1;
+        const currentCount = this.files.length;
+        const remainingSlots = maxFiles - currentCount;
+
+        if (remainingSlots <= 0) {
+            this.handleError(`Máximo de ${maxFiles} archivos permitido`);
             return;
         }
 
+        const filesToProcess = Array.from(fileList).slice(0, remainingSlots);
         this.isLoading = true;
-        this.hasError = false;
-        this.fileName = file.name;
-        this.fileSize = this.formatBytes(file.size);
-        
-        const reader = new FileReader();
-        
-        reader.onload = () => {
-            const base64Result = reader.result as string;
-            
-            const rawBase64 = base64Result.split(',')[1];
+        this.hasErrorMessage = null;
 
-            const byteArray = this.base64ToByteArray(rawBase64);
-            this.onChange(byteArray); 
+        for (const file of filesToProcess) {
+            await this.processFile(file);
+        }
 
-            this.updatePreview(rawBase64);
-            
-            this.isLoading = false;
-            this.cdr.markForCheck();
-        };
+        this.isLoading = false;
+        this.updateValue();
+        this.cdr.markForCheck();
+    }
 
-        reader.onerror = () => {
-            this.isLoading = false;
-            this.handleError('Error al leer el archivo');
-        };
+    private processFile(file: File): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.acceptTypes && !this.checkFileType(file)) {
+                this.handleError('Tipo de archivo no permitido: ' + file.name);
+                resolve();
+                return;
+            }
 
-        reader.readAsDataURL(file);
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64Result = reader.result as string;
+                const rawBase64 = base64Result.split(',')[1];
+                const byteArray = this.base64ToByteArray(rawBase64);
+
+                this.files.push({
+                    name: file.name,
+                    size: this.formatBytes(file.size),
+                    base64: rawBase64,
+                    byteArray: byteArray
+                });
+                resolve();
+            };
+            reader.onerror = () => {
+                this.handleError('Error al leer: ' + file.name);
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    private updateValue(): void {
+        const value = this.isMultiple ? this.files.map(f => f.byteArray) : (this.files[0]?.byteArray || null);
+        this.onChange(value);
         this.onTouch();
+        this.cdr.markForCheck();
+    }
+
+    private byteArrayToBase64(byteArray: number[]): string {
+        if (!byteArray || byteArray.length === 0) return '';
+        try {
+            const bytes = new Uint8Array(byteArray);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        } catch (e) {
+            return '';
+        }
     }
 
     private base64ToByteArray(base64: string): number[] {
@@ -170,20 +224,6 @@ export class FileComponent implements ControlValueAccessor, Validator {
         return bytes;
     }
 
-    private updatePreview(value: string | null): void {
-        const previewFieldName = this.field?.options?.['previewField'];
-        
-        if (previewFieldName && this.controlContainer && this.controlContainer.control) {
-            const formGroup = this.controlContainer.control as FormGroup;
-            const previewControl = formGroup.get(previewFieldName);
-            
-            if (previewControl) {
-                previewControl.setValue(value);
-                previewControl.markAsDirty();
-            }
-        }
-    }
-
     private checkFileType(file: File): boolean {
         if (!this.acceptTypes) return true;
         const accepted = this.acceptTypes.split(',').map(t => t.trim().toLowerCase());
@@ -192,33 +232,19 @@ export class FileComponent implements ControlValueAccessor, Validator {
         return accepted.some(acc => acc === ext || type.match(new RegExp(acc.replace('*', '.*'))));
     }
 
-    removeFile(event: Event): void {
+    removeFile(index: number, event: Event): void {
         event.stopPropagation();
-        this.clearState();
-        this.onChange(null);
-        this.updatePreview(null);
-        this.onTouch();
-        if (this.fileInput) this.fileInput.nativeElement.value = '';
-    }
-
-    private clearState(): void {
-        this.fileName = null;
-        this.fileSize = null;
-        this.hasError = false;
-        this.isLoading = false;
-        this.cdr.markForCheck();
+        this.files.splice(index, 1);
+        this.updateValue();
     }
 
     private handleError(msg: string): void {
-        this.hasError = true;
-        this.fileName = msg;
-        this.fileSize = null;
-        this.onChange(null);
+        this.hasErrorMessage = msg;
         this.cdr.markForCheck();
     }
 
     triggerFileInput(): void {
-        if (!this.isDisabled) {
+        if (!this.isDisabled && (this.isMultiple || this.files.length === 0)) {
             this.fileInput.nativeElement.click();
         }
     }
@@ -234,5 +260,9 @@ export class FileComponent implements ControlValueAccessor, Validator {
 
     get acceptTypes(): string {
         return this.field?.options?.acceptTypes ?? '';
+    }
+
+    get isMultiple(): boolean {
+        return this.field?.options?.multiple === true;
     }
 }

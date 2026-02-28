@@ -100,6 +100,8 @@ export interface FileOptions extends BaseFieldOptions {
     height?: string;
     shape?: string;
     previewField?: string;
+    multiple?: boolean;
+    maxFiles?: number;
 }
 
 export interface ColorPickerOptions extends BaseFieldOptions {

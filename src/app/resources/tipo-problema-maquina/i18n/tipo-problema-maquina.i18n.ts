@@ -19,6 +19,7 @@ export const TIPO_PROBLEMA_MAQUINA_I18N_DEF: I18n = {
     'TIPO_PROBLEMA_MAQUINA_CREATE_FORM_FIELDS_DEF_FIELD_tipomaquina': 'Tipo Maquina',
     'TIPO_PROBLEMA_MAQUINA_UPDATE_FORM_FIELDS_DEF_FIELD_tipomaquina': 'Tipo Maquina',
     'TIPO_PROBLEMA_MAQUINA_READ_FORM_FIELDS_DEF_FIELD_tipomaquina': 'Tipo Maquina',
-    'TIPO_PROBLEMA_MAQUINA_FILTER_FORM_FIELDS_DEF_FIELD_tipomaquina': 'Tipo Maquina'
+    'TIPO_PROBLEMA_MAQUINA_FILTER_FORM_FIELDS_DEF_FIELD_tipomaquina': 'Tipo Maquina',
+    'tipo_problema_grid_def_button_action_problemas': 'Problemas'
   }
 };

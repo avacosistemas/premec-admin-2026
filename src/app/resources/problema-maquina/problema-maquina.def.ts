@@ -31,11 +31,12 @@ export const PROBLEMA_MAQUINA_DEF: CrudDef = {
         width: '600px'
     },
     
-    filterInMemory: true,
+    filterInMemory: false,
     serverPagination: false,
     pagination: {
         page: 0,
         pageSize: 10
     },
-    cancelInitSearch: false
+    cancelInitSearch: false,
+    backButton: true,
 };

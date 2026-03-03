@@ -5,5 +5,10 @@ export const PROBLEMA_MAQUINA_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
         labelKey: 'PROBLEMA_MAQUINA_FILTER_FORM_FIELDS_DEF_FIELD_nombre',
         controlType: 'textbox',
         required: true
+    },
+    {
+        key: 'idTipoProblemaMaquina',
+        controlType: 'hidden',
+        required: true
     }
 ];

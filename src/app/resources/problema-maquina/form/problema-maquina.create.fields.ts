@@ -7,14 +7,9 @@ export const PROBLEMA_MAQUINA_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
         required: true
     },
     {
-        key: 'idTipoProblema',
+        key: 'idTipoProblemaMaquina',
         labelKey: 'PROBLEMA_MAQUINA_CREATE_FORM_FIELDS_DEF_FIELD_idtipoproblema',
-        controlType: 'number',
+        controlType: 'hidden',
         mappingQuerystring: true
-    },
-    {
-        key: 'tipoProblema',
-        labelKey: 'PROBLEMA_MAQUINA_CREATE_FORM_FIELDS_DEF_FIELD_tipoproblema',
-        controlType: 'textbox'
     }
 ];

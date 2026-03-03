@@ -6,5 +6,5 @@ export const PROBLEMA_MAQUINA_NAV_DEF: NavigationDef = {
     url: '/problemaMaquina',
     icon: 'heroicons_outline:server',
     group: 'RECLAMOS',
-    showInMenu: true
+    showInMenu: false
 };

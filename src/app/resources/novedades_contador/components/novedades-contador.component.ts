@@ -199,7 +199,14 @@ export class NovedadesContadorComponent implements OnInit, CustomPageComponent {
         this._cdr.markForCheck();
         this.toggleSaveButton(false, true);
 
-        this._novedadesService.saveNovedades(this.novedadesData).subscribe({
+        const datosActualizados: NovedadesContadorData = {
+            ...this.novedadesData,
+            jornales: this.jornalesDataSource.data,
+            fueraConvenio: this.fueraConvenioDataSource.data,
+            mensual: this.mensualDataSource.data
+        };
+
+        this._novedadesService.saveNovedades(datosActualizados).subscribe({
             next: () => {
                 this._notificationService.notifySuccess(this.translate('novedades_contador_exito_guardado'));
                 this.saving = false;

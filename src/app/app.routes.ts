@@ -4,9 +4,11 @@ import { AuthGuard } from '@fwk/auth/guards/auth.guard';
 import { NoAuthGuard } from '@fwk/auth/guards/noAuth.guard';
 import { LayoutComponent } from '@fwk/layout/layout.component';
 import { InitialRedirectComponent } from '@fwk/auth/guards/initial-redirect.component';
+import { SignedInRedirectComponent } from '@fwk/auth/guards/signed-in-redirect.component';
 import { CRUD_MODULES } from 'app/core/registries/crud.registry';
 import { generateFwkPageRoutes } from '@fwk/utils/crud-route-generator';
 import { DevModeGuard } from '@fwk/auth/guards/dev-mode.guard';
+import { environment } from 'environments/environment';
 
 export const appRoutes: Route[] = [
     {
@@ -15,7 +17,7 @@ export const appRoutes: Route[] = [
         canActivate: [NoAuthGuard],
         component: InitialRedirectComponent
     },
-    { path: 'signed-in-redirect', pathMatch: 'full', redirectTo: 'welcome' },
+    { path: 'signed-in-redirect', pathMatch: 'full', component: SignedInRedirectComponent },
 
     {
         path: '',
@@ -46,12 +48,12 @@ export const appRoutes: Route[] = [
                 loadChildren: () => import('@fwk/modules/dev-tools/dev-tools.routes')
             },
             { path: 'unlock-session', data: { layout: 'empty' }, loadChildren: () => import('@fwk/auth/components/unlock-session/unlock-session.routes') },
-            { 
-                path: 'change-password', 
+            {
+                path: 'change-password',
                 data: { layout: 'empty' },
-                loadChildren: () => import('@fwk/auth/components/change-password/change-password.routes') 
+                loadChildren: () => import('@fwk/auth/components/change-password/change-password.routes')
             },
-            { path: 'welcome', loadChildren: () => import('app/modules/welcome/welcome.routes') },
+            ...(environment.customRoutes || []),
             ...CRUD_MODULES.map(crudModule => ({
                 path: crudModule.path,
                 data: {

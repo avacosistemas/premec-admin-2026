@@ -1,33 +1,49 @@
 ﻿export const PREFIX_DOMAIN_API = 'http://premec.ddns.net:48080/ws-rest-test/';
 // export const PREFIX_DOMAIN_API = 'http://localhost:8080/ws-rest/';
 export const PREFIX_DOMAIN_WEB = 'http://localhost:4200/';
-export const PREFIX_STATS_API = PREFIX_DOMAIN_API + 'estadisticas/'; 
+export const PREFIX_STATS_API = PREFIX_DOMAIN_API + 'estadisticas/'; // Reservado prefijo y endpoint para dashboards
 export const PREFIX_SWAGGER_API = 'http://premec.ddns.net:48080/ws-rest-test/v2/api-docs';
 
-
 export const environment = {
+    appId: 'premecApp',
     localAuth: true,
     useMocks: false,
     production: false,
-    security: false,
+    security: true,
     dummyServices: false,
     hmr: false,
 
     apiBaseUrl: PREFIX_DOMAIN_API,
-    SITE_DOMAIN_WEB: 'http://localhost:4200/',
+    SITE_DOMAIN_WEB: PREFIX_DOMAIN_WEB,
 
     auth: {
         signIn: PREFIX_DOMAIN_API + 'auth',
         signOut: PREFIX_DOMAIN_API + 'user/logout',
         refreshToken: PREFIX_DOMAIN_API + 'refresh',
         forgotPassword: PREFIX_DOMAIN_API + 'password/reset',
-        changePassword: PREFIX_DOMAIN_API + 'password/update/', 
+        changePassword: PREFIX_DOMAIN_API + 'password/update/',
         resetPassword: PREFIX_DOMAIN_API + 'password/reset',
         signUp: PREFIX_DOMAIN_API + 'auth/sign-up'
     },
 
     AUTOCOMPLETE_WAITING_TIME: 700,
 
-    URL_ROOT: '',
-    URL_LOGIN: '/',
+    appConfig: {
+        appName: 'PREMEC',
+        appLogo: 'assets/images/logo/logo_premec.png',
+        appLogoSmall: 'assets/images/logo/logo_premec.png',
+        welcomeTitleLine1: 'Administrador de',
+        welcomeTitleLine2: 'Contenidos',
+        showWelcome: true,
+        urlToRedirect: '/reclamos',
+        showSearchButton: true,
+        showCollapseSidebarIcon: true,
+        sidebarOpened: true,
+        signInWelcomeSubtitle: 'Bienvenido al panel. Desde aquí podrás gestionar tu sistema.',
+        urlToRedirectOnLogout: '/sign-in',
+    },
+
+    customRoutes: [
+        { path: 'welcome', loadChildren: () => import('app/modules/welcome/welcome.routes') }
+    ]
 };

@@ -1,5 +1,5 @@
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
-import { registerLocaleData } from '@angular/common'; 
+import { registerLocaleData } from '@angular/common';
 import localeEsAr from '@angular/common/locales/es';
 
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
@@ -14,6 +14,7 @@ import { provideFwkAuth, provideAppAuth } from '@fwk/auth/auth.provider';
 import { provideFwkCore } from '@fwk/providers/core.provider';
 import { provideAppNavigation } from '@fwk/navigation/navigation.provider';
 import { provideFwkBranding } from '@fwk/providers/config.provider';
+import { environment } from 'environments/environment';
 
 registerLocaleData(localeEsAr, 'es-AR');
 
@@ -39,13 +40,7 @@ export const appConfig: ApplicationConfig = {
         ),
         importProvidersFrom(MatDialogModule),
 
-        provideFwkBranding({
-            appName: 'PREMEC',
-            appLogo: 'assets/images/logo/logo_premec.png',
-            appLogoSmall: 'assets/images/logo/logo_premec.png',
-            welcomeTitleLine1: 'Administrador de',
-            welcomeTitleLine2: 'Contenidos PREMEC'
-        }),
+        provideFwkBranding(environment.appConfig),
 
         provideFwkCore(),
         provideFwkAuth(),
@@ -56,7 +51,7 @@ export const appConfig: ApplicationConfig = {
             mockApi: undefined,
             fuse: {
                 layout: 'dense',
-                scheme: getInitialScheme(), 
+                scheme: getInitialScheme(),
                 screens: {
                     sm: '600px',
                     md: '960px',

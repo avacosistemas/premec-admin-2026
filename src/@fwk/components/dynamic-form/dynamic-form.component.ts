@@ -1,8 +1,8 @@
-﻿import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ChangeDetectorRef, OnDestroy, Injector, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ChangeDetectorRef, OnDestroy, Injector, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,11 +12,15 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MAT_DATE_LOCALE, MAT_DATE_FORMATS } from '@angular/material/core';
 import { MatDateFnsModule } from '@angular/material-date-fns-adapter';
+
 import { es } from 'date-fns/locale';
 
 import { FormService } from '@fwk/services/dynamic-form/form.service';
 import { AbstractComponent } from '../abstract-component.component';
+import { FuseAlertComponent } from '@fuse/components/alert/alert.component';
 import { DynamicField, CONTROL_TYPE } from '../../model/dynamic-form/dynamic-field';
+
+
 import { MY_FORMATS } from '@fwk/services/dynamic-form/form.validator.service';
 import { AutocompleteService } from '../autocomplete/autocomplete.service';
 import { ApiAutocompleteConfiguration } from '../autocomplete/autocomplete.interface';
@@ -70,8 +74,12 @@ import { HtmlEditorComponent } from '../html-editor/html-editor.component';
         TagsComponent,
         UrlInputComponent,
         IconPickerComponent,
-        HtmlEditorComponent
+        HtmlEditorComponent,
+        FuseAlertComponent
     ],
+
+
+
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: es },
         { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
@@ -113,6 +121,8 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
         this.autocompleteService = injector.get(AutocompleteService);
     }
 
+
+
     override ngOnInit(): void {
         super.ngOnInit();
         if (!this.parentForm) {
@@ -125,6 +135,8 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
     override ngOnDestroy(): void {
         super.ngOnDestroy();
         this.formValueChangesSub?.unsubscribe();
+        this.fieldSubscriptions.forEach(s => s.unsubscribe());
+        this.fieldSubscriptions = [];
         if (this.parentForm?.get(this.subFormName)) {
             this.parentForm.removeControl(this.subFormName);
         }
@@ -146,8 +158,7 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
 
         this.formValueChangesSub = this.form.valueChanges
             .pipe(
-                debounceTime(300),
-                distinctUntilChanged()
+                debounceTime(100)
             )
             .subscribe(() => {
                 this.checkObjectModified();
@@ -216,6 +227,7 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
         const currentValues = this.form.getRawValue();
         const isModified = JSON.stringify(this.initStateObject) !== JSON.stringify(currentValues);
         this.objectModified.emit(isModified);
+        this.cdRef.markForCheck();
     }
 
     getRestrictionKeys(field: DynamicField<any>): string {

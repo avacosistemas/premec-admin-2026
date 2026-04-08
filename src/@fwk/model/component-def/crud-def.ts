@@ -1,9 +1,9 @@
-﻿import { ComponentDef } from './component-def';
+import { ComponentDef } from './component-def';
 import { FormsCrudDef } from './form-crud-def';
-import { PageComponentDef } from './page-component-def';
 import { GridDef } from './grid-def';
 import { ActionDef } from './action-def';
 import { DisplayActionsCondition } from '../display-actions-condition';
+import { DynamicFieldConditionIf } from '../dynamic-form/dynamic-field-condition-if';
 
 export class CrudDef extends ComponentDef {
   grid?: GridDef;
@@ -15,13 +15,14 @@ export class CrudDef extends ComponentDef {
   forceGetDetail?: boolean;
   crudActions?: ActionDef[];
   displayGlobalActions?: DisplayActionsCondition[];
-  filterInMemory: boolean;
-  pagination: {
+  filterInMemory?: boolean;
+  readCondition?: DynamicFieldConditionIf;
+  pagination?: {
     page: number,
     pageSize: number
   };
-  cancelInitSearch: boolean;
-  serverPagination: boolean;
+  cancelInitSearch?: boolean;
+  serverPagination?: boolean;
   initFilter?: boolean;
   openLink?: string;
   openLinkTitle?: string;
@@ -35,4 +36,7 @@ export class CrudDef extends ComponentDef {
   searchFields?: any;
   initSearch?: boolean;
   wsGetDetail?: string;
+  
+  mock?: boolean;
+  mockData?: any;
 }

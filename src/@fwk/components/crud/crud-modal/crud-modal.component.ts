@@ -1,4 +1,4 @@
-﻿import { Component, Inject, ViewChild, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, Inject, ViewChild, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -21,7 +21,9 @@ import { FormDef } from '../../../model/form-def';
 import { ActionDef } from '../../../model/component-def/action-def';
 import { ActionDefService } from '../../../services/action-def-service/action-def.service';
 import { DialogService } from '../../../services/dialog-service/dialog.service';
-import { of, finalize } from 'rxjs';
+import { FuseLoadingService } from '@fuse/services/loading/loading.service';
+import { of, finalize, Observable } from 'rxjs';
+
 import { A11yModule } from '@angular/cdk/a11y';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
@@ -61,6 +63,8 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
   handlerFieldSourceData: any;
   _fields: DynamicField<any>[] = [];
   _isEdit: boolean = false;
+  loading$: Observable<boolean>;
+
 
   private fieldsBehavior: DynamicFieldBehavior[] | undefined;
   private customSubmitActions: ((action: ActionDef, entity: any) => void) | undefined;
@@ -85,7 +89,9 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
     this.activatedRoute = injector.get(ActivatedRoute);
     this.actionDefService = injector.get(ActionDefService);
     this.dialogService = injector.get(DialogService);
+    this.loading$ = injector.get(FuseLoadingService).show$;
     this.i18nName = this.data.i18n?.name || 'fwk';
+
     this.dialogRef.disableClose = true;
     this.entity = this.localStorageService.clone(this.data.entity || {});
     this.formDef = this.data.formDef;
@@ -104,20 +110,26 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
   ngAfterViewInit(): void {
     if (this.dynamicForm) {
       setTimeout(() => {
-        this.dynamicForm.updateInitialState();
+        if (this.dynamicForm.form) {
+          this.dynamicForm.updateInitialState();
+        }
 
         if (this.fieldsBehavior && this.fieldsBehavior.length > 0) {
           const uniqueTriggerFields = [...new Set(this.fieldsBehavior.map(fb => fb.fieldKey))];
 
-          uniqueTriggerFields.forEach(key => {
-            this.formService.fieldChangeBehavior(
-              key,
-              this.fieldsBehavior!,
-              this.entity,
-              this.fields,
-              this.form.get('subForm') as FormGroup
-            );
-          });
+          const subForm = this.form.get('subForm') as FormGroup;
+
+          if (subForm) {
+            uniqueTriggerFields.forEach(key => {
+              this.formService.fieldChangeBehavior(
+                key,
+                this.fieldsBehavior!,
+                this.entity,
+                this.fields,
+                subForm
+              );
+            });
+          }
         }
 
         this._cdr.markForCheck();
@@ -134,7 +146,7 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
     const closeDialog = (): void => {
       this.dialogRef.close();
     };
-    if (this.isObjectModified && !this.isRead) {
+    if (this.form.dirty && !this.isRead) {
       this.dialogService.showQuestionModal({
         title: this.translate('modal_close_warning_title'),
         message: this.translate('modal_close_warning_message'),
@@ -230,36 +242,48 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
               this.notificationService.notifySuccess(this.translate('success_message'));
 
               if (andContinue) {
-                const persistentValues: any = {};
-                this.fields.forEach(f => {
-                  if (f.mappingQuerystring || f.controlType === 'hidden') {
-                    const controlValue = subForm?.get(f.key)?.value;
-                    if (controlValue !== undefined) {
-                      persistentValues[f.key] = controlValue;
+                if (this.isAdd) {
+                  const persistentValues: any = {};
+                  this.fields.forEach(f => {
+                    if (f.mappingQuerystring || f.controlType === 'hidden') {
+                      const controlValue = subForm?.get(f.key)?.value;
+                      if (controlValue !== undefined) {
+                        persistentValues[f.key] = controlValue;
+                      }
+                    }
+                  });
+
+                  this.entity = { ...this.newObjectEntity(), ...persistentValues };
+                  delete this.entity.id;
+
+                  if (subForm) {
+                    subForm.reset();
+                    subForm.patchValue(persistentValues);
+                  }
+
+                  if (this.dynamicForm) {
+                    this.dynamicForm.entity = this.entity;
+                    this.dynamicForm.updateInitialState();
+                  }
+
+                  this.isObjectModified = false;
+                } else {
+                  if (response && typeof response === 'object' && (response.id || response.Guid)) {
+                    this.entity = { ...this.entity, ...response };
+                  }
+
+                  if (this.dynamicForm) {
+                    this.dynamicForm.form.markAsPristine();
+                    this.dynamicForm.updateInitialState();
+                    if (response && typeof response === 'object') {
+                      this.dynamicForm.form.patchValue(this.entity, { emitEvent: false });
                     }
                   }
-                });
-
-                this.entity = { ...this.newObjectEntity(), ...persistentValues };
-                delete this.entity.id;
-
-                if (subForm) {
-                  subForm.reset();
-                  subForm.patchValue(persistentValues);
+                  this.isObjectModified = false;
                 }
-
-                if (this.dynamicForm) {
-                  this.dynamicForm.entity = this.entity;
-                  this.dynamicForm.updateInitialState();
-                }
-
-                this.isObjectModified = false;
-                this.isAdd = true;
-                this._isEdit = false;
 
                 this.submitting = false;
                 this._cdr.markForCheck();
-
               } else {
                 this.dialogRef.close(response || true);
               }

@@ -9,5 +9,10 @@ export const CLIENTE_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
         key: 'username',
         labelKey: 'CLIENTE_CREATE_FORM_FIELDS_DEF_FIELD_username',
         controlType: 'textbox'
+    },
+    {
+        key: 'email',
+        labelKey: 'CLIENTE_CREATE_FORM_FIELDS_DEF_FIELD_email',
+        controlType: 'textbox'
     }
 ];

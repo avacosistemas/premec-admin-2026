@@ -219,7 +219,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
             if (action.confirm && action.confirm.messageKey) {
                 action.confirm.message = i18n?.translate?.(action.confirm.messageKey);
             }
-            
+
             if (action.form && this.i18nComponent) {
                 this.formService.setUpFieldTextFromI18n(this.i18nComponent, action.form);
             }
@@ -227,13 +227,27 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
     }
 
     findAll(): void {
-        if (!this.service) {
+        if (!this.service && !this.crudDef?.mock) {
             console.warn(`[FWK] findAll: No hay servicio para el componente: ${this.name}.`);
             return;
         }
 
         this.searchPerformed = true;
         this.isTableLoading = true;
+
+        if (this.crudDef?.mock) {
+            const entities = this.crudDef.mockData || [];
+            this.entities = entities;
+            this.dataSource = this.entities;
+            this.appliedFilterEntity = { ...this.filterEntity };
+
+            setTimeout(() => {
+                this.isTableLoading = false;
+                this.postFindAll();
+                this._cdr.markForCheck();
+            }, 500);
+            return;
+        }
 
         const filterInMemory = this.crudDef.filterInMemory ?? true;
         const filterFields = this.crudDef.forms?.filter;
@@ -262,19 +276,38 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
 
     add(entity: E): Observable<any> {
         if (!entity) { return of(null); }
+        if (this.crudDef?.mock) {
+            this.crudDef.mockData = [...(this.crudDef.mockData || []), entity];
+            return of(entity).pipe(tap(() => this.findAll()));
+        }
         return this.service.add(entity).pipe(tap(() => this.findAll()));
     }
 
     edit(entity: E): Observable<any> {
         if (!entity) { return of(null); }
+        if (this.crudDef?.mock) {
+            const index = this.crudDef.mockData.findIndex((e: any) => e.id === (entity as any).id);
+            if (index > -1) { this.crudDef.mockData[index] = entity; }
+            return of(entity).pipe(tap(() => this.findAll()));
+        }
         return this.service.update(entity).pipe(tap(() => this.findAll()));
     }
 
     delete(entity: E): void {
+        if (this.crudDef?.mock) {
+            this.crudDef.mockData = (this.crudDef.mockData || []).filter((e: any) => e.id !== (entity as any).id);
+            this.findAll();
+            return;
+        }
         this.service.delete(entity).subscribe(() => this.findAll());
     }
 
     deleteAll(entities: E[]): Observable<any> {
+        if (this.crudDef?.mock) {
+            const idsToDelete = new Set(entities.map(e => (e as any).id));
+            this.crudDef.mockData = (this.crudDef.mockData || []).filter((e: any) => !idsToDelete.has((e as any).id));
+            return of(true).pipe(tap(() => this.findAll()));
+        }
         if (this.crudDef.grid?.deleteTernaria) {
             const singleIdKey = this.crudDef.grid.columnsDef.find(c => c.singleId)?.columnDef;
             const multiIdKey = this.crudDef.grid.columnsDef.find(c => c.multiId)?.columnDef;

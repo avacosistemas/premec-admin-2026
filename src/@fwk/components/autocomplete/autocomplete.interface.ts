@@ -20,6 +20,7 @@ export interface AutocompleteOptions {
 
     minTermLength?: number;
     useFormSenderFilter?: boolean;
+    searchOnFocus?: boolean;
 }
 
 export interface AutocompleteChangeValue {

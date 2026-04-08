@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AbstractControl, FormControl, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
 import { I18nService } from '../i18n-service/i18n.service';
 import { I18n } from '../../model/i18n';
@@ -9,7 +9,12 @@ import { parse, isValid, differenceInYears } from 'date-fns';
 import { DatepickerOptions } from '../../model/dynamic-form/dynamic-field-options.interface';
 
 export const MY_FORMATS = {
-  parse: { dateInput: 'dd/MM/yyyy', dateInputHours: 'dd/MM/yyyy HH:mm' },
+  parse: { 
+    dateInput: 'dd/MM/yyyy', 
+    dateInputHours: 'dd/MM/yyyy HH:mm',
+    dateInputHoursSeconds: 'dd/MM/yyyy HH:mm:ss',
+    dateInputIso: 'yyyy-MM-dd HH:mm:ss'
+  },
   display: { dateInput: 'dd/MM/yyyy', monthYearLabel: 'MMM yyyy', dateA11yLabel: 'PP', monthYearA11yLabel: 'MMMM yyyy' },
 };
 
@@ -88,6 +93,7 @@ export class FormValidatorService {
         url_protocol_error_message: 'El campo {0} debe comenzar con http:// o https://',
         url_incomplete_error_message: 'La URL en el campo {0} está incompleta o mal formada',
         url_format_error_message: 'El campo {0} no tiene un formato válido',
+        autocomplete_select_or_clean_error: 'Debe seleccionar un elemento de la lista o limpiar el campo',
       }
     });
     this.i18nService.getByName('form-validator').subscribe(i18n => { this.i18n = i18n; });
@@ -206,6 +212,13 @@ const ERROR_MESSAGE_GENERATORS: { [key: string]: (service: FormValidatorService,
       return (field.options as any).invalidValueMessage;
     }
     return service['translate']('generic_error_message', (field.label ?? field.key).toLowerCase());
+  },
+  'invalidDate': (_, __, error) => typeof error === 'string' ? error : 'Fecha inválida',
+  'selectOrCleanField': (service, field) => {
+    if (field.options && (field.options as any).selectElementOrCleanField) {
+      return (field.options as any).selectElementOrCleanField;
+    }
+    return service['translate']('autocomplete_select_or_clean_error');
   },
   ...ERROR_MESSAGES_HELPER
 };

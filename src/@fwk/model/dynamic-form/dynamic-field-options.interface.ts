@@ -41,6 +41,7 @@ export interface AutocompleteOptions extends BaseFieldOptions {
     elementValue: string;
     useNativeFilter?: boolean;
     transferIdToField?: string;
+    transferMap?: { [targetKey: string]: string };
     minTermLength?: number;
     useFormSenderFilter?: boolean;
     fromData?: any[];
@@ -100,6 +101,9 @@ export interface FileOptions extends BaseFieldOptions {
     height?: string;
     shape?: string;
     previewField?: string;
+    multiple?: boolean;
+    maxFiles?: number;
+    outputFormat?: 'byteArray' | 'object';
 }
 
 export interface ColorPickerOptions extends BaseFieldOptions {

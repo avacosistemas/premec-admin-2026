@@ -45,8 +45,10 @@
                             {{ def.columnName }}
                         </mat-header-cell>
 
-                        <mat-cell *matCellDef="let element" [ngClass]="[def.cellClass || '', getColumnStyles(def)]">
-                            <span>{{ getValue(element, def.columnDef, def) }}</span>
+                        <mat-cell *matCellDef="let element"
+                            [ngClass]="[def.cellClass || '', getColumnStyles(def), def.cellClassRender ? def.cellClassRender(element) : '']">
+                            <span *ngIf="!def.cellRender">{{ getValue(element, def.columnDef, def) }}</span>
+                            <span *ngIf="def.cellRender" [innerHTML]="getValue(element, def.columnDef, def)"></span>
                         </mat-cell>
                     </ng-container>
 
@@ -67,7 +69,7 @@
                                             <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"
                                                 class="bg-transparent"></mat-icon>
                                         </button>
-                                        <mat-menu #actionsMenu="matMenu" class="rounded-xl">
+                                        <mat-menu #actionsMenu="matMenu" class="rounded-xl crud-actions-menu">
                                             <ng-container *ngFor="let action of actions">
                                                 <button mat-menu-item (click)="submitAction(action, element, $event)">
                                                     <ng-container *ngIf="action.icon">

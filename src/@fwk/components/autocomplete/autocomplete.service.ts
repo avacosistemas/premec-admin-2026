@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { FormGroup } from '@angular/forms';
 import { ApiAutocompleteConfiguration } from './autocomplete.interface';
@@ -17,7 +17,15 @@ export class AutocompleteService {
     const apiOptions = configuration.apiOptions;
 
     if (!apiOptions?.url) {
-      return of(apiOptions?.fromData || []);
+      let data = apiOptions?.fromData || (configuration as any).options?.fromData || [];
+      if (term) {
+        const labelKey = configuration.options?.elementLabel || (configuration as any).apiOptions?.elementLabel;
+        data = data.filter((item: any) => {
+          const val = labelKey ? item[labelKey] : item;
+          return String(val).toLowerCase().includes(term.toLowerCase());
+        });
+      }
+      return of(data);
     }
 
     let params = new HttpParams();
@@ -38,9 +46,12 @@ export class AutocompleteService {
         const controlName = queryString[key];
         const control = formGroup.get(controlName);
 
-        if (control && control.value !== null && control.value !== undefined) {
-          params = params.set(key, control.value);
+        if (!control || control.value === null || control.value === undefined || control.value === '') {
+          console.log(`[Autocomplete] Abortando búsqueda para ${configuration.key}: falta dependencia ${controlName}`);
+          return of([]);
         }
+
+        params = params.set(key, control.value);
       }
     }
 

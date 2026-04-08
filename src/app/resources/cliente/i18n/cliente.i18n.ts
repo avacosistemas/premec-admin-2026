@@ -40,7 +40,7 @@ export const CLIENTE_I18N_DEF: I18n = {
     'CLIENTE_UPDATE_FORM_FIELDS_DEF_FIELD_intentosfallidoslogin': 'Intentos Fallidos Login',
     'CLIENTE_READ_FORM_FIELDS_DEF_FIELD_intentosfallidoslogin': 'Intentos Fallidos Login',
     'CLIENTE_FILTER_FORM_FIELDS_DEF_FIELD_intentosfallidoslogin': 'Intentos Fallidos Login',
-    'CLIENTE_CREATE_FORM_FIELDS_DEF_FIELD_email': 'Email',
+    'CLIENTE_CREATE_FORM_FIELDS_DEF_FIELD_email': 'Ingrese el email en el cual el cliente recibirá notificaciones sobre sus reclamos',
     'CLIENTE_UPDATE_FORM_FIELDS_DEF_FIELD_email': 'Email',
     'CLIENTE_READ_FORM_FIELDS_DEF_FIELD_email': 'Email',
     'CLIENTE_FILTER_FORM_FIELDS_DEF_FIELD_email': 'Email'

@@ -1,17 +1,25 @@
-﻿import { Component, OnInit, Input, forwardRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, forwardRef, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+
+
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, Validator, FormControl, AbstractControl, ValidationErrors, NG_VALIDATORS, ReactiveFormsModule, FormGroupDirective, NgForm } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+
 import { MatOptionModule, ErrorStateMatcher } from '@angular/material/core';
-import { Subject, Observable, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from "rxjs/operators";
+import { Subject, Observable, of, timer } from 'rxjs';
+
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil, debounce } from "rxjs/operators";
+
 import { AutocompleteConfiguration, AutocompleteSearchTerm } from './autocomplete.interface';
 import { TranslatePipe } from '../../pipe/translate.pipe';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
 
 @Component({
-     selector: 'fwk-autocomplete',
+    selector: 'fwk-autocomplete',
     templateUrl: './autocomplete.component.html',
     styleUrls: ['./autocomplete.component.scss'],
     standalone: true,
@@ -23,7 +31,10 @@ import { TranslatePipe } from '../../pipe/translate.pipe';
         MatAutocompleteModule,
         MatOptionModule,
         TranslatePipe,
+        MatButtonModule,
+        MatIconModule,
     ],
+
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -43,7 +54,12 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     @Input() searchTermInterface!: AutocompleteSearchTerm;
     @Input() errorMessage: string | null = null;
 
+    @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
+    @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
+
+
     autocompleteControl = new FormControl<string | object | null>(null);
+
     filteredOptions$: Observable<any[]> = of([]);
 
     matcher = new class implements ErrorStateMatcher {
@@ -54,12 +70,13 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     }(this);
 
     private destroy$ = new Subject<void>();
+    private focus$ = new Subject<string | null>();
     private isOptionSelected: boolean = false;
 
-    onChange: (value: any) => void = () => {};
-    onTouched: () => void = () => {};
+    onChange: (value: any) => void = () => { };
+    onTouched: () => void = () => { };
 
-    constructor(private cdr: ChangeDetectorRef) {}
+    constructor(private cdr: ChangeDetectorRef) { }
 
     ngOnInit() {
         if (!this.searchTermInterface) {
@@ -83,24 +100,49 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+        this.focus$.complete();
     }
 
     private setupFiltering(): void {
-        this.filteredOptions$ = this.autocompleteControl.valueChanges.pipe(
+        const valueChanges$ = this.autocompleteControl.valueChanges.pipe(
+            debounce(value => {
+                const term = typeof value === 'string' ? value : '';
+                const wait = (term === '') ? 0 : 300;
+                return timer(wait);
+            }),
+            distinctUntilChanged()
+        );
+
+        const triggers$ = new Observable<string | null>(observer => {
+            this.focus$.subscribe(val => observer.next(val));
+            valueChanges$.subscribe(val => observer.next(typeof val === 'string' ? val : ''));
+        });
+
+        this.filteredOptions$ = triggers$.pipe(
             takeUntil(this.destroy$),
-            debounceTime(500),
-            distinctUntilChanged(),
             switchMap(value => {
+                const term = value || '';
                 if (this.isOptionSelected) {
                     this.isOptionSelected = false;
                     return of([]);
                 }
-                if (typeof value !== 'string' || !value || value.length < (this.config.options?.minTermLength ?? 3)) {
+
+                const minLength = this.config.options?.minTermLength ?? 1;
+                const searchOnFocus = this.config.options?.searchOnFocus ?? true;
+
+                if (term.length < minLength && !searchOnFocus) {
                     return of([]);
                 }
-                return this.searchTermInterface.search(value);
+
+                return this.searchTermInterface.search(term);
             })
         );
+    }
+
+    onFocus(): void {
+        const value = this.autocompleteControl.value;
+        this.focus$.next(typeof value === 'string' ? value : '');
+        this.onTouched();
     }
 
     writeValue(value: any): void {
@@ -132,7 +174,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
         if (typeof value === 'string' && value.trim() !== '') {
             return { selectOrCleanField: true };
         }
-        
+
         return null;
     }
 
@@ -147,5 +189,24 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
     onOptionSelected(): void {
         this.isOptionSelected = true;
         this.onTouched();
+    }
+
+    clear(event: MouseEvent): void {
+        event.stopPropagation();
+        this.autocompleteControl.setValue('', { emitEvent: true });
+        this.onChange(null);
+        this.onTouched();
+
+        if (this.inputElement) {
+            this.inputElement.nativeElement.focus();
+        }
+
+        if (this.autocompleteTrigger) {
+            setTimeout(() => {
+                this.autocompleteTrigger.updatePosition();
+                this.autocompleteTrigger.openPanel();
+            }, 300);
+        }
+        this.cdr.markForCheck();
     }
 }

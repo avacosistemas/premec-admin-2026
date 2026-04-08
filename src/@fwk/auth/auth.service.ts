@@ -23,11 +23,11 @@ export class AuthService implements AbstractAuthService {
     private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
     private _refreshTimeout: any;
 
-    private readonly TOKEN_KEY = 'accessToken';
-    private readonly USER_DATA_KEY = 'currentUser';
+    private readonly TOKEN_KEY = environment.appId + '_accessToken';
+    private readonly USER_DATA_KEY = environment.appId + '_currentUser';
 
     get authenticated$(): Observable<boolean> { return this._authenticated.asObservable(); }
-
+ 
     signIn(credentials: SignInData): Observable<any> {
         return this._httpClient.post(environment.auth.signIn, credentials, { responseType: 'json' }).pipe(
             tap((responseFromApi: any) => {
@@ -62,7 +62,16 @@ export class AuthService implements AbstractAuthService {
         }
 
         this._checkRequest$ = this.refreshToken().pipe(
-            map(() => true),
+            map(() => {
+                if (!this._userService.userValue) {
+                    const storedUser = this.getUserFromLocalStorage();
+                    if (storedUser) {
+                        this._userService.user = storedUser;
+                        this._userPermissions = new Set(storedUser.permisos ?? []);
+                    }
+                }
+                return true;
+            }),
             catchError(() => {
                 this.signOut();
                 return of(false);
@@ -103,7 +112,7 @@ export class AuthService implements AbstractAuthService {
     }
 
     hasPermission(permission?: string): boolean {
-        if (!environment.production) {
+        if (!environment.security) {
             return true;
         }
         if (!permission) {
@@ -143,6 +152,8 @@ export class AuthService implements AbstractAuthService {
 
         const emailNotSpecified = this._i18nService.getDictionary('fwk')?.translate?.('auth_email_not_specified') ?? 'auth_email_not_specified';
 
+        const storedUser = this.getUserFromLocalStorage();
+
         let permisosProcesados: string[] = [];
 
         if (responseFromApi.permissions && Array.isArray(responseFromApi.permissions)) {
@@ -155,16 +166,35 @@ export class AuthService implements AbstractAuthService {
             }
         }
 
+        if (permisosProcesados.length === 0 && storedUser?.permisos?.length) {
+            permisosProcesados = storedUser.permisos;
+        }
+
+        const hasExplicitName = responseFromApi.name != null && responseFromApi.name !== '';
+        const hasUsername = responseFromApi.username != null && responseFromApi.username !== '';
+
+        const displayName = hasExplicitName
+            ? responseFromApi.name
+            : hasUsername
+                ? responseFromApi.username
+                : storedUser?.name ?? '';
+
+        const loginUsername = hasExplicitName
+            ? responseFromApi.username
+            : hasUsername
+                ? (this.extractUsernameFromToken(accessToken) ?? responseFromApi.username)
+                : storedUser?.username ?? '';
+
         const userForFuse: User = {
-            id: responseFromApi.guid,
-            name: responseFromApi.name || responseFromApi.username,
-            email: responseFromApi.email || emailNotSpecified,
+            id: responseFromApi.guid ?? storedUser?.id ?? '',
+            name: displayName,
+            email: responseFromApi.email || storedUser?.email || emailNotSpecified,
             avatar: null,
             status: 'online',
             permisos: permisosProcesados,
             refreshToken: refreshTokenValue || accessToken,
-            username: responseFromApi.username,
-            passwordExpired: responseFromApi.passwordExpired
+            username: loginUsername,
+            passwordExpired: responseFromApi.passwordExpired ?? storedUser?.passwordExpired
         };
 
         this.setToken(accessToken);
@@ -184,7 +214,7 @@ export class AuthService implements AbstractAuthService {
         this._userService.user = { id: '', name: '', email: '' };
         this._userPermissions.clear();
     }
-    
+
     private scheduleTokenRenewal(token: string): void {
         this.clearRefreshTimeout();
 
@@ -235,6 +265,28 @@ export class AuthService implements AbstractAuthService {
             const date = new Date(0);
             date.setUTCSeconds(payload.exp);
             return date;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    private extractUsernameFromToken(token: string): string | null {
+        try {
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+            if (payload.ApplicationUserModel) {
+                const appUser = JSON.parse(payload.ApplicationUserModel);
+                return appUser.username ?? null;
+            }
+
+            if (payload.sub) {
+                return payload.sub;
+            }
+
+            return null;
         } catch (e) {
             return null;
         }

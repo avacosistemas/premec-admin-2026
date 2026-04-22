@@ -16,7 +16,7 @@ export class IndicadoresMensualesGeneralService {
             .set('anio', anio.toString())
             .set('mes', mes.toString());
 
-        return this._http.get<any>(`${this.urlBase}indicadorMensual`, { params });
+        return this._http.get<any>(`${this.urlBase}indicadorMensualGeneral`, { params });
     }
 
     getIndicadoresGrupo(anio: number, mes: number, idGrupo: number, agrupado: boolean): Observable<any> {

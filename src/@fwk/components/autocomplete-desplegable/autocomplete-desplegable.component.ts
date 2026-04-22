@@ -71,13 +71,20 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
     matcher = new class implements ErrorStateMatcher {
         constructor(private component: AutocompleteDesplegableComponent) { }
         isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-            return !!(this.component.errorMessage || (control?.invalid && (control?.dirty || control?.touched)));
+            if (this.component.errorMessage) {
+                return true;
+            }
+            if (this.component.isFocused) {
+                return false;
+            }
+            return !!(control?.invalid && (control?.dirty || control?.touched));
         }
     }(this);
 
     private destroy$ = new Subject<void>();
     private isOptionSelected: boolean = false;
     private searchTrigger$ = new Subject<any>();
+    isFocused: boolean = false;
 
     onChange: (value: any) => void = () => { };
     onTouched: () => void = () => { };
@@ -96,12 +103,16 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
         this.setupFiltering();
 
         this.autocompleteControl.valueChanges
-            .pipe(takeUntil(this.destroy$))
+            .pipe(
+                distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+                takeUntil(this.destroy$)
+            )
             .subscribe(value => {
                 if (typeof value !== 'string') {
                     this.onChange(value);
                     this.updateSiblingField(value);
                 } else {
+                    this.onChange(value);
                     if (!this.isOptionSelected) {
                         this.updateSiblingField(null);
                     }
@@ -125,6 +136,7 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
 
                     if (targetControl.value !== valToSet) {
                         targetControl.setValue(valToSet);
+                        targetControl.updateValueAndValidity();
                         if (markAsDirty) targetControl.markAsDirty();
                     }
                 }
@@ -138,6 +150,7 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
                         const valToSet = value[sourceProp];
                         if (targetControl.value !== valToSet) {
                             targetControl.setValue(valToSet);
+                            targetControl.updateValueAndValidity();
                             if (markAsDirty) targetControl.markAsDirty();
                         }
                     }
@@ -169,18 +182,15 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
             }),
 
             switchMap(value => {
-                if (typeof value === 'object' && value !== null) {
-                    return of([]);
-                }
-
                 if (this.isOptionSelected) {
                     this.isOptionSelected = false;
                     return of([]);
                 }
 
-                const searchTerm = typeof value === 'string' ? value : '';
+                const isObject = typeof value === 'object' && value !== null;
+                const searchTerm = isObject ? '' : (typeof value === 'string' ? value : '');
 
-                if (searchTerm === '' && !searchOnFocus) {
+                if (isObject || (searchTerm === '' && !searchOnFocus)) {
                     return of([]);
                 }
 
@@ -225,11 +235,13 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
         const value = this.autocompleteControl.value;
         const isRequired = this.config?.required;
 
-        if (isRequired && (value === null || value === undefined)) {
+        if (isRequired && (value === null || value === undefined || value === '')) {
             return { required: true };
         }
 
-        if (typeof value === 'string' && value.trim() !== '') {
+        const options = this.config?.options as AutocompleteOptions;
+
+        if (typeof value === 'string' && value.trim() !== '' && !options?.allowFreeText) {
             return { selectOrCleanField: true };
         }
 
@@ -253,38 +265,56 @@ export class AutocompleteDesplegableComponent implements OnInit, OnDestroy, Cont
     onOptionSelected(): void {
         this.isOptionSelected = true;
         this.onTouched();
+        this.autocompleteControl.updateValueAndValidity();
+        this.cdr.markForCheck();
     }
 
     onInputFocus(): void {
-        if (!this.autocompleteControl.disabled) {
-            const val = this.autocompleteControl.value;
-
-            if (typeof val !== 'object') {
-                this.autocompleteControl.setValue(val || '', { emitEvent: true });
-            }
+        this.isFocused = true;
+        this.cdr.markForCheck();
+        
+        if (this.autoCompleteTrigger) {
+            setTimeout(() => {
+                if (this.autoCompleteTrigger.panelOpen) {
+                    this.autoCompleteTrigger.updatePosition();
+                }
+            }, 100);
+            setTimeout(() => {
+                if (this.autoCompleteTrigger.panelOpen) {
+                    this.autoCompleteTrigger.updatePosition();
+                }
+            }, 300);
         }
+    }
+
+    onInputBlur(): void {
+        setTimeout(() => {
+            this.isFocused = false;
+            this.onTouched();
+            this.autocompleteControl.updateValueAndValidity();
+            this.cdr.markForCheck();
+        }, 200);
     }
 
     triggerSearch(): void {
         if (!this.autocompleteControl.disabled) {
             const val = this.autocompleteControl.value;
 
-            if (typeof val !== 'object') {
-                this.searchTrigger$.next(val || '');
+            this.searchTrigger$.next(val);
 
-                setTimeout(() => {
-                    if (this.autoCompleteTrigger) {
-                        this.autoCompleteTrigger.updatePosition();
-                        this.autoCompleteTrigger.openPanel();
-                    }
-                }, 400);
-            }
+            setTimeout(() => {
+                if (this.autoCompleteTrigger) {
+                    this.autoCompleteTrigger.updatePosition();
+                    this.autoCompleteTrigger.openPanel();
+                }
+            }, 400);
         }
     }
 
     openDropdown(): void {
         if (this.autoCompleteTrigger) {
-            this.autocompleteControl.setValue(this.autocompleteControl.value, { emitEvent: true });
+            const val = this.autocompleteControl.value;
+            this.searchTrigger$.next(val);
             setTimeout(() => {
                 this.autoCompleteTrigger.updatePosition();
                 this.autoCompleteTrigger.openPanel();

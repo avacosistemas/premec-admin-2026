@@ -67,6 +67,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/recibos_procesamiento/recibos_procesamiento.def')
     },
     {
+        path: 'reclamo',
+        loader: () => import('app/resources/reclamo/reclamo.def')
+    },
+    {
         path: 'reporteHorasMaquina',
         loader: () => import('app/resources/reporte_horas_maquina/reporte_horas_maquina.def')
     },
@@ -109,6 +113,7 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
         import('app/resources/problema-maquina/problema-maquina.def'),
         import('app/resources/recibos/recibos.def'),
         import('app/resources/recibos_procesamiento/recibos_procesamiento.def'),
+        import('app/resources/reclamo/reclamo.def'),
         import('app/resources/reporte_horas_maquina/reporte_horas_maquina.def'),
         import('app/resources/seguridad_grupo/seguridad_grupo.def'),
         import('app/resources/seguridad_grupo_permiso/seguridad_grupo_permiso.def'),

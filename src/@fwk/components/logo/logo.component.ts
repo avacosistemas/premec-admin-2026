@@ -7,13 +7,13 @@ import { FWK_CONFIG } from '@fwk/model/fwk-config';
     standalone: true,
     imports: [CommonModule],
     template: `
-        <div [class]="containerClass" class="flex items-center gap-2">
+        <div [class]="finalContainerClass" class="flex items-center gap-2">
             <img [src]="logoUrl" 
-                 [class]="imgClass" 
+                 [class]="finalImgClass" 
                  [alt]="fwkConfig.appName">
 
-            <h1 *ngIf="showName" 
-                [class]="nameClass">
+            <h1 *ngIf="finalShowName" 
+                [class]="finalNameClass">
                 {{ fwkConfig.appName }}
             </h1>
         </div>
@@ -21,17 +21,41 @@ import { FWK_CONFIG } from '@fwk/model/fwk-config';
 })
 export class LogoComponent {
     public fwkConfig = inject(FWK_CONFIG);
-    
-    @Input() size: 'normal' | 'small' = 'normal';
-    @Input() showName: boolean = false;
 
-    @Input() containerClass: string = '';
-    @Input() imgClass: string = 'h-10';
-    @Input() nameClass: string = 'text-xl font-bold';
+    @Input() size: 'normal' | 'small' = 'normal';
+    @Input() type: 'normal' | 'icon' = 'normal';
+    @Input() showName?: boolean;
+
+    @Input() containerClass?: string;
+    @Input() imgClass?: string;
+    @Input() nameClass?: string;
+
+    get finalShowName(): boolean {
+        if (this.type === "icon") {
+            return false;
+        }
+
+        return this.showName ?? this.fwkConfig.logoConfig?.showName ?? false;
+    }
+
+    get finalContainerClass(): string {
+        if (this.type === "icon") {
+            return '';
+        }
+        return this.containerClass ?? this.fwkConfig.logoConfig?.containerClass ?? '';
+    }
+
+    get finalImgClass(): string {
+        return this.imgClass ?? this.fwkConfig.logoConfig?.imgClass ?? 'h-10';
+    }
+
+    get finalNameClass(): string {
+        return this.nameClass ?? this.fwkConfig.logoConfig?.nameClass ?? 'text-xl font-bold';
+    }
 
     get logoUrl(): string {
-        return this.size === 'small' 
-            ? (this.fwkConfig.appLogoSmall || this.fwkConfig.appLogo) 
+        return this.size === 'small'
+            ? (this.fwkConfig.appLogoSmall || this.fwkConfig.appLogo)
             : this.fwkConfig.appLogo;
     }
 }

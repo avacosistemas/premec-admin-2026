@@ -8,6 +8,7 @@ import { MatExpansionPanel, MatExpansionModule } from '@angular/material/expansi
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { ActivatedRoute } from '@angular/router';
 
 import { AbstractComponent } from '../../abstract-component.component';
 import { DynamicField } from '../../../model/dynamic-form/dynamic-field';
@@ -20,7 +21,7 @@ import { TranslatePipe } from '../../../pipe/translate.pipe';
 import { I18n } from '../../../model/i18n';
 
 @Component({
-   selector: 'fwk-search',
+  selector: 'fwk-search',
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
   standalone: true,
@@ -93,7 +94,7 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
       this.onInit();
       this.updateActiveFilterCount();
 
-      this.initialDisplayableColumns = [...this.displayedColumns];
+      this.initialDisplayableColumns = this.displayedColumns.filter(col => !col.startsWith('_'));
       this.buildMenuColumns();
       this.initializeColumnVisibility();
     } else {
@@ -164,6 +165,14 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
 
   onInit() {
     this.form = new FormGroup({});
+    const originalPatchValue = this.form.patchValue.bind(this.form);
+    this.form.patchValue = (value: any, options?: any) => {
+      originalPatchValue(value, options);
+      const subForm = this.form.get('subForm') as FormGroup;
+      if (subForm) {
+        subForm.patchValue(value, options);
+      }
+    };
     this.reInit();
   }
 
@@ -175,20 +184,20 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
     this.fieldsOptions = this.cacheFields.filter(f => !f.options?.baseFilter);
 
     this.fieldsOptions.forEach(field => {
-        if (field.colSpan === undefined || field.colSpan === null) {
-            field.colSpan = 1;
-        }
+      if (field.colSpan === undefined || field.colSpan === null) {
+        field.colSpan = 1;
+      }
+    });
+
+    this.generalFields.forEach(field => {
+      if (field.colSpan === undefined || field.colSpan === null) {
+        field.colSpan = 1;
+      }
     });
 
     this.visibleGeneralFields = this.generalFields.filter(field =>
       field.controlType !== 'hidden' && !field.options?.hidden
     );
-
-    this.visibleGeneralFields.forEach(field => {
-      if (field.colSpan === undefined || field.colSpan === null) {
-        field.colSpan = 1;
-      }
-    });
 
     this.hasVisibleFields = this.visibleGeneralFields.length > 0;
 
@@ -197,6 +206,17 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
     }
 
     this.entity = this.formService.getEntityFromFields(this.cacheFields);
+
+    const activatedRoute = this.injector.get(ActivatedRoute, null);
+    const queryParams = activatedRoute?.snapshot?.queryParams;
+    if (queryParams) {
+      this.cacheFields.forEach(field => {
+        if (queryParams[field.key] !== undefined && queryParams[field.key] !== null && queryParams[field.key] !== '') {
+          this.entity[field.key] = queryParams[field.key];
+          field.value = queryParams[field.key];
+        }
+      });
+    }
   }
 
   private getGeneralFields(fields: DynamicField<any>[]): DynamicField<any>[] {
@@ -233,11 +253,36 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
     this.onSubmitSearch();
   }
 
+  resetToDefaults(): void {
+    const defaults = this.formService.getEntityFromFields(this.cacheFields);
+    const subForm = this.form.get('subForm');
+    if (subForm) {
+      subForm.reset(defaults, { emitEvent: false });
+    } else {
+      this.form.reset(defaults, { emitEvent: false });
+    }
+    this.entity = { ...defaults };
+    this.updateActiveFilterCount();
+  }
+
+  patchValue(entity: any): void {
+    if (!entity) return;
+    const subForm = this.form.get('subForm');
+    if (subForm) {
+      subForm.patchValue(entity, { emitEvent: false });
+    } else {
+      this.form.patchValue(entity, { emitEvent: false });
+    }
+    this.entity = { ...this.entity, ...entity };
+    this.updateActiveFilterCount();
+    this._cdr.markForCheck();
+  }
+
   onSubmitSearch(): void {
     const subForm = this.form.get('subForm') as FormGroup;
-    
+
     if (subForm) {
-      this.entity = this.formService.injectToEntity(this.entity, subForm, this.fields);
+      this.entity = { ...this.entity, ...this.formService.injectToEntity({}, subForm, this.visibleGeneralFields) };
     }
 
     if (!this.firstSubmitForced) {
@@ -317,8 +362,24 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
       return;
     }
 
+    const transferTargets = new Set<string>();
+    this.fields.forEach(field => {
+      const opts = field.options as any;
+      if (opts?.transferIdToField) {
+        transferTargets.add(opts.transferIdToField);
+      }
+    });
+
     this.activeFilterCount = this.fields.reduce((count, field) => {
       const value = this.entity[field.key];
+
+      if (transferTargets.has(field.key)) {
+        const sourceField = this.fields.find(f => (f.options as any)?.transferIdToField === field.key);
+        const sourceValue = sourceField ? this.entity[sourceField.key] : null;
+        if (sourceValue !== null && sourceValue !== undefined && sourceValue !== '') {
+          return count;
+        }
+      }
 
       if (field.controlType === 'checkbox') {
         if (value === true) {

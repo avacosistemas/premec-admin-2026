@@ -14,6 +14,7 @@ export const FWK_I18N_DEF = {
     add_button: 'Agregar',
     and: 'y',
     back_button_tooltip: 'Volver',
+    breadcrumb_home: 'Inicio',
     day_label: 'Día',
     generic_error_try_again: 'Algo salió mal, por favor intenta de nuevo.',
     go_to_link: 'Ir a',
@@ -104,6 +105,10 @@ export const FWK_I18N_DEF = {
     delete_selected_tooltip: 'Eliminar seleccionados',
     export_csv_tooltip: 'Exportar a CSV',
     page_title_default: 'Gestión',
+    create_access_denied_message: 'Sin permisos para crear',
+    update_access_denied_message: 'Sin permisos para actualizar',
+    delete_access_denied_message: 'Sin permisos para eliminar',
+    read_access_denied_message: 'Sin permisos para leer',
 
     // --- Módulo CRUD: Buscador (Search) y Búsqueda Global ---
     search_button_label: 'Buscar Página',

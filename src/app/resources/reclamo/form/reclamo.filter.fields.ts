@@ -9,7 +9,7 @@ export const RECLAMO_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
     {
         key: 'cliente',
         labelKey: 'Cliente',
-        controlType: 'autocomplete',
+        controlType: 'autocomplete-desplegable',
         options: {
           transferIdToField: 'customerCode',
           elementLabel: 'nombre',

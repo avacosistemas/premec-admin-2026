@@ -33,13 +33,19 @@ export const environment = {
         appLogoSmall: 'assets/images/logo/logo_premec.png',
         welcomeTitleLine1: 'Administrador de',
         welcomeTitleLine2: 'Contenidos',
+        signInWelcomeSubtitle: 'Bienvenido al panel. Desde aquí podrás gestionar tu sistema.',
+        urlToRedirectOnLogout: '/sign-in',
         showWelcome: true,
         urlToRedirect: '/reclamos',
         showSearchButton: true,
         showCollapseSidebarIcon: true,
         sidebarOpened: true,
-        signInWelcomeSubtitle: 'Bienvenido al panel. Desde aquí podrás gestionar tu sistema.',
-        urlToRedirectOnLogout: '/sign-in',
+        logoConfig: {
+            showName: true,
+            containerClass: 'w-16',
+            imgClass: 'w-10 h-10',
+            nameClass: 'text-xl font-bold'
+        }
     },
 
     customRoutes: [

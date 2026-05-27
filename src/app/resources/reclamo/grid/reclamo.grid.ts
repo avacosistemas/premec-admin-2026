@@ -9,6 +9,10 @@ export const RECLAMO_GRID_DEF: GridDef = {
         columnNameKey: 'reclamo_grid_def_column_customercode'
     },
     {
+        columnDef: 'customerName',
+        columnNameKey: 'reclamo_grid_def_column_customername'
+    },
+    {
         columnDef: 'serviceCallID',
         columnNameKey: 'reclamo_grid_def_column_servicecallid'
     },
@@ -53,16 +57,17 @@ export const RECLAMO_GRID_DEF: GridDef = {
   deleteAction: false,
   displayedColumns: [
     'serviceCallID',
-    'customerCode',
-    // 'asunto',
     'estadoReclamo',
+    //'customerCode',
+    'customerName',
+    'internalSN',
+    // 'asunto',
     'fechaCreacion',
     'fechaInicioActividad',
     'fechaFinActividad',
-    'internalSN',
-    'itemCode',
-    'itemName',
-    'motivoRechazo'
+    //'itemCode',
+    //'itemName',
+    //'motivoRechazo'
   ],
   actions: [],
 };

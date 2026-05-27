@@ -1,27 +1,21 @@
 import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
 export const RECLAMO_READ_FORM_FIELDS_DEF: DynamicField<any>[] = [
     {
-        key: 'customerCode',
-        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_customercode',
-        controlType: 'textbox',
-        disabled: true
-    },
-    {
         key: 'serviceCallID',
         labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_servicecallid',
         controlType: 'number',
         disabled: true
     },
     {
-        key: 'asunto',
-        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_asunto',
+        key: 'customerName',
+        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_customercode',
         controlType: 'textbox',
         disabled: true
     },
     {
-        key: 'estadoServiceCall',
-        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_estadoservicecall',
-        controlType: 'number',
+        key: 'asunto',
+        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_asunto',
+        controlType: 'textarea',
         disabled: true
     },
     {
@@ -34,12 +28,6 @@ export const RECLAMO_READ_FORM_FIELDS_DEF: DynamicField<any>[] = [
         key: 'fechaCreacion',
         labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_fechacreacion',
         controlType: 'datepicker',
-        disabled: true
-    },
-    {
-        key: 'horaCreacion',
-        labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_horacreacion',
-        controlType: 'number',
         disabled: true
     },
     {
@@ -87,7 +75,7 @@ export const RECLAMO_READ_FORM_FIELDS_DEF: DynamicField<any>[] = [
     {
         key: 'motivoRechazo',
         labelKey: 'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_motivorechazo',
-        controlType: 'textbox',
+        controlType: 'textarea',
         disabled: true
     }
 ];

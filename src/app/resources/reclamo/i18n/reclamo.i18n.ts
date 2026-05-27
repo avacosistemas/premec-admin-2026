@@ -76,6 +76,7 @@ export const RECLAMO_I18N_DEF: I18n = {
     'RECLAMO_CREATE_FORM_FIELDS_DEF_FIELD_motivorechazo': 'Observaciones',
     'RECLAMO_UPDATE_FORM_FIELDS_DEF_FIELD_motivorechazo': 'Observaciones',
     'RECLAMO_READ_FORM_FIELDS_DEF_FIELD_motivorechazo': 'Observaciones',
-    'RECLAMO_FILTER_FORM_FIELDS_DEF_FIELD_motivorechazo': 'Observaciones'
+    'RECLAMO_FILTER_FORM_FIELDS_DEF_FIELD_motivorechazo': 'Observaciones',
+    reclamo_grid_def_column_customername: 'Cliente'
   }
 };

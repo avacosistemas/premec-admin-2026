@@ -6,5 +6,6 @@ export const CLIENTE_NAV_DEF: NavigationDef = {
     url: '/cliente',
     icon: 'heroicons_outline:user-circle',
     group: 'RECLAMOS',
+    order: 1,
     showInMenu: true
 };

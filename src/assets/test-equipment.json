@@ -1,0 +1,1620 @@
+{
+  "status": "OK",
+  "data": [
+    {
+      "label": "A230 - BT RRB/E 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A230",
+      "ItemCode": "BT RRB/E 9500",
+      "ManufacturerSerialNum": "351698AA (LLAVE)",
+      "EquipmentCardNum": 39,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A235 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A235",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "928096 (TECLADO)",
+      "EquipmentCardNum": 40,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A285 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A285",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "6101525",
+      "EquipmentCardNum": 65,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A175 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A175",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "584737AA (LLAVE)",
+      "EquipmentCardNum": 89,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A156 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A156",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "366256AA",
+      "EquipmentCardNum": 97,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A122 - BT RRB/E 8000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A122",
+      "ItemCode": "BT RRB/E 8000",
+      "ManufacturerSerialNum": "320356AA (LLAVE)",
+      "EquipmentCardNum": 98,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "E096 - BT CBE1,6F 5000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "E096",
+      "ItemCode": "BT CBE1,6F 5000",
+      "ManufacturerSerialNum": "233400",
+      "EquipmentCardNum": 99,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A176 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A176",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "708209",
+      "EquipmentCardNum": 100,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A179 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A179",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "426367AA (LLAVE)",
+      "EquipmentCardNum": 101,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A192 - BT RRB/E 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A192",
+      "ItemCode": "BT RRB/E 9500",
+      "ManufacturerSerialNum": "905298 (TECLADO)",
+      "EquipmentCardNum": 102,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A191 - BT RRB/E 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A191",
+      "ItemCode": "BT RRB/E 9500",
+      "ManufacturerSerialNum": "733550 (TECLADO)",
+      "EquipmentCardNum": 103,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A196 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A196",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "730330 (TECLADO)",
+      "EquipmentCardNum": 104,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A207 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A207",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "729491 (TECLADO)",
+      "EquipmentCardNum": 105,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A210 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A210",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "918001 (TECLADO)",
+      "EquipmentCardNum": 106,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "E111 - ARTISON FB18 4800",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "E111",
+      "ItemCode": "ARTISON FB18 4800",
+      "ManufacturerSerialNum": "AE01123",
+      "EquipmentCardNum": 107,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A212 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A212",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "729499 (TECLADO)",
+      "EquipmentCardNum": 108,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A232 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A232",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "581375AA (LLAVE)",
+      "EquipmentCardNum": 109,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A213 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A213",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "729502 (TECLADO)",
+      "EquipmentCardNum": 110,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A215 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A215",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "729509",
+      "EquipmentCardNum": 111,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A218 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A218",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "958628 (TECLADO)",
+      "EquipmentCardNum": 112,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A241 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A241",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "418589AA",
+      "EquipmentCardNum": 116,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A242 - BT RRB/E 8500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A242",
+      "ItemCode": "BT RRB/E 8500",
+      "ManufacturerSerialNum": "926300 (TECLADO)",
+      "EquipmentCardNum": 117,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "E150 - EP CPD18TV 4800",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "E150",
+      "ItemCode": "EP CPD18TV 4800",
+      "ManufacturerSerialNum": "226160016",
+      "EquipmentCardNum": 123,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A226 - BT RRB/E 8500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A226",
+      "ItemCode": "BT RRB/E 8500",
+      "ManufacturerSerialNum": "550275AA (LLAVE)",
+      "EquipmentCardNum": 133,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A171 - BT RRB/E 10500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A171",
+      "ItemCode": "BT RRB/E 10500",
+      "ManufacturerSerialNum": "425254AA (LLAVE)",
+      "EquipmentCardNum": 134,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z132 - SOOSUNG SWP2500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z132",
+      "ItemCode": "SOOSUNG SWP2500",
+      "ManufacturerSerialNum": "WPBGD0024",
+      "EquipmentCardNum": 139,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A168 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A168",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "710942 (LLAVE)",
+      "EquipmentCardNum": 144,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A161 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A161",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "710940 (LLAVE)",
+      "EquipmentCardNum": 145,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A291 - BT RRB/E 8500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A291",
+      "ItemCode": "BT RRB/E 8500",
+      "ManufacturerSerialNum": "723731",
+      "EquipmentCardNum": 151,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A231 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A231",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "581373AA (LLAVE)",
+      "EquipmentCardNum": 155,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z163 - EP EPT25-25RAS (DOBLE)",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z163",
+      "ItemCode": "EP EPT25-25RAS (DOBLE)",
+      "ManufacturerSerialNum": "326210950",
+      "EquipmentCardNum": 156,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A190 - BT RRB/E 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A190",
+      "ItemCode": "BT RRB/E 9500",
+      "ManufacturerSerialNum": "733549",
+      "EquipmentCardNum": 163,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP934 (TOYOTA) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP934 (TOYOTA)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "5FBRS15-10960 (5FBRS15)",
+      "EquipmentCardNum": 527,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A208 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A208",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "729501",
+      "EquipmentCardNum": 608,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A216 - BT RRB/E 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A216",
+      "ItemCode": "BT RRB/E 9000",
+      "ManufacturerSerialNum": "339614AA (LLAVE)",
+      "EquipmentCardNum": 610,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z168 - EP EPT25-25RAS",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z168",
+      "ItemCode": "EP EPT25-25RAS",
+      "ManufacturerSerialNum": "326210943",
+      "EquipmentCardNum": 671,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A163 - BT RRB/E 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A163",
+      "ItemCode": "BT RRB/E 9500",
+      "ManufacturerSerialNum": "357400AA (LLAVE)",
+      "EquipmentCardNum": 828,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1047 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1047 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N22157V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 851,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1048 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1048 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N22158V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 852,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1049 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1049 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N15721V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 853,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1050 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1050 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N15718V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 854,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1051 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1051 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N15715V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 855,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1052 (YALE) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1052 (YALE)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "A827N15433V (MPB040ACN24C2748)",
+      "EquipmentCardNum": 856,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z172 - EP EPT25-25RAS 540 (DOBLE)",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z172",
+      "ItemCode": "EP EPT25-25RAS 540 (DOBLE)",
+      "ManufacturerSerialNum": "326210947",
+      "EquipmentCardNum": 876,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z170 - EP EPT25-25RAS 540 (DOBLE)",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z170",
+      "ItemCode": "EP EPT25-25RAS 540 (DOBLE)",
+      "ManufacturerSerialNum": "326210945",
+      "EquipmentCardNum": 877,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z082 - SOOSUNG SWP3500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z082",
+      "ItemCode": "SOOSUNG SWP3500",
+      "ManufacturerSerialNum": "WPBDH0012",
+      "EquipmentCardNum": 883,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z165 - EP EPT25-25RAS (DOBLE)",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z165",
+      "ItemCode": "EP EPT25-25RAS (DOBLE)",
+      "ManufacturerSerialNum": "326210940",
+      "EquipmentCardNum": 919,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z166 - EP EPT25-25RAS (DOBLE)",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z166",
+      "ItemCode": "EP EPT25-25RAS (DOBLE)",
+      "ManufacturerSerialNum": "326210941",
+      "EquipmentCardNum": 920,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z109 - SOOSUNG SWP3500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z109",
+      "ItemCode": "SOOSUNG SWP3500",
+      "ManufacturerSerialNum": "WPBEF0004",
+      "EquipmentCardNum": 972,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z178 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z178",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3301100074",
+      "EquipmentCardNum": 2252,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z179 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z179",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3301100075",
+      "EquipmentCardNum": 2253,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z183 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z183",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3301100079",
+      "EquipmentCardNum": 2257,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z186 - EP RPL-251  LITHIUM W560",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z186",
+      "ItemCode": "EP RPL-251  LITHIUM W560",
+      "ManufacturerSerialNum": "3301100082",
+      "EquipmentCardNum": 2260,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP646 (SOOSUNG) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP646 (SOOSUNG)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "WSAFG0001 (SWS1000L)",
+      "EquipmentCardNum": 2442,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1168 (N°7) (TOYOTA) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1168 (N°7) (TOYOTA)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "608FD25-12671 (62-8FD25)",
+      "EquipmentCardNum": 2494,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP384 (BT) (Nº8) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP384 (BT) (Nº8)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "346781AA (RRB2/15) 9000",
+      "EquipmentCardNum": 2541,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z192 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z192",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3311101210",
+      "EquipmentCardNum": 3064,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z193 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z193",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3311101211",
+      "EquipmentCardNum": 3065,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z200 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z200",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3311200976",
+      "EquipmentCardNum": 3072,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z205 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z205",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3311200981",
+      "EquipmentCardNum": 3077,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z206 - EP RPL-251  LITHIUM W560",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z206",
+      "ItemCode": "EP RPL-251  LITHIUM W560",
+      "ManufacturerSerialNum": "3311202092",
+      "EquipmentCardNum": 3238,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z222 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z222",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3311301610",
+      "EquipmentCardNum": 3425,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z213 - EP RPL-251  LITHIUM W560",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z213",
+      "ItemCode": "EP RPL-251  LITHIUM W560",
+      "ManufacturerSerialNum": "3311301364",
+      "EquipmentCardNum": 3428,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1275(BT) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1275(BT)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "6399762(RRE160)",
+      "EquipmentCardNum": 3949,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121106 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121106 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121106",
+      "EquipmentCardNum": 4177,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121105 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121105 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121105",
+      "EquipmentCardNum": 4178,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121107 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121107 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121107",
+      "EquipmentCardNum": 4179,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121102 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121102 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121102",
+      "EquipmentCardNum": 4180,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121103 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121103 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121103",
+      "EquipmentCardNum": 4181,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "17121104 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "17121104 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "17121104",
+      "EquipmentCardNum": 4182,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "L18010060 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "L18010060 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "L18010060",
+      "EquipmentCardNum": 4183,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "L18010059 (EP) - EPC-550-30",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "L18010059 (EP)",
+      "ItemCode": "EPC-550-30",
+      "ManufacturerSerialNum": "L18010059",
+      "EquipmentCardNum": 4184,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "RP1291(TOYOTA) - MAQCLIENTES",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "RP1291(TOYOTA)",
+      "ItemCode": "MAQCLIENTES",
+      "ManufacturerSerialNum": "608FD25-13079",
+      "EquipmentCardNum": 4250,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A535 - EP ES16-RS 4500 LITHIUM",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A535",
+      "ItemCode": "EP ES16-RS 4500 LITHIUM",
+      "ManufacturerSerialNum": "3321703332",
+      "EquipmentCardNum": 5146,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z264 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z264",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3341000173",
+      "EquipmentCardNum": 6066,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z265 - EP RPL-251  LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z265",
+      "ItemCode": "EP RPL-251  LITHIUM W685",
+      "ManufacturerSerialNum": "3341000174",
+      "EquipmentCardNum": 6067,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z267 - EP RPL-251  LITHIUM W560",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z267",
+      "ItemCode": "EP RPL-251  LITHIUM W560",
+      "ManufacturerSerialNum": "3341000176",
+      "EquipmentCardNum": 6069,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A578 - HYUNDAI 20BRJ-9B 9000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A578",
+      "ItemCode": "HYUNDAI 20BRJ-9B 9000",
+      "ManufacturerSerialNum": "NL2202513086",
+      "EquipmentCardNum": 6161,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A579 - HYUNDAI 20BRJ-9BH 10507",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A579",
+      "ItemCode": "HYUNDAI 20BRJ-9BH 10507",
+      "ManufacturerSerialNum": "NL2202513087",
+      "EquipmentCardNum": 6162,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A580 - HYUNDAI 20BRJ-9BH 10507",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A580",
+      "ItemCode": "HYUNDAI 20BRJ-9BH 10507",
+      "ManufacturerSerialNum": "NL2202513088",
+      "EquipmentCardNum": 6163,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "2154 - HYUNDAI HP30-685X1220",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "2154",
+      "ItemCode": "HYUNDAI HP30-685X1220",
+      "ManufacturerSerialNum": "2154 23/033/ZFE1/002807/G",
+      "EquipmentCardNum": 6266,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z238 - EP RPL-251 DOBLE LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z238",
+      "ItemCode": "EP RPL-251 DOBLE LITHIUM W685",
+      "ManufacturerSerialNum": "3312001465",
+      "EquipmentCardNum": 6481,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z239 - EP RPL-251 DOBLE LITHIUM W685",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z239",
+      "ItemCode": "EP RPL-251 DOBLE LITHIUM W685",
+      "ManufacturerSerialNum": "3312001464",
+      "EquipmentCardNum": 6482,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z282 - HYUNDAI 20EPR-X W540-1150",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z282",
+      "ItemCode": "HYUNDAI 20EPR-X W540-1150",
+      "ManufacturerSerialNum": "NL32025C1696",
+      "EquipmentCardNum": 6683,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z285 - HYUNDAI 20EPR-X W685-1150",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z285",
+      "ItemCode": "HYUNDAI 20EPR-X W685-1150",
+      "ManufacturerSerialNum": "NL32025C1699",
+      "EquipmentCardNum": 6686,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z287 - HYUNDAI 20EPR-X W685-1150",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z287",
+      "ItemCode": "HYUNDAI 20EPR-X W685-1150",
+      "ManufacturerSerialNum": "NL32025C1701",
+      "EquipmentCardNum": 6688,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "Z292 - HYUNDAI 25EPR-X W685-2400",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "Z292",
+      "ItemCode": "HYUNDAI 25EPR-X W685-2400",
+      "ManufacturerSerialNum": "NL32025C1706",
+      "EquipmentCardNum": 6693,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A611 - HYUNDAI 16BRJ-9B 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A611",
+      "ItemCode": "HYUNDAI 16BRJ-9B 9500",
+      "ManufacturerSerialNum": "NL22025H9394",
+      "EquipmentCardNum": 6776,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A612 - HYUNDAI 16BRJ-9B 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A612",
+      "ItemCode": "HYUNDAI 16BRJ-9B 9500",
+      "ManufacturerSerialNum": "NL22025H9395",
+      "EquipmentCardNum": 6777,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A613 - HYUNDAI 16BRJ-9B 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A613",
+      "ItemCode": "HYUNDAI 16BRJ-9B 9500",
+      "ManufacturerSerialNum": "NL22025H9396",
+      "EquipmentCardNum": 6778,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A614 - HYUNDAI 16BRJ-9B 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A614",
+      "ItemCode": "HYUNDAI 16BRJ-9B 9500",
+      "ManufacturerSerialNum": "NL22025H9397",
+      "EquipmentCardNum": 6779,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A615 - HYUNDAI 16BRJ-9B 9500",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A615",
+      "ItemCode": "HYUNDAI 16BRJ-9B 9500",
+      "ManufacturerSerialNum": "NL22025H9398",
+      "EquipmentCardNum": 6780,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "A275 - BT RRB/E 7000",
+      "tipo": "ELECTRICA",
+      "InternalSerialNum": "A275",
+      "ItemCode": "BT RRB/E 7000",
+      "ManufacturerSerialNum": "418981AA (LLAVE)",
+      "EquipmentCardNum": 6949,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tYES",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "2161 - HYUNDAI HP30-685X1220",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "2161",
+      "ItemCode": "HYUNDAI HP30-685X1220",
+      "ManufacturerSerialNum": "2161 23/033/ZFE1/002807/G",
+      "EquipmentCardNum": 6965,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    },
+    {
+      "label": "2162 - HYUNDAI HP30-685X1220",
+      "tipo": "SIN_TIPO",
+      "InternalSerialNum": "2162",
+      "ItemCode": "HYUNDAI HP30-685X1220",
+      "ManufacturerSerialNum": "2162 23/033/ZFE1/002807/G",
+      "EquipmentCardNum": 6966,
+      "Item": {
+        "Properties8": "tNO",
+        "Properties9": "tNO",
+        "Properties11": "tNO",
+        "Properties12": "tNO",
+        "Properties13": "tNO",
+        "Properties14": "tNO",
+        "Properties40": "tNO"
+      }
+    }
+  ]
+}

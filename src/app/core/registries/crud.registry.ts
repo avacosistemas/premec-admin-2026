@@ -15,6 +15,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/cliente/cliente.def')
     },
     {
+        path: 'estadisticas',
+        loader: () => import('app/resources/estadisticas/estadisticas.def')
+    },
+    {
         path: 'fichado-procesamiento',
         loader: () => import('app/resources/fichado_procesamiento/fichado_procesamiento.def')
     },
@@ -100,6 +104,7 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
     const loaderPromises = [
         import('app/resources/cierre_mes/cierre_mes.def'),
         import('app/resources/cliente/cliente.def'),
+        import('app/resources/estadisticas/estadisticas.def'),
         import('app/resources/fichado_procesamiento/fichado_procesamiento.def'),
         import('app/resources/generar_qr/generar_qr.def'),
         import('app/resources/grupo-empleado/grupo-empleado.def'),

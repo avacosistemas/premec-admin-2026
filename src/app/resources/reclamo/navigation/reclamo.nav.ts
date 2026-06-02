@@ -6,5 +6,6 @@ export const RECLAMO_NAV_DEF: NavigationDef = {
     url: '/reclamo',
     icon: 'heroicons_outline:chat-bubble-left-right',
     group: 'RECLAMOS',
+    order: 2,
     showInMenu: true
 };

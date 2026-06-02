@@ -1,0 +1,30 @@
+{
+  "periodos": [
+    {
+      "anio": 2026,
+      "mes": 5,
+      "cantidadReclamos": 2,
+      "diasParadaTotal": 1
+    },
+    {
+      "anio": 2026,
+      "mes": 4,
+      "cantidadReclamos": 1,
+      "diasParadaTotal": 8
+    },
+    {
+      "anio": 2026,
+      "mes": 3,
+      "cantidadReclamos": 2,
+      "diasParadaTotal": 4
+    },
+    {
+      "anio": 2026,
+      "mes": 2,
+      "cantidadReclamos": 3,
+      "diasParadaTotal": 7
+    }
+  ],
+  "cantidadReclamosTotal": 8,
+  "diasParadaTotalTotal": 20
+}

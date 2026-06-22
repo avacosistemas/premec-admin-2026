@@ -2,8 +2,7 @@ import { Component, ViewEncapsulation, ChangeDetectionStrategy, OnInit, OnDestro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, of } from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { catchError, takeUntil, debounceTime } from 'rxjs/operators';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -37,10 +36,10 @@ import { EstadisticasService } from '../services/estadisticas.service';
 })
 export class EstadisticasComponent implements OnInit, OnDestroy {
     private estadisticasService = inject(EstadisticasService);
-    private http = inject(HttpClient);
     private i18nService = inject(I18nService);
     private cdr = inject(ChangeDetectorRef);
     private destroy$ = new Subject<void>();
+    private maquinaSearch$ = new Subject<string>();
 
     currentYear = new Date().getFullYear();
 
@@ -78,7 +77,15 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.loadClientes();
         this.loadMaquinas();
-        // this.cargarMockData();
+        
+        this.maquinaSearch$.pipe(
+            debounceTime(300),
+            takeUntil(this.destroy$)
+        ).subscribe(query => {
+            if (this.clienteSelected) {
+                this.loadMaquinas(this.clienteSelected.username, query);
+            }
+        });
     }
 
     ngOnDestroy(): void {
@@ -112,6 +119,7 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
             this.maquinaSelected = null;
         }
         this.errors.maquina = '';
+        this.maquinaSearch$.next(this.maquinaQuery);
     }
 
     limpiarMaquina(): void {
@@ -125,7 +133,7 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
         this.clienteSelected = cliente;
         this.limpiarMaquina();
         if (cliente) {
-            this.loadMaquinas(cliente.id);
+            this.loadMaquinas(cliente.username);
         } else {
             this.loadMaquinas();
         }
@@ -145,7 +153,7 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
     }
 
     private loadClientes(): void {
-        this.http.get<any>(PREFIX_DOMAIN_API + 'cliente').pipe(
+        this.estadisticasService.getClientes().pipe(
             catchError(() => of([])),
             takeUntil(this.destroy$),
         ).subscribe(resp => {
@@ -155,13 +163,13 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
         });
     }
 
-    private loadMaquinas(clienteId?: string | number): void {
-        // let url = PREFIX_DOMAIN_API + 'customer/equipment';
-        let url = '/assets/test-equipment.json'; // Endpoint de prueba
-        if (clienteId) {
-            url += `?cliente=${clienteId}`;
+    private loadMaquinas(cuit?: string, query?: string): void {
+        if (!cuit) {
+            this.maquinas = [];
+            this.cdr.markForCheck();
+            return;
         }
-        this.http.get<any>(url).pipe(
+        this.estadisticasService.getMaquinas(cuit, query).pipe(
             catchError(() => of([])),
             takeUntil(this.destroy$),
         ).subscribe(resp => {

@@ -1,0 +1,3 @@
+export const ESTADISTICAS_CLIENTE_SECURITY_DEF = {
+    readAccess: 'REPORTE_MAQUINA_PARADA',
+};

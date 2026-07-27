@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+estadisticas-cliente {
+    mat-card {
+        @apply rounded-lg shadow-sm;
+    }
+
+    .mat-mdc-form-field {
+        width: 100%;
+    }
+}

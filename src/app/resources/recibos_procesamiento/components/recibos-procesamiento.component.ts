@@ -76,7 +76,7 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
     fileName: string = '';
 
     dataSource = new MatTableDataSource<ReciboTabla>([]);
-    displayedColumns = ['legajo', 'nombreCompleto', 'periodo', 'neto', 'tipo', 'aprobado', 'observaciones', 'descripcion'];
+    displayedColumns = ['legajo', 'nombreCompleto', 'periodo', 'neto', 'sueldoJornal', 'tipo', 'aprobado', 'observaciones', 'descripcion'];
 
     ngOnInit(): void {
         this.processingForm = this._fb.group({
@@ -234,6 +234,7 @@ export class RecibosProcesamientoComponent implements OnInit, CustomPageComponen
         const requestData: ReciboAprobarRechazarRequest[] = this.dataSource.data.map(row => ({
             legajo: row.legajo,
             neto: row.neto,
+            sueldoJornal: row.sueldoJornal,
             nombreCompleto: row.nombreCompleto,
             periodo: row.periodo,
             tipo: row.tipo,

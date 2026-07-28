@@ -36,6 +36,7 @@ export const RECIBOS_PROCESAMIENTO_I18N_DEF: I18n = {
         recibos_proc_exito_envio: 'Recibos enviados correctamente.',
         recibos_proc_error_procesar: 'Error al procesar el archivo. Verifique el formato.',
         recibos_proc_error_envio: 'Error al enviar los recibos.',
-        recibos_proc_resultados_titulo: 'Vista Previa del Procesamiento'
+        recibos_proc_resultados_titulo: 'Vista Previa del Procesamiento',
+        recibos_proc_col_sueldo_jornal: 'Sueldo/Jornal'
     }
 };

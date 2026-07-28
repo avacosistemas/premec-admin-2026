@@ -6,6 +6,7 @@ export interface ReciboProcesarRequest {
 export interface ReciboProcesarResponse {
     legajo: number;
     neto: number;
+    sueldoJornal: number;
     nombreCompleto: string;
     periodo: string;
     tipo: string;

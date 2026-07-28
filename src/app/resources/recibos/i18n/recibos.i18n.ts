@@ -18,6 +18,8 @@ export const RECIBOS_I18N_DEF: I18n = {
         recibos_filter_form_fields_def_field_year: 'Año',
         recibos_filter_form_fields_def_field_month: 'Mes',
         recibos_filter_form_fields_def_field_tipo: 'Tipo de Recibo',
-        recibos_filter_form_fields_def_field_attachmentEntry: 'Referencia del Recibo'
+        recibos_filter_form_fields_def_field_attachmentEntry: 'Referencia del Recibo',
+        recibos_grid_action_firmar_recibo: 'Firmar Recibo',
+        recibos_grid_column_firmado: 'Firmado'
     }
 };

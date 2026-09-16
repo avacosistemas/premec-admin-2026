@@ -48,7 +48,7 @@ export const USUARIOS_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
     controlType: 'textbox'
   },
   {
-    key: 'legajoFichaje',
+    key: 'legajo',
     labelKey: 'usuarios_create_form_fields_def_field_legajo',
     type: 'string',
     controlType: 'textbox'

@@ -1,7 +1,7 @@
-﻿export const PREFIX_DOMAIN_API = 'http://premec.ddns.net:48080/ws-rest/';
-export const PREFIX_DOMAIN_WEB = 'http://premec.ddns.net:48080/';
+﻿export const PREFIX_DOMAIN_API = 'https://premec.ddns.net/ws-rest/';
+export const PREFIX_DOMAIN_WEB = 'https://premec.ddns.net/';
 export const PREFIX_STATS_API = PREFIX_DOMAIN_API + 'estadisticas/';  // Reservado prefijo y endpoint para dashboards 
-export const PREFIX_SWAGGER_API = 'http://premec.ddns.net:48080/ws-rest/v2/api-docs';
+export const PREFIX_SWAGGER_API = 'https://premec.ddns.net/ws-rest/v2/api-docs';
 
 export const environment = {
     appId: 'premecApp',

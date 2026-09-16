@@ -10,7 +10,7 @@ export class EstadisticasService extends HttpService {
     }
 
     getStats(maquinas: string[], periodos: { anio: number; mes: number }[]): Observable<any> {
-        return this.httpPost(this.baseUrl + 'maquina-parada', {
+        return this.httpPost(this.baseUrl + 'maquina/maquina-parada', {
             maquinas,
             periodos
         });

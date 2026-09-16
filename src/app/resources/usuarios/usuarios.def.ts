@@ -23,7 +23,7 @@ export const USUARIOS_DEF: CrudDef = {
     security: USUARIOS_SECURITY_DEF,
     ws: {
         key: 'USUARIOS_CRUD_URL',
-        url: PREFIX_DOMAIN_API + 'users/'
+        url: PREFIX_DOMAIN_API + 'usuarioPremec/'
     },
     dialogConfig: {
         width: '400px'

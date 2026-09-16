@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
-import { environment, PREFIX_DOMAIN_WEB } from 'environments/environment';
+import { environment, PREFIX_DOMAIN_API, PREFIX_DOMAIN_WEB } from 'environments/environment';
 
 import * as QRCode from 'qrcode';
 
@@ -46,8 +46,6 @@ export class GenerarQrComponent implements OnInit, CustomPageComponent {
     public i18nName = 'GENERAR_QR_I18N_DEF';
     private _generarQrService = inject(GenerarQrService);
 
-    private defaultDomain: string = 'http://premec.ddns.net:48080/';
-
     constructor() {}
 
     ngOnInit() {
@@ -66,8 +64,7 @@ export class GenerarQrComponent implements OnInit, CustomPageComponent {
 
         this._generarQrService.getServiceCallId(this.id).subscribe({
             next: async (newId: string) => {
-                const domain = PREFIX_DOMAIN_WEB ? PREFIX_DOMAIN_WEB : this.defaultDomain;
-                const url = `${domain}informe-qr/?serviceCallId=${newId}`;
+                const url = PREFIX_DOMAIN_WEB + `informe-qr/?serviceCallId=${newId}`;
 
                 try {
                     const qrCodeDataUrl = await QRCode.toDataURL(url, { 

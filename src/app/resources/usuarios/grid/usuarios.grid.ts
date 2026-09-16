@@ -43,7 +43,7 @@ export const USUARIOS_GRID_DEF: GridDef = {
       columnNameKey: 'usuarios_grid_def_column_deposito'
     },
     {
-      columnDef: 'legajoFichaje',
+      columnDef: 'legajo',
       columnNameKey: 'usuarios_grid_def_column_legajo'
     }
   ],
@@ -56,7 +56,7 @@ export const USUARIOS_GRID_DEF: GridDef = {
     'lastname',
     'usuariosap',
     'deposito',
-    'legajoFichaje',
+    'legajo',
     'email',
     'enabled',
     'admin'

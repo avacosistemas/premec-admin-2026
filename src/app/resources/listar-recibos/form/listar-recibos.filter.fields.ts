@@ -2,22 +2,41 @@ import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";
 import { PREFIX_DOMAIN_API } from "environments/environment";
 export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
     {
-        key: 'empleado',
+        key: 'empleadosIds',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_empleado',
-        controlType: 'simple-pick-list',
+        controlType: 'select',
         options: {
             fromWs: {
                 key: 'GRUPO_EMPLEADO_USUARIOS_URL',
                 url: PREFIX_DOMAIN_API + 'grupoEmpleado/usuarios'
             },
             elementLabel: 'usuario',
-            elementValue: 'id'
+            elementValue: 'idSap'
         }
     },
     {
-        key: 'month',
+        key: 'meses',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_month',
-        controlType: 'number'
+        controlType: 'select',
+        options: {
+            handlerSourceData: false,
+            elementLabel: 'label',
+            elementValue: 'value',
+            fromData: [
+                { value: 1, label: 'Enero' },
+                { value: 2, label: 'Febrero' },
+                { value: 3, label: 'Marzo' },
+                { value: 4, label: 'Abril' },
+                { value: 5, label: 'Mayo' },
+                { value: 6, label: 'Junio' },
+                { value: 7, label: 'Julio' },
+                { value: 8, label: 'Agosto' },
+                { value: 9, label: 'Septiembre' },
+                { value: 10, label: 'Octubre' },
+                { value: 11, label: 'Nobiembre' },
+                { value: 12, label: 'Diciembre' },
+            ]
+        }
     },
     {
         key: 'year',

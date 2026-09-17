@@ -4,8 +4,8 @@ export const LISTAR_RECIBOS_I18N_DEF: I18n = {
   name: 'LISTAR_RECIBOS_I18N_DEF',
   lang: 'es',
   words: {
-    'page_title': 'Listar Reciboss',
-    'listar-recibos_nav_def': 'Listar Reciboss',
+    'page_title': 'Listar Recibos',
+    'listar-recibos_nav_def': 'Listar Recibos',
     'listar_recibos_grid_def_column_attachmententry': 'Attachment Entry',
     'listar_recibos_grid_def_column_absentry': 'Abs Entry',
     'listar_recibos_grid_def_column_year': 'Año',

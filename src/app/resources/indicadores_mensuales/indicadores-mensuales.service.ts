@@ -17,4 +17,12 @@ export class IndicadoresMensualesService {
 
         return this._http.get<any>(this.url, { params });
     }
+
+    getValoracionesNegativas(anio: number, mes: number): Observable<any> {
+        const params = new HttpParams()
+            .set('anio', anio.toString())
+            .set('mes', mes.toString());
+
+        return this._http.get<any>(`${this.url}/valoracionesNegativas`, { params });
+    }
 }

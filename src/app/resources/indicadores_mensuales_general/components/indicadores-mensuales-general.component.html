@@ -85,7 +85,7 @@
 
 <div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
 
-    <div *ngIf="!dashboardData && (!dataSource.data || dataSource.data.length === 0) && !loading"
+    <div *ngIf="!dashboardData && (!dataSource.data || dataSource.data.length === 0) && (!dataSourceObservaciones.data || dataSourceObservaciones.data.length === 0) && !loading"
         class="flex flex-col items-center p-12 text-center h-full">
         <mat-icon class="icon-size-24 text-gray-300 dark:text-gray-700 mb-4"
             svgIcon="heroicons_outline:chart-pie"></mat-icon>
@@ -93,142 +93,223 @@
         <div class="text-secondary mt-2">{{ 'indicadores_sin_datos_desc' | translate:i18nName }}</div>
     </div>
 
-    <div *ngIf="showGrid && dataSource.data.length > 0" class="flex-auto h-full w-full overflow-auto pb-20">
-        <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full">
+    <div *ngIf="showGrid && dataSource.data.length > 0" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
+        <mat-card class="overflow-hidden rounded-2xl shadow">
+            <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full">
 
-            <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-                <th mat-header-cell *matHeaderCellDef class="text-sm font-semibold text-secondary pl-6">
-                    {{ getColumnLabel(column) | translate:i18nName }}
-                </th>
-                <td mat-cell *matCellDef="let element" class="pl-6 text-default">
-                    {{ element[column] }}
-                </td>
-            </ng-container>
+                    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+                        <th mat-header-cell *matHeaderCellDef class="text-sm font-semibold text-secondary pl-6">
+                            {{ getColumnLabel(column) | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-6 text-default">
+                            {{ element[column] }}
+                        </td>
+                    </ng-container>
 
-            <ng-container matColumnDef="expand">
-                <th mat-header-cell *matHeaderCellDef class="w-12"></th>
-                <td mat-cell *matCellDef="let element" class="w-12 pr-4 text-right">
-                    <button mat-icon-button
-                        (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
-                        <mat-icon class="text-secondary"
-                            [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
-                        </mat-icon>
-                    </button>
-                </td>
-            </ng-container>
+                    <ng-container matColumnDef="expand">
+                        <th mat-header-cell *matHeaderCellDef class="w-12"></th>
+                        <td mat-cell *matCellDef="let element" class="w-12 pr-4 text-right">
+                            <button mat-icon-button
+                                (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+                                <mat-icon class="text-secondary"
+                                    [svgIcon]="expandedElement === element ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
+                                </mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
 
-            <ng-container matColumnDef="expandedDetail">
-                <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"
-                    class="p-0 border-0">
-                    <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50 dark:bg-gray-800 border-l-4 border-l-accent-500 shadow-inner"
-                        [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                    <ng-container matColumnDef="expandedDetail">
+                        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"
+                            class="p-0 border-0">
+                            <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50 dark:bg-gray-800 border-l-4 border-l-accent-500 shadow-inner"
+                                [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
 
-                        <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                            <div class="space-y-4">
-                                <h3 class="text-base font-semibold text-primary flex items-center">
-                                    <mat-icon class="icon-size-5 mr-2"
-                                        svgIcon="heroicons_outline:presentation-chart-line"></mat-icon>
-                                    {{ 'group_desempeno' | translate:i18nName }}
-                                </h3>
-                                <div
-                                    class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-                                    <div class="flex flex-col">
-                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_actividades' |
-                                            translate:i18nName }}</span>
-                                        <span class="text-lg font-medium">{{ element.cantidadActividades }}</span>
+                                    <div class="space-y-4">
+                                        <h3 class="text-base font-semibold text-primary flex items-center">
+                                            <mat-icon class="icon-size-5 mr-2"
+                                                svgIcon="heroicons_outline:presentation-chart-line"></mat-icon>
+                                            {{ 'group_desempeno' | translate:i18nName }}
+                                        </h3>
+                                        <div
+                                            class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-secondary uppercase">{{ 'lbl_actividades' |
+                                                    translate:i18nName }}</span>
+                                                <span class="text-lg font-medium">{{ element.cantidadActividades }}</span>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-secondary uppercase">{{ 'lbl_objetivo' |
+                                                    translate:i18nName }}</span>
+                                                <span class="text-lg font-medium">{{ element.objetivoActividades }}</span>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-secondary uppercase">{{ 'lbl_cumplimiento' |
+                                                    translate:i18nName }}</span>
+                                                <span class="text-lg font-medium">{{ element.cumplimientoObjetivo || '-'
+                                                    }}</span>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-secondary uppercase">{{ 'lbl_valoracion' |
+                                                    translate:i18nName }}</span>
+                                                <span class="text-lg font-bold text-green-600">{{ element.porcentajeValoracion
+                                                    }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_objetivo' |
-                                            translate:i18nName }}</span>
-                                        <span class="text-lg font-medium">{{ element.objetivoActividades }}</span>
+
+                                    <div class="space-y-4">
+                                        <h3 class="text-base font-semibold text-primary flex items-center">
+                                            <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:star"></mat-icon>
+                                            {{ 'group_calidad' | translate:i18nName }}
+                                        </h3>
+                                        <div
+                                            class="bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 gap-4 grid grid-cols-2 p-4 rounded-lg shadow-sm sm:grid-cols-5">
+                                            <div
+                                                class="flex items-center px-3 py-2 rounded bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
+                                                <span class="text-xs font-bold text-green-800 dark:text-green-300 mr-2">{{
+                                                    'lbl_mb' | translate:i18nName }}</span>
+                                                <span class="text-base font-bold text-green-700 dark:text-green-400">{{
+                                                    element.cantMB }}</span>
+                                            </div>
+                                            <div
+                                                class="flex items-center px-3 py-2 rounded bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800">
+                                                <span class="text-xs font-bold text-blue-800 dark:text-blue-300 mr-2">{{ 'lbl_b'
+                                                    | translate:i18nName }}</span>
+                                                <span class="text-base font-bold text-blue-700 dark:text-blue-400">{{
+                                                    element.cantB }}</span>
+                                            </div>
+                                            <div
+                                                class="flex items-center px-3 py-2 rounded bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-100 dark:border-yellow-800">
+                                                <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300 mr-2">{{
+                                                    'lbl_r' | translate:i18nName }}</span>
+                                                <span class="text-base font-bold text-yellow-700 dark:text-yellow-400">{{
+                                                    element.cantR }}</span>
+                                            </div>
+                                            <div
+                                                class="flex items-center px-3 py-2 rounded bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800">
+                                                <span class="text-xs font-bold text-red-800 dark:text-red-300 mr-2">{{ 'lbl_m' |
+                                                    translate:i18nName }}</span>
+                                                <span class="text-base font-bold text-red-700 dark:text-red-400">{{
+                                                    element.cantM }}</span>
+                                            </div>
+                                            <div
+                                                class="flex items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                                                <span class="text-xs font-bold text-gray-600 dark:text-gray-300 mr-2">{{
+                                                    'lbl_sv' | translate:i18nName }}</span>
+                                                <span class="text-base font-bold text-gray-700 dark:text-gray-400">{{
+                                                    element.cantSV }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_cumplimiento' |
-                                            translate:i18nName }}</span>
-                                        <span class="text-lg font-medium">{{ element.cumplimientoObjetivo || '-'
-                                            }}</span>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-xs text-secondary uppercase">{{ 'lbl_valoracion' |
-                                            translate:i18nName }}</span>
-                                        <span class="text-lg font-bold text-green-600">{{ element.porcentajeValoracion
-                                            }}</span>
-                                    </div>
+
                                 </div>
                             </div>
+                        </td>
+                    </ng-container>
 
-                            <div class="space-y-4">
-                                <h3 class="text-base font-semibold text-primary flex items-center">
-                                    <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:star"></mat-icon>
-                                    {{ 'group_calidad' | translate:i18nName }}
-                                </h3>
-                                <div
-                                    class="bg-white border border-gray-200 dark:bg-gray-700 dark:border-gray-600 gap-4 grid grid-cols-2 p-4 rounded-lg shadow-sm sm:grid-cols-5">
-                                    <div
-                                        class="flex items-center px-3 py-2 rounded bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
-                                        <span class="text-xs font-bold text-green-800 dark:text-green-300 mr-2">{{
-                                            'lbl_mb' | translate:i18nName }}</span>
-                                        <span class="text-base font-bold text-green-700 dark:text-green-400">{{
-                                            element.cantMB }}</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center px-3 py-2 rounded bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800">
-                                        <span class="text-xs font-bold text-blue-800 dark:text-blue-300 mr-2">{{ 'lbl_b'
-                                            | translate:i18nName }}</span>
-                                        <span class="text-base font-bold text-blue-700 dark:text-blue-400">{{
-                                            element.cantB }}</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center px-3 py-2 rounded bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-100 dark:border-yellow-800">
-                                        <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300 mr-2">{{
-                                            'lbl_r' | translate:i18nName }}</span>
-                                        <span class="text-base font-bold text-yellow-700 dark:text-yellow-400">{{
-                                            element.cantR }}</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center px-3 py-2 rounded bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800">
-                                        <span class="text-xs font-bold text-red-800 dark:text-red-300 mr-2">{{ 'lbl_m' |
-                                            translate:i18nName }}</span>
-                                        <span class="text-base font-bold text-red-700 dark:text-red-400">{{
-                                            element.cantM }}</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-                                        <span class="text-xs font-bold text-gray-600 dark:text-gray-300 mr-2">{{
-                                            'lbl_sv' | translate:i18nName }}</span>
-                                        <span class="text-base font-bold text-gray-700 dark:text-gray-400">{{
-                                            element.cantSV }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"
+                        class="bg-gray-50 dark:bg-gray-900"></tr>
 
-                        </div>
-                    </div>
-                </td>
-            </ng-container>
+                    <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+                        class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b dark:border-gray-800"
+                        [class.bg-accent-50]="expandedElement === element"
+                        [class.dark:bg-accent-900]="expandedElement === element"
+                        (click)="expandedElement = expandedElement === element ? null : element">
+                    </tr>
 
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"
-                class="bg-gray-50 dark:bg-gray-900"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row h-0"></tr>
 
-            <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-                class="element-row cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b dark:border-gray-800"
-                [class.bg-accent-50]="expandedElement === element"
-                [class.dark:bg-accent-900]="expandedElement === element"
-                (click)="expandedElement = expandedElement === element ? null : element">
-            </tr>
+                </table>
 
-            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row h-0"></tr>
+                <mat-paginator #empPaginator [hidden]="dataSource.data.length === 0" class="border-t w-full"
+                    [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </mat-card>
 
-        </table>
+        <mat-card class="overflow-hidden rounded-2xl shadow hover:shadow-md transition-shadow">
+            <div class="bg-red-600 p-4 text-white flex items-center gap-2">
+                <mat-icon svgIcon="heroicons_outline:exclamation-triangle" style="color: inherit;"></mat-icon>
+                <span class="font-semibold text-lg">{{ 'group_observaciones_negativas' | translate:i18nName }}</span>
+            </div>
+            <div class="p-0 overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceObservaciones" class="w-full bg-transparent">
 
-        <mat-paginator [hidden]="dataSource.data.length === 0" class="border-t bottom-0 fixed print:hidden w-full z-30"
-            [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons>
-        </mat-paginator>
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_fecha' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm whitespace-nowrap">
+                            {{ element.StartDate | date:'dd/MM/yyyy':'UTC' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actividad">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_actividad' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm font-medium">
+                            {{ element.ActivityCode }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="empleado">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_empleado' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ (element.EmployeeInfo?.FirstName ? element.EmployeeInfo.FirstName + ' ' : '') + (element.EmployeeInfo?.LastName || '') || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cliente">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_cliente' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.BusinessPartner?.CardName || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="detalle">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_detalle' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.Details || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="valoracion">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_valoracion' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.U_detallevaloracion || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsObservaciones; sticky: true" class="bg-gray-50 dark:bg-gray-800"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsObservaciones;" class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800"></tr>
+                </table>
+
+                <div *ngIf="dataSourceObservaciones.data.length === 0" class="p-6 text-center text-secondary italic">
+                    {{ 'sin_observaciones_negativas' | translate:i18nName }}
+                </div>
+
+                <mat-paginator #obsPaginator
+                    [hidden]="dataSourceObservaciones.data.length === 0"
+                    [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </mat-card>
     </div>
 
-    <div *ngIf="!showGrid && dashboardData" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
-        <div *ngIf="dashboardData.nombre"
+    <div *ngIf="!showGrid && (dashboardData || (dataSourceObservaciones.data && dataSourceObservaciones.data.length > 0))" class="p-6 w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in">
+        <div *ngIf="dashboardData?.nombre"
             class="flex items-center gap-4 border-b pb-6 border-gray-200 dark:border-gray-700">
             <div
                 class="h-12 w-12 rounded-full bg-accent-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
@@ -238,7 +319,7 @@
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ dashboardData.nombre }}</h1>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngIf="dashboardData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <mat-card class="overflow-hidden rounded-2xl shadow hover:shadow-md transition-shadow">
                 <div class="bg-blue-600 p-4 text-white flex items-center gap-2">
                     <mat-icon svgIcon="heroicons_outline:clock" style="color: inherit;"></mat-icon>
@@ -344,5 +425,82 @@
                 </div>
             </mat-card>
         </div>
+
+        <mat-card class="overflow-hidden rounded-2xl shadow hover:shadow-md transition-shadow">
+            <div class="bg-red-600 p-4 text-white flex items-center gap-2">
+                <mat-icon svgIcon="heroicons_outline:exclamation-triangle" style="color: inherit;"></mat-icon>
+                <span class="font-semibold text-lg">{{ 'group_observaciones_negativas' | translate:i18nName }}</span>
+            </div>
+            <div class="p-0 overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceObservaciones" class="w-full bg-transparent">
+
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_fecha' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm whitespace-nowrap">
+                            {{ element.StartDate | date:'dd/MM/yyyy':'UTC' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actividad">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_actividad' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm font-medium">
+                            {{ element.ActivityCode }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="empleado">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_empleado' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ (element.EmployeeInfo?.FirstName ? element.EmployeeInfo.FirstName + ' ' : '') + (element.EmployeeInfo?.LastName || '') || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cliente">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_cliente' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.BusinessPartner?.CardName || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="detalle">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_detalle' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.Details || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="valoracion">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-secondary uppercase px-4 py-3">
+                            {{ 'lbl_col_valoracion' | translate:i18nName }}
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm">
+                            {{ element.U_detallevaloracion || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsObservaciones; sticky: true" class="bg-gray-50 dark:bg-gray-800"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsObservaciones;" class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800"></tr>
+                </table>
+
+                <div *ngIf="dataSourceObservaciones.data.length === 0" class="p-6 text-center text-secondary italic">
+                    {{ 'sin_observaciones_negativas' | translate:i18nName }}
+                </div>
+
+                <mat-paginator #obsPaginator
+                    [hidden]="dataSourceObservaciones.data.length === 0"
+                    [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </mat-card>
     </div>
 </div>

@@ -15,6 +15,9 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
 import { NotificationService } from '@fwk/services/notification/notification.service';
 import { TranslatePipe } from '@fwk/pipe/translate.pipe';
 import { I18nService } from '@fwk/services/i18n-service/i18n.service';
@@ -63,8 +66,8 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
     private _i18nService = inject(I18nService);
     private _cdr = inject(ChangeDetectorRef);
 
-    filterForm: FormGroup;
-    meses: { value: number, viewValue: string }[];
+    filterForm!: FormGroup;
+    meses: { value: number, viewValue: string }[] = [];
     currentYear = new Date().getFullYear();
     loading = false;
     panelOpenState = true;
@@ -83,7 +86,11 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
     columnsToDisplay = ['nombre', 'fichadoHora', 'facturablesHora', 'ociosasHora', 'efectividad'];
     columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
 
-    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild('empPaginator') paginator!: MatPaginator;
+
+    dataSourceObservaciones = new MatTableDataSource<any>([]);
+    displayedColumnsObservaciones: string[] = ['fecha', 'actividad', 'empleado', 'cliente', 'detalle', 'valoracion'];
+    @ViewChild('obsPaginator') paginatorObservaciones!: MatPaginator;
 
     ngOnInit(): void {
         const currentDate = new Date();
@@ -170,6 +177,7 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
         });
         this.dashboardData = null;
         this.dataSource.data = [];
+        this.dataSourceObservaciones.data = [];
         this.showGrid = false;
         this.panelOpenState = true;
     }
@@ -180,6 +188,7 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
         this.loading = true;
         this.dashboardData = null;
         this.dataSource.data = [];
+        this.dataSourceObservaciones.data = [];
 
         const formVal = this.filterForm.value;
         const tipo = formVal.tipoReporte;
@@ -187,19 +196,31 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
         this.showGrid = (tipo !== 'TODOS' && formVal.agrupado === false);
 
         let request$;
+        let requestValNeg$;
 
         if (tipo === 'TODOS') {
             request$ = this._service.getIndicadores(formVal.anio, formVal.mes);
+            requestValNeg$ = this._service.getValoracionesNegativas(formVal.anio, formVal.mes);
         } else if (tipo === 'GRUPO') {
             request$ = this._service.getIndicadoresGrupo(formVal.anio, formVal.mes, formVal.idGrupo, formVal.agrupado);
+            requestValNeg$ = this._service.getValoracionesNegativasGrupo(formVal.anio, formVal.mes, formVal.idGrupo);
         } else if (tipo === 'EMPLEADOS') {
             request$ = this._service.getIndicadoresEmpleados(formVal.anio, formVal.mes, formVal.idsEmpleados, formVal.agrupado);
+            requestValNeg$ = this._service.getValoracionesNegativasEmpleados(formVal.anio, formVal.mes, formVal.idsEmpleados);
         }
 
-        request$?.subscribe({
-            next: (response) => {
-                if (response && response.status === 'OK' && response.data) {
-                    const data = response.data;
+        forkJoin({
+            indicadores: request$ ? request$.pipe(catchError(() => of(null))) : of(null),
+            valoraciones: requestValNeg$ ? requestValNeg$.pipe(catchError(() => of(null))) : of(null)
+        }).subscribe({
+            next: (res: any) => {
+                const indicadores = res?.indicadores;
+                const valoraciones = res?.valoraciones;
+                let hasData = false;
+
+                if (indicadores && indicadores.status === 'OK' && indicadores.data) {
+                    const data = indicadores.data;
+                    hasData = true;
 
                     if (this.showGrid) {
                         const dataArray = Array.isArray(data) ? data : [data];
@@ -214,9 +235,25 @@ export class IndicadoresMensualesGeneralComponent implements OnInit, CustomPageC
                         this.dashboardData = Array.isArray(data) ? data[0] : data;
                     }
                     this.panelOpenState = false;
+                }
+
+                if (valoraciones && valoraciones.status === 'OK' && valoraciones.data) {
+                    hasData = true;
+                    this.dataSourceObservaciones.data = Array.isArray(valoraciones.data) ? valoraciones.data : [];
+                    setTimeout(() => {
+                        if (this.paginatorObservaciones) {
+                            this.dataSourceObservaciones.paginator = this.paginatorObservaciones;
+                        }
+                    });
+                    this.panelOpenState = false;
                 } else {
+                    this.dataSourceObservaciones.data = [];
+                }
+
+                if (!hasData) {
                     this._notificationService.notify('No se encontraron datos para los filtros seleccionados.');
                 }
+
                 this.loading = false;
                 this._cdr.markForCheck();
             },

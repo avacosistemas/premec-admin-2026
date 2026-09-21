@@ -44,6 +44,15 @@ export const INDICADORES_MENSUALES_GENERAL_I18N_DEF: I18n = {
         lbl_b: 'B',
         lbl_r: 'REG',
         lbl_m: 'MAL',
-        lbl_sv: 'S/V'
+        lbl_sv: 'S/V',
+
+        group_observaciones_negativas: 'Observaciones con Calificación Mala',
+        lbl_col_fecha: 'Fecha',
+        lbl_col_actividad: 'Actividad',
+        lbl_col_empleado: 'Empleado',
+        lbl_col_cliente: 'Cliente',
+        lbl_col_detalle: 'Detalle',
+        lbl_col_valoracion: 'Valoración',
+        sin_observaciones_negativas: 'No se registran observaciones con calificación mala para los filtros seleccionados.'
     }
 };

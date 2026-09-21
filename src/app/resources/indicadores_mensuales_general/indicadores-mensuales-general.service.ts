@@ -41,6 +41,34 @@ export class IndicadoresMensualesGeneralService {
         return this._http.get<any>(`${this.urlBase}indicadorMensualEmpleados`, { params });
     }
 
+    getValoracionesNegativas(anio: number, mes: number): Observable<any> {
+        const params = new HttpParams()
+            .set('anio', anio.toString())
+            .set('mes', mes.toString());
+
+        return this._http.get<any>(`${this.urlBase}indicadorMensualGeneral/valoracionesNegativas`, { params });
+    }
+
+    getValoracionesNegativasGrupo(anio: number, mes: number, idGrupo: number): Observable<any> {
+        const params = new HttpParams()
+            .set('anio', anio.toString())
+            .set('mes', mes.toString())
+            .set('idGrupoEmpleado', idGrupo.toString());
+
+        return this._http.get<any>(`${this.urlBase}indicadorMensualGrupoEmpleado/valoracionesNegativas`, { params });
+    }
+
+    getValoracionesNegativasEmpleados(anio: number, mes: number, idsEmpleados: number[]): Observable<any> {
+        const idsStr = idsEmpleados.join(',');
+
+        const params = new HttpParams()
+            .set('anio', anio.toString())
+            .set('mes', mes.toString())
+            .set('idsEmpleados', idsStr);
+
+        return this._http.get<any>(`${this.urlBase}indicadorMensualEmpleados/valoracionesNegativas`, { params });
+    }
+
     getGruposEmpleados(): Observable<any[]> {
         return this._http.get<any>(`${this.urlBase}grupoEmpleado`).pipe(
             map(response => {

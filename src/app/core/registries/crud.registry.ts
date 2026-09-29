@@ -55,6 +55,10 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
         loader: () => import('app/resources/item_checklist_grupo/item_checklist_grupo.def')
     },
     {
+        path: 'listarRecibos',
+        loader: () => import('app/resources/listar-recibos/listar-recibos.def')
+    },
+    {
         path: 'novedades-contador',
         loader: () => import('app/resources/novedades_contador/novedades_contador.def')
     },
@@ -118,6 +122,7 @@ export async function loadAllCrudDefs(): Promise<CrudDef[]> {
         import('app/resources/indicadores_mensuales/indicadores_mensuales.def'),
         import('app/resources/indicadores_mensuales_general/indicadores_mensuales_general.def'),
         import('app/resources/item_checklist_grupo/item_checklist_grupo.def'),
+        import('app/resources/listar-recibos/listar-recibos.def'),
         import('app/resources/novedades_contador/novedades_contador.def'),
         import('app/resources/permiso/permiso.def'),
         import('app/resources/problema-maquina/problema-maquina.def'),

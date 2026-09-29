@@ -22,6 +22,7 @@ export interface GenericDialogData {
     cancelButtonText?: string;
     customComponent?: Type<any>;
     componentData?: any;
+    badge?: string | number;
 }
 
 @Component({

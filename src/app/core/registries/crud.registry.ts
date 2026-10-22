@@ -7,6 +7,10 @@ export interface CrudModuleDefinition {
 
 export const CRUD_MODULES: CrudModuleDefinition[] = [
     {
+        path: 'ausentismos',
+        loader: () => import('app/resources/ausentismos/ausentismos.def')
+    },
+    {
         path: 'cierre-mes',
         loader: () => import('app/resources/cierre_mes/cierre_mes.def')
     },
@@ -110,6 +114,7 @@ export const CRUD_MODULES: CrudModuleDefinition[] = [
 
 export async function loadAllCrudDefs(): Promise<CrudDef[]> {
     const loaderPromises = [
+        import('app/resources/ausentismos/ausentismos.def'),
         import('app/resources/cierre_mes/cierre_mes.def'),
         import('app/resources/cliente/cliente.def'),
         import('app/resources/estadisticas-cliente/estadisticas-cliente.def'),

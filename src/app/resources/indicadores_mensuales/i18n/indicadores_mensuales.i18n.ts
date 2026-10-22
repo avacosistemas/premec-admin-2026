@@ -20,6 +20,7 @@ export const INDICADORES_MENSUALES_I18N_DEF: I18n = {
         group_horas: 'Control Horario',
         group_desempeno: 'Desempeño y Objetivos',
         group_calidad: 'Calidad (Feedback)',
+        group_ausentismo: 'Ausentismo',
         group_economico: 'Información Económica',
         group_novedades: 'Novedades',
 
@@ -28,6 +29,11 @@ export const INDICADORES_MENSUALES_I18N_DEF: I18n = {
         lbl_ociosas_hora: 'Hs. Ociosas',
         lbl_fichado_hora: 'Hs. Fichadas',
         lbl_efectividad: 'Efectividad',
+        lbl_horas_totales: 'Horas totales',
+        lbl_horas_ausencia: 'Horas de ausencia',
+        lbl_ausencia_justificada: 'Justificadas',
+        lbl_ausencia_injustificada: 'Injustificadas',
+        lbl_porcentaje_ausentismo: 'Porcentaje de ausentismo',
         
         lbl_actividades: 'Actividades',
         lbl_objetivo: 'Objetivo',

@@ -1,0 +1,41 @@
+import { I18n } from '@fwk/model/i18n';
+
+export const AUSENTISMOS_I18N_DEF: I18n = {
+    name: 'AUSENTISMOS_I18N_DEF',
+    lang: 'es',
+    words: {
+        page_title: 'Consulta de Ausentismos',
+        ausentismos_nav_def: 'Ausentismos',
+        ausentismos_filter_fecha_desde: 'Fecha desde',
+        ausentismos_filter_fecha_hasta: 'Fecha hasta',
+        ausentismos_filter_empleados: 'Empleados',
+        ausentismos_filter_tipo: 'Tipo de ausentismo',
+        ausentismos_filter_justificacion: 'Justificación',
+        ausentismos_todos: 'Todos',
+        ausentismos_justificado: 'Justificado',
+        ausentismos_no_justificado: 'No justificado',
+        ausentismos_buscar: 'Consultar',
+        ausentismos_limpiar: 'Limpiar',
+        ausentismos_sin_resultados_titulo: 'Sin resultados',
+        ausentismos_sin_resultados_desc: 'Seleccione los filtros y consulte para ver los ausentismos.',
+        ausentismos_sin_registros: 'No se encontraron registros para los filtros seleccionados.',
+        ausentismos_registros: 'registros',
+        ausentismos_col_empleado: 'Empleado',
+        ausentismos_horas_totales: 'Horas totales',
+        ausentismos_horas_ausentes: 'Horas ausentes',
+        ausentismos_horas_justificadas: 'Horas justificadas',
+        ausentismos_horas_injustificadas: 'Horas injustificadas',
+        ausentismos_porcentaje_ausentismo: '% ausentismo',
+        ausentismos_porcentaje_justificado: '% justificado',
+        ausentismos_porcentaje_injustificado: '% injustificado',
+        ausentismos_detalle_fecha: 'Fecha',
+        ausentismos_detalle_tipo: 'Tipo',
+        ausentismos_detalle_justificado: 'Justificado',
+        ausentismos_detalle_horas: 'Horas',
+        ausentismos_col_fecha: 'Fecha',
+        ausentismos_col_tipo: 'Tipo de ausentismo',
+        ausentismos_col_justificado: 'Justificado',
+        ausentismos_col_horas: 'Horas ausentes',
+        ausentismos_sin_detalle: 'No hay registros de detalle para este empleado.'
+    }
+};

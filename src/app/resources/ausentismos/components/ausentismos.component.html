@@ -1,0 +1,161 @@
+<div class="flex flex-col flex-auto min-w-0 w-full h-full bg-gray-50 dark:bg-gray-900">
+    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent">
+        <div class="p-4 sm:px-6 w-full">
+            <form [formGroup]="filterForm" (ngSubmit)="buscar()" class="w-full">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pb-2">
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ 'ausentismos_filter_fecha_desde' | translate:i18nName }}</mat-label>
+                        <input matInput type="date" formControlName="fechaDesde">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ 'ausentismos_filter_fecha_hasta' | translate:i18nName }}</mat-label>
+                        <input matInput type="date" formControlName="fechaHasta">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lg:col-span-2">
+                        <mat-label>{{ 'ausentismos_filter_empleados' | translate:i18nName }}</mat-label>
+                        <mat-select formControlName="empleadosIds" multiple>
+                            <mat-option *ngFor="let empleado of empleados" [value]="empleado.id">
+                                {{ empleado.usuario }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ 'ausentismos_filter_tipo' | translate:i18nName }}</mat-label>
+                        <mat-select formControlName="tipoAusentismo">
+                            <mat-option value="">{{ 'ausentismos_todos' | translate:i18nName }}</mat-option>
+                            <mat-option *ngFor="let tipo of tiposAusentismo" [value]="tipo.codigo">
+                                {{ tipo.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ 'ausentismos_filter_justificacion' | translate:i18nName }}</mat-label>
+                        <mat-select formControlName="justificacion">
+                            <mat-option value="">{{ 'ausentismos_todos' | translate:i18nName }}</mat-option>
+                            <mat-option value="true">{{ 'ausentismos_justificado' | translate:i18nName }}</mat-option>
+                            <mat-option value="false">{{ 'ausentismos_no_justificado' | translate:i18nName }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <button type="submit" hidden></button>
+            </form>
+
+            <div class="flex items-center justify-end gap-2">
+                <button mat-stroked-button type="button" (click)="limpiar()">
+                    <mat-icon svgIcon="heroicons_outline:x-mark" class="icon-size-5"></mat-icon>
+                    <span class="ml-2">{{ 'ausentismos_limpiar' | translate:i18nName }}</span>
+                </button>
+                <button mat-flat-button color="accent" type="button" (click)="buscar()" [disabled]="loading">
+                    <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                    <mat-icon *ngIf="!loading" svgIcon="heroicons_outline:magnifying-glass" class="icon-size-5"></mat-icon>
+                    <span class="ml-2">{{ 'ausentismos_buscar' | translate:i18nName }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-auto relative overflow-hidden h-full dark:bg-transparent flex flex-col">
+        <div *ngIf="!searched && !loading" class="flex-auto flex flex-col items-center h-full p-6 py-10 text-center">
+            <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:circle-stack"></mat-icon>
+            <div class="text-2xl font-bold text-gray-700 dark:text-gray-200">{{ 'ausentismos_sin_resultados_titulo' | translate:i18nName }}</div>
+            <div class="text-secondary mt-1 max-w-sm">{{ 'ausentismos_sin_resultados_desc' | translate:i18nName }}</div>
+        </div>
+
+        <div *ngIf="searched && dataSource.data.length === 0 && !loading" class="flex-auto flex flex-col items-center p-10 text-center">
+            <mat-icon class="icon-size-16 text-gray-300 mb-4" svgIcon="heroicons_outline:magnifying-glass"></mat-icon>
+            <div class="text-xl font-bold text-gray-700 dark:text-gray-200">{{ 'ausentismos_sin_registros' | translate:i18nName }}</div>
+        </div>
+
+        <div *ngIf="dataSource.data.length > 0" class="flex-auto overflow-auto container-table pb-20 dark:bg-transparent">
+            <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="bg-transparent w-full min-w-[1100px]">
+                <ng-container matColumnDef="empleado">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_col_empleado' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo" class="font-medium">{{ grupo.empleado || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="horasTotales">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_horas_totales' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.horasTotales || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="horasAusentes">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_horas_ausentes' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.horasAusentes || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="horasJustificadas">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_horas_justificadas' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.horasJustificadas || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="horasInjustificadas">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_horas_injustificadas' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.horasInjustificadas || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="porcentajeAusentismo">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_porcentaje_ausentismo' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo" class="font-semibold text-red-600">{{ grupo.porcentajeAusentismo | number:'1.2-2' }}%</td>
+                </ng-container>
+                <ng-container matColumnDef="porcentajeJustificado">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_porcentaje_justificado' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.porcentajeJustificado | number:'1.2-2' }}%</td>
+                </ng-container>
+                <ng-container matColumnDef="porcentajeInjustificado">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'ausentismos_porcentaje_injustificado' | translate:i18nName }}</th>
+                    <td mat-cell *matCellDef="let grupo">{{ grupo.porcentajeInjustificado | number:'1.2-2' }}%</td>
+                </ng-container>
+                <ng-container matColumnDef="expand">
+                    <th mat-header-cell *matHeaderCellDef class="w-12"></th>
+                    <td mat-cell *matCellDef="let grupo" class="w-12">
+                        <button mat-icon-button type="button" (click)="expandedElement = expandedElement === grupo ? null : grupo; $event.stopPropagation()">
+                            <mat-icon [svgIcon]="expandedElement === grupo ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expandedDetail">
+                    <td mat-cell *matCellDef="let grupo" [attr.colspan]="columnsToDisplayWithExpand.length" class="p-0 border-0">
+                        <div class="element-detail overflow-hidden flex flex-col w-full bg-gray-50/50 dark:bg-gray-900 border-l-4 border-l-accent-500"
+                            [@detailExpand]="grupo === expandedElement ? 'expanded' : 'collapsed'">
+                            <div class="p-4 grid gap-5 w-full">
+                                <div class="overflow-x-auto rounded border border-gray-200 dark:border-gray-700 w-full">
+                                    <table mat-table [dataSource]="grupo.detalle || []" class="detail-table w-full bg-transparent">
+                                        <ng-container matColumnDef="fecha">
+                                            <th mat-header-cell *matHeaderCellDef class="text-center">{{ 'ausentismos_detalle_fecha' | translate:i18nName }}</th>
+                                            <td mat-cell *matCellDef="let detalle" class="text-center">{{ detalle.fecha || '-' }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="tipoAusentismo">
+                                            <th mat-header-cell *matHeaderCellDef class="text-center">{{ 'ausentismos_detalle_tipo' | translate:i18nName }}</th>
+                                            <td mat-cell *matCellDef="let detalle" class="text-left">{{ detalle.tipoAusentismo || '-' }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="justificado">
+                                            <th mat-header-cell *matHeaderCellDef class="text-center">{{ 'ausentismos_detalle_justificado' | translate:i18nName }}</th>
+                                            <td mat-cell *matCellDef="let detalle" class="text-center">{{ esJustificado(detalle.justificado) }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="horasAusentes">
+                                            <th mat-header-cell *matHeaderCellDef class="text-center">{{ 'ausentismos_detalle_horas' | translate:i18nName }}</th>
+                                            <td mat-cell *matCellDef="let detalle" class="text-center">{{ detalle.horasAusentes || '-' }}</td>
+                                        </ng-container>
+                                        <tr mat-header-row *matHeaderRowDef="detalleColumns"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: detalleColumns"></tr>
+                                    </table>
+                                    <div *ngIf="!grupo.detalle?.length" class="p-4 text-center text-secondary">
+                                        {{ 'ausentismos_sin_detalle' | translate:i18nName }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"></tr>
+                <tr mat-row *matRowDef="let grupo; columns: columnsToDisplayWithExpand"
+                    class="element-row cursor-pointer transition-colors border-b dark:border-gray-700"
+                    [class.bg-accent-50]="expandedElement === grupo"
+                    (click)="expandedElement = expandedElement === grupo ? null : grupo"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row h-0"></tr>
+            </table>
+        </div>
+
+        <mat-paginator [hidden]="dataSource.data.length === 0" class="border-t bottom-0 fixed print:hidden w-full z-30"
+            [length]="totalRegistros" [pageIndex]="pageIndex" [pageSize]="pageSize"
+            [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="onPageChange($event)">
+        </mat-paginator>
+    </div>
+</div>

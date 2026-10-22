@@ -155,6 +155,37 @@
                 </div>
             </mat-card>
 
+            <mat-card *ngIf="data.ausentismo" class="overflow-hidden rounded-2xl shadow-xl">
+                <div class="bg-red-600 p-4 text-white flex items-center gap-2">
+                    <mat-icon svgIcon="heroicons_outline:calendar-days" style="color: inherit;"></mat-icon>
+                    <span class="font-semibold text-lg">{{ 'group_ausentismo' | translate:i18nName }}</span>
+                </div>
+                <div class="p-6 grid gap-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <span class="text-secondary font-medium">{{ 'lbl_porcentaje_ausentismo' | translate:i18nName }}</span>
+                        <span class="text-3xl font-bold text-red-600">{{ data.ausentismo.porcentajeAusentismo | number:'1.2-2' }}%</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_horas_totales' | translate:i18nName }}</span>
+                            <span class="text-lg font-semibold">{{ data.ausentismo.horasTotales | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_horas_ausencia' | translate:i18nName }}</span>
+                            <span class="text-lg font-semibold text-red-600">{{ data.ausentismo.horasAusencia | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_ausencia_justificada' | translate:i18nName }}</span>
+                            <span class="text-lg font-medium text-amber-600">{{ data.ausentismo.horasAusenciaJustificadas | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-secondary uppercase">{{ 'lbl_ausencia_injustificada' | translate:i18nName }}</span>
+                            <span class="text-lg font-medium text-gray-800 dark:text-white">{{ data.ausentismo.horasAusenciaInjustificadas | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
             <mat-card class="overflow-hidden rounded-2xl shadow-xl md:col-span-2 xl:col-span-2">
                 <div class="bg-green-600 p-4 text-white flex items-center gap-2">
                     <mat-icon svgIcon="heroicons_outline:currency-dollar" style="color: inherit;"></mat-icon>

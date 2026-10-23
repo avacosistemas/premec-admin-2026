@@ -12,6 +12,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { CustomDatePickerComponent } from '@fwk/components/dynamic-form/custom-datepicker/custom-datepicker.component';
+import { DATEPICKER, DynamicField } from '@fwk/model/dynamic-form/dynamic-field';
 import { ActionDef } from '@fwk/model/component-def/action-def';
 import { CustomPageComponent } from '@fwk/model/page-component.interface';
 import { NotificationService } from '@fwk/services/notification/notification.service';
@@ -32,6 +34,7 @@ import { AusentismoAgrupado, AusentismosService } from '../ausentismos.service';
         MatProgressSpinnerModule,
         MatSelectModule,
         MatTableModule,
+        CustomDatePickerComponent,
         TranslatePipe
     ],
     templateUrl: './ausentismos.component.html',
@@ -45,6 +48,17 @@ import { AusentismoAgrupado, AusentismosService } from '../ausentismos.service';
     ]
 })
 export class AusentismosComponent implements OnInit, CustomPageComponent {
+    readonly todosTiposValue = '__TODOS_TIPOS_AUSENTISMO__';
+    readonly fechaDesdeField = new DynamicField({
+        key: 'fechaDesde',
+        label: 'Fecha desde',
+        controlType: DATEPICKER
+    });
+    readonly fechaHastaField = new DynamicField({
+        key: 'fechaHasta',
+        label: 'Fecha hasta',
+        controlType: DATEPICKER
+    });
     private readonly fb = inject(FormBuilder);
     private readonly service = inject(AusentismosService);
     private readonly notifications = inject(NotificationService);
@@ -59,7 +73,8 @@ export class AusentismosComponent implements OnInit, CustomPageComponent {
         'horasInjustificadas',
         'porcentajeAusentismo',
         'porcentajeJustificado',
-        'porcentajeInjustificado'
+        'porcentajeInjustificado',
+        'llegadasTarde'
     ];
     readonly columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
     readonly detalleColumns = ['fecha', 'tipoAusentismo', 'justificado', 'horasAusentes'];
@@ -81,7 +96,7 @@ export class AusentismosComponent implements OnInit, CustomPageComponent {
             fechaDesde: [''],
             fechaHasta: [''],
             empleadosIds: [[]],
-            tipoAusentismo: [''],
+            tiposAusentismo: [[]],
             justificacion: ['']
         });
         this.cargarOpciones();
@@ -111,7 +126,9 @@ export class AusentismosComponent implements OnInit, CustomPageComponent {
             fechaDesde: this.toApiDate(value.fechaDesde) || null,
             fechaHasta: this.toApiDate(value.fechaHasta) || null,
             empleadosIds: Array.isArray(value.empleadosIds) ? value.empleadosIds : [],
-            tipoAusentismo: value.tipoAusentismo || null,
+            tipoAusentismo: Array.isArray(value.tiposAusentismo) && value.tiposAusentismo.length
+                ? value.tiposAusentismo.filter((codigo: string) => codigo !== this.todosTiposValue).join(',') || null
+                : null,
             justificacion: value.justificacion || null,
             page,
             pageSize
@@ -141,7 +158,7 @@ export class AusentismosComponent implements OnInit, CustomPageComponent {
 
     limpiar(): void {
         this.filterForm.reset({
-            fechaDesde: '', fechaHasta: '', empleadosIds: [], tipoAusentismo: '', justificacion: ''
+            fechaDesde: '', fechaHasta: '', empleadosIds: [], tiposAusentismo: [], justificacion: ''
         });
         this.dataSource.data = [];
         this.expandedElement = null;
@@ -152,6 +169,15 @@ export class AusentismosComponent implements OnInit, CustomPageComponent {
 
     onPageChange(event: PageEvent): void {
         this.buscar(event.pageIndex, event.pageSize);
+    }
+
+    onTiposAusentismoChange(values: string[]): void {
+        if (!values?.includes(this.todosTiposValue)) return;
+
+        const todosLosTipos = this.tiposAusentismo
+            .map(tipo => tipo.codigo)
+            .filter((codigo): codigo is string => codigo != null);
+        this.filterForm.get('tiposAusentismo')?.setValue(todosLosTipos);
     }
 
     esJustificado(value: boolean | null | undefined): string {

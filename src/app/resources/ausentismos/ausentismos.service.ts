@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { PREFIX_DOMAIN_API } from 'environments/environment';
 import { Observable } from 'rxjs';
@@ -6,13 +6,14 @@ import { Observable } from 'rxjs';
 export interface AusentismoDetalle {
     fecha: string;
     tipoAusentismo: string;
-    justificado: boolean;
+    justificado: boolean | null;
     horasAusentes: string;
 }
 
 export interface AusentismoAgrupado {
     idEmpleado: number;
     empleado: string;
+    llegadasTarde: string | number;
     horasTotales: string;
     horasAusentes: string;
     horasJustificadas: string;
@@ -40,18 +41,30 @@ export class AusentismosService {
     private readonly api = PREFIX_DOMAIN_API;
 
     buscar(filtros: AusentismoFiltros): Observable<any> {
-        const params = new HttpParams()
-            .set('page', filtros.page.toString())
-            .set('pageSize', filtros.pageSize.toString());
         const payload = {
             fechaDesde: filtros.fechaDesde,
             fechaHasta: filtros.fechaHasta,
             empleadosIds: filtros.empleadosIds,
             tipoAusentismo: filtros.tipoAusentismo,
-            justificacion: filtros.justificacion
+            justificacion: filtros.justificacion,
+            page: filtros.page,
+            pageSize: filtros.pageSize
         };
 
-        return this.http.post<any>(`${this.api}ausentismo`, payload, { params });
+        return this.http.post<any>(`${this.api}ausentismo`, payload);
+    }
+
+    buscarMiAusentismo(fechaDesde: string, fechaHasta: string, page = 0, pageSize = 100): Observable<any> {
+        const payload = {
+            fechaDesde,
+            fechaHasta,
+            page,
+            pageSize,
+            tipoAusentismo: null,
+            justificacion: null
+        };
+
+        return this.http.post<any>(`${this.api}miausentismo`, payload);
     }
 
     getEmpleados(): Observable<any> {

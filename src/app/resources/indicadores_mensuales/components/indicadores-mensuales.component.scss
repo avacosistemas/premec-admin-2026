@@ -1,0 +1,27 @@
+@media (max-width: 639px) {
+    .mis-indicadores-tabs {
+        .mat-mdc-tab-header-pagination {
+            display: none !important;
+        }
+
+        .mat-mdc-tab-labels {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            width: 100%;
+        }
+
+        .mat-mdc-tab {
+            min-width: 0 !important;
+            flex: 1 1 0 !important;
+            padding: 0 4px !important;
+        }
+
+        .mdc-tab__text-label {
+            justify-content: center;
+            text-align: center;
+            white-space: normal;
+            line-height: 1.2;
+            font-size: 0.75rem;
+        }
+    }
+}

@@ -21,6 +21,7 @@ export const AUSENTISMOS_I18N_DEF: I18n = {
         ausentismos_sin_registros: 'No se encontraron registros para los filtros seleccionados.',
         ausentismos_registros: 'registros',
         ausentismos_col_empleado: 'Empleado',
+        ausentismos_llegadas_tarde: 'Llegadas tarde',
         ausentismos_horas_totales: 'Horas totales',
         ausentismos_horas_ausentes: 'Horas ausentes',
         ausentismos_horas_justificadas: 'Horas justificadas',

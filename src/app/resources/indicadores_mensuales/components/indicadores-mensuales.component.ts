@@ -12,6 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -23,6 +24,7 @@ import { CustomPageComponent } from '@fwk/model/page-component.interface';
 import { ActionDef } from '@fwk/model/component-def/action-def';
 
 import { IndicadoresMensualesService } from '../indicadores-mensuales.service';
+import { AusentismoDetalle, AusentismosService } from '../../ausentismos/ausentismos.service';
 
 @Component({
     selector: 'app-indicadores-mensuales',
@@ -42,16 +44,19 @@ import { IndicadoresMensualesService } from '../indicadores-mensuales.service';
         MatCardModule,
         MatDividerModule,
         MatTableModule,
+        MatTabsModule,
         MatPaginatorModule,
         TranslatePipe
     ],
     templateUrl: './indicadores-mensuales.component.html',
+    styleUrls: ['./indicadores-mensuales.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class IndicadoresMensualesComponent implements OnInit, CustomPageComponent {
     
     private _fb = inject(FormBuilder);
     private _service = inject(IndicadoresMensualesService);
+    private _ausentismosService = inject(AusentismosService);
     private _notificationService = inject(NotificationService);
     private _i18nService = inject(I18nService);
     private _cdr = inject(ChangeDetectorRef);
@@ -65,6 +70,8 @@ export class IndicadoresMensualesComponent implements OnInit, CustomPageComponen
     i18nName = 'INDICADORES_MENSUALES_I18N_DEF';
     
     data: any | null = null;
+    detalleAusentismo: AusentismoDetalle[] = [];
+    cargandoDetalleAusentismo = false;
 
     dataSourceObservaciones = new MatTableDataSource<any>([]);
     displayedColumnsObservaciones: string[] = ['fecha', 'actividad', 'empleado', 'cliente', 'detalle', 'valoracion'];
@@ -98,6 +105,8 @@ export class IndicadoresMensualesComponent implements OnInit, CustomPageComponen
             anio: currentDate.getFullYear()
         });
         this.data = null;
+        this.detalleAusentismo = [];
+        this.cargandoDetalleAusentismo = false;
         this.dataSourceObservaciones.data = [];
         this.panelOpenState = true;
     }
@@ -107,6 +116,8 @@ export class IndicadoresMensualesComponent implements OnInit, CustomPageComponen
 
         this.loading = true;
         this.data = null;
+        this.detalleAusentismo = [];
+        this.cargandoDetalleAusentismo = false;
         this.dataSourceObservaciones.data = [];
         const { anio, mes } = this.filterForm.value;
 
@@ -120,6 +131,7 @@ export class IndicadoresMensualesComponent implements OnInit, CustomPageComponen
                 if (indicadores && indicadores.status === 'OK' && indicadores.data) {
                     this.data = indicadores.data;
                     this.panelOpenState = false;
+                    this.cargarDetalleAusentismo(indicadores.data, anio, mes);
                 } else {
                     this.data = null;
                     this._notificationService.notify('No se encontraron datos para el período seleccionado.');
@@ -145,6 +157,26 @@ export class IndicadoresMensualesComponent implements OnInit, CustomPageComponen
                 this.loading = false;
                 this._cdr.markForCheck();
             }
+        });
+    }
+
+    private cargarDetalleAusentismo(indicador: any, anio: number, mes: number): void {
+        if (!indicador?.ausentismo) return;
+
+        const fechaDesde = `01/${String(mes).padStart(2, '0')}/${anio}`;
+        const ultimoDia = new Date(anio, mes, 0).getDate();
+        const fechaHasta = `${String(ultimoDia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${anio}`;
+        this.cargandoDetalleAusentismo = true;
+        this._ausentismosService.buscarMiAusentismo(fechaDesde, fechaHasta).pipe(catchError(() => of(null))).subscribe(response => {
+            const grupos = Array.isArray(response?.data) ? response.data
+                : Array.isArray(response?.data?.content) ? response.data.content
+                    : Array.isArray(response?.content) ? response.content
+                        : Array.isArray(response?.items) ? response.items
+                            : response?.detalle ? [response] : [];
+            const empleado = grupos[0];
+            this.detalleAusentismo = empleado?.detalle || [];
+            this.cargandoDetalleAusentismo = false;
+            this._cdr.markForCheck();
         });
     }
 }

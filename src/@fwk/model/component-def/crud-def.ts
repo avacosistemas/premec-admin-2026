@@ -5,6 +5,7 @@ import { GridDef } from './grid-def';
 import { ActionDef } from './action-def';
 import { DisplayActionsCondition } from '../display-actions-condition';
 import { DynamicFieldConditionIf } from '../dynamic-form/dynamic-field-condition-if';
+import { WsDef } from '../ws-def';
 
 export class CrudDef extends ComponentDef {
   grid?: GridDef;
@@ -32,6 +33,12 @@ export class CrudDef extends ComponentDef {
     type?: 'none' | 'client' | 'server';
     csvExportFileName: string,
     ws?: string
+  };
+  bulkDownload?: {
+    ws: WsDef;
+    title: string;
+    icon?: string;
+    minSelection?: number;
   };
   // Deprecado
   searchFields?: any;

@@ -19,6 +19,16 @@ export const LISTAR_RECIBOS_DEF: CrudDef = {
         key: 'LISTAR_RECIBOS_CRUD_URL',
         url: PREFIX_DOMAIN_API + 'listarRecibos'
     },
+    bulkDownload: {
+        ws: {
+            key: 'DOWNLOAD_GRUPO_RECIBOS_WS',
+            url: PREFIX_DOMAIN_API + 'descargarGrupoRecibos',
+            method: 'POST'
+        },
+        title: 'Descargar grupo de recibos',
+        icon: 'heroicons_outline:arrow-down-tray',
+        minSelection: 2
+    },
     dialogConfig: {
         width: '600px'
     },

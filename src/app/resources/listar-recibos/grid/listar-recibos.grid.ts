@@ -3,6 +3,8 @@ import { PREFIX_DOMAIN_API } from "environments/environment";
 
 export const LISTAR_RECIBOS_GRID_DEF: GridDef = {
   actionCellClass: '',
+  selectRows: true,
+  selectionLimit: 0,
   groupActions: false,
   columnsDef: [
     {
@@ -53,6 +55,7 @@ export const LISTAR_RECIBOS_GRID_DEF: GridDef = {
   sortAllColumns: true,
   deleteAction: false,
   displayedColumns: [
+    '_general_action',
     'empleado',
     'monthString',
     'year',

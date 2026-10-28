@@ -156,6 +156,7 @@
                 appearance="outline">
                 <mat-label>{{ field.options?.matLabel ?? field.label }}</mat-label>
                 <mat-select [formControlName]="field.key" (selectionChange)="onChangeSelect($event)"
+                    [multiple]="field.options?.multiple === true"
                     [cdkFocusInitial]="i === firstFocusableFieldIndex">
                     <mat-option *ngFor="let data of field.options?.fromData"
                         [value]="field.options?.elementValue ? data[field.options.elementValue] : data">

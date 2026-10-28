@@ -90,6 +90,7 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     selects: false
   };
   selects: any[] = [];
+  bulkDownloadLoading = false;
   hasActiveFilters: boolean = false;
   actionLoadingStates = new Map<string, boolean>();
 
@@ -153,6 +154,27 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
 
   displayGlobalButtons(hasElementsSelected: boolean): void {
     this.display.selects = hasElementsSelected;
+  }
+
+  canDownloadSelection(): boolean {
+    const action = this.crudDef?.bulkDownload;
+    return !!action && this.selects.length >= (action.minSelection ?? 1);
+  }
+
+  downloadSelectedGroup(): void {
+    const action = this.crudDef?.bulkDownload;
+    if (!action || !this.canDownloadSelection() || this.bulkDownloadLoading) return;
+
+    this.bulkDownloadLoading = true;
+    this.genericHttpService.callWs(action.ws, this.selects).pipe(
+      finalize(() => {
+        this.bulkDownloadLoading = false;
+        this._cdr.markForCheck();
+      })
+    ).subscribe({
+      next: file => this.fileService.downloadFileOctectStream(file),
+      error: () => this.notificationService.notifyError('No se pudo descargar el grupo de recibos.')
+    });
   }
 
   openAddDialog(): void {

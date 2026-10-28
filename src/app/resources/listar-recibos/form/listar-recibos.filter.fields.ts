@@ -11,8 +11,14 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
                 url: PREFIX_DOMAIN_API + 'grupoEmpleado/usuarios'
             },
             elementLabel: 'usuario',
-            elementValue: 'idSap'
+            elementValue: 'idSap',
+            multiple: true
         }
+    },
+    {
+        key: 'year',
+        labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_year',
+        controlType: 'number'
     },
     {
         key: 'meses',
@@ -22,6 +28,7 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
             handlerSourceData: false,
             elementLabel: 'label',
             elementValue: 'value',
+            multiple: true,
             fromData: [
                 { value: 1, label: 'Enero' },
                 { value: 2, label: 'Febrero' },
@@ -33,15 +40,10 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
                 { value: 8, label: 'Agosto' },
                 { value: 9, label: 'Septiembre' },
                 { value: 10, label: 'Octubre' },
-                { value: 11, label: 'Nobiembre' },
+                { value: 11, label: 'Noviembre' },
                 { value: 12, label: 'Diciembre' },
             ]
         }
-    },
-    {
-        key: 'year',
-        labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_year',
-        controlType: 'number'
     },
     {
         key: 'tipoRecibo',

@@ -8,6 +8,8 @@ export class GridDef {
     displayedColumnsCondition?: DisplayCondition[];
     displayedActionsCondition?: DisplayCondition[];
     selectCondition?: DynamicFieldConditionIf;
+    selectRows?: boolean;
+    selectionLimit?: number;
 
     key?: string;
     actionHeaderClass?: string;

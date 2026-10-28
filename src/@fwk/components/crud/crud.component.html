@@ -93,10 +93,19 @@
             <fwk-crud-table *ngIf="crudDef.grid" [containerClass]="isTableLoading ? 'h-[67vh]' : ''"
                 [onClickRow]="onClickRow" [datasource]="dataSource" [canDelete]="showDeleteButton()"
                 [searchPerformed]="searchPerformed" [grid]="crudDef.grid" [crud]="this" [isLoading]="isTableLoading"
-                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()" (status)="statusChanged($event)"
+                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()"
+                [selectable]="!!crudDef.grid?.selectRows" (status)="statusChanged($event)"
                 (onChangePagination)="handlePageChange()" (onAddClicked)="openAddDialog()"
                 (onClearFiltersClicked)="clearFilters()" (onRowClicked)="handleRowClick($event)">
             </fwk-crud-table>
         </div>
     </div>
+
+    <button *ngIf="canDownloadSelection()" mat-fab color="accent"
+        class="fixed bottom-8 right-8 z-50 shadow-lg" [matTooltip]="crudDef.bulkDownload?.title"
+        [attr.title]="crudDef.bulkDownload?.title" [attr.aria-label]="crudDef.bulkDownload?.title"
+        [disabled]="bulkDownloadLoading" (click)="downloadSelectedGroup()">
+        <mat-progress-spinner *ngIf="bulkDownloadLoading" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+        <mat-icon *ngIf="!bulkDownloadLoading" [svgIcon]="crudDef.bulkDownload?.icon || 'heroicons_outline:arrow-down-tray'"></mat-icon>
+    </button>
 </div>

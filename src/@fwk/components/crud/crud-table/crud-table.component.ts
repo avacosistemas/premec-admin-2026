@@ -391,7 +391,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     }
 
     hasGeneralActions(): boolean {
-        if (this.selectable) {
+        if (this.selectable || this.grid?.selectRows) {
             return true;
         }
         return !!(this.grid?.deleteAction || this.grid?.deleteColumn) && this.canDelete;
@@ -665,16 +665,16 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     }
 
     masterToggle(): void {
-        if (this.isAllSelected() || this.statustable.selects.length >= 10) {
+        if (this.isAllSelected()) {
             this.rows.forEach(r => {
                 if (r.selectable) r.select = false;
             });
         } else {
             let count = 0;
-            const maxSelection = 10;
+            const maxSelection = this.grid.selectionLimit ?? 10;
 
             this.rows.forEach(r => {
-                if (r.selectable && count < maxSelection) {
+                if (r.selectable && (maxSelection <= 0 || count < maxSelection)) {
                     r.select = true;
                     count++;
                 } else {
@@ -682,10 +682,15 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
                 }
             });
 
-            if (this.rows.length > maxSelection) {
-                this.notificationService.notify('Se han seleccionado los primeros 10 elementos (máximo permitido).');
+            if (maxSelection > 0 && this.rows.filter(r => r.selectable).length > maxSelection) {
+                this.notificationService.notify(`Se han seleccionado los primeros ${maxSelection} elementos (máximo permitido).`);
             }
         }
+    }
+
+    isSelectionLimitReached(): boolean {
+        const maxSelection = this.grid.selectionLimit ?? 10;
+        return maxSelection > 0 && this.statustable.selects.length >= maxSelection;
     }
 
     isAllSelected(): boolean {
@@ -693,9 +698,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
         if (!selectableRows.length) return false;
 
         const allSelected = selectableRows.every(r => r.select);
-        const maxSelected = this.statustable.selects.length >= 10;
-
-        return allSelected || maxSelected;
+        return allSelected;
     }
 
     onPageFired(event: any): void {

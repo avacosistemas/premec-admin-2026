@@ -7,4 +7,5 @@ export interface PageComponentDef extends ComponentDef {
     actions?: ActionDef[];
     backButton?: boolean;
     subtitleKey?: string;
+    hideHeader?: boolean;
 }

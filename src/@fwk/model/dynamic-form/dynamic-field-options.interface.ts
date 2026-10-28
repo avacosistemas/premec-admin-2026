@@ -23,6 +23,7 @@ export interface SelectOptions extends BaseFieldOptions {
     fromData?: any[];
     elementValue?: string;
     elementLabel?: string;
+    multiple?: boolean;
 }
 
 export interface RadioButtonOptions extends BaseFieldOptions {

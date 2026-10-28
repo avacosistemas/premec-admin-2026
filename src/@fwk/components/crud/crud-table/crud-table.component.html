@@ -25,8 +25,8 @@
                         <mat-header-cell *matHeaderCellDef class="print:hidden column-action-table"
                             [ngClass]="grid.actionHeaderClass">
                             <mat-checkbox (change)="$event ? masterToggle() : null"
-                                [checked]="isAllSelected() || (statustable.selects.length === 10 && totalSize > 10)"
-                                [indeterminate]="statustable.selects.length > 0 && !isAllSelected() && statustable.selects.length < 10"
+                                [checked]="isAllSelected()"
+                                [indeterminate]="statustable.selects.length > 0 && !isAllSelected()"
                                 [matTooltip]="'table_select_all_tooltip' | translate">
                             </mat-checkbox>
                         </mat-header-cell>
@@ -34,7 +34,7 @@
                             [ngClass]="grid.actionCellClass">
                             <mat-checkbox *ngIf="getRow(element)?.selectable" (click)="$event.stopPropagation()"
                                 [(ngModel)]="getRow(element)!.select"
-                                [disabled]="!getRow(element)!.select && statustable.selects.length >= 10">
+                                [disabled]="!getRow(element)!.select && isSelectionLimitReached()">
                             </mat-checkbox>
                         </mat-cell>
                     </ng-container>

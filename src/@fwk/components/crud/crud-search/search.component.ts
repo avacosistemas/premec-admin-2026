@@ -46,6 +46,7 @@ export class SearchComponent extends AbstractComponent implements OnInit, AfterV
 
   @Input() title: string | undefined;
   @Input() forceFirstSubmit: boolean = false;
+  @Input() compactFilterRow: boolean = false;
   @Input() fields!: DynamicField<any>[];
   @Input() crudDef!: CrudDef;
   @Input() columnsDef: any[] = [];

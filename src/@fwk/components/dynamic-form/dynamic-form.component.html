@@ -1,4 +1,6 @@
 <form *ngIf="form" #formDirective="ngForm" class="dynamicFormDiv grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+    [class.compact-filter-row]="compactFilterRow"
+    [style.grid-template-columns]="compactFilterRow ? 'repeat(8, minmax(0, 1fr))' : null"
     [formGroup]="form" novalidate>
 
     <div *ngFor="let field of fields; let i = index" class="dynamicFieldDiv" [class]="field.cssClass || ''" [ngClass]="{

@@ -25,10 +25,18 @@ export const LISTAR_RECIBOS_DEF: CrudDef = {
             url: PREFIX_DOMAIN_API + 'descargarGrupoRecibos',
             method: 'POST'
         },
-        title: 'Descargar grupo de recibos',
+        title: 'Generar PDF unificado',
         icon: 'heroicons_outline:arrow-down-tray',
-        minSelection: 2
+        minSelection: 1
     },
+    selectionPanel: {
+        title: 'Recibos agregados',
+        addAllLabel: 'Agregar todos',
+        addLabel: 'Agregar',
+        removeAllLabel: 'Borrar todo',
+        generateLabel: 'listar_recibos_download_button'
+    },
+    compactFilterRow: true,
     dialogConfig: {
         width: '600px'
     },

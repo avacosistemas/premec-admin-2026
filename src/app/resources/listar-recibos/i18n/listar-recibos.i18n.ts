@@ -17,6 +17,8 @@ export const LISTAR_RECIBOS_I18N_DEF: I18n = {
     'listar_recibos_grid_def_column_firmado': 'Firmado',
     'listar_recibos_grid_def_column_linenum': 'Line Num',
     'listar_recibos_grid_def_column_empleado': 'Empleado',
+    'listar_recibos_grid_def_column_agregar': 'Agregar',
+    'listar_recibos_download_button': 'Descargar',
     'LISTAR_RECIBOS_CREATE_FORM_FIELDS_DEF_FIELD_attachmententry': 'Attachment Entry',
     'LISTAR_RECIBOS_UPDATE_FORM_FIELDS_DEF_FIELD_attachmententry': 'Attachment Entry',
     'LISTAR_RECIBOS_READ_FORM_FIELDS_DEF_FIELD_attachmententry': 'Attachment Entry',
@@ -60,6 +62,7 @@ export const LISTAR_RECIBOS_I18N_DEF: I18n = {
     'LISTAR_RECIBOS_CREATE_FORM_FIELDS_DEF_FIELD_empleado': 'Empleado',
     'LISTAR_RECIBOS_UPDATE_FORM_FIELDS_DEF_FIELD_empleado': 'Empleado',
     'LISTAR_RECIBOS_READ_FORM_FIELDS_DEF_FIELD_empleado': 'Empleado',
-    'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_empleado': 'Empleado'
+    'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_empleado': 'Empleado',
+    'recibos_grid_action_download_receipt': 'Descargar recibo'
   }
 };

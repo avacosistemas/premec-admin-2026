@@ -80,7 +80,7 @@
         </div>
 
         <div *ngIf="crudDef.forms?.filter" class="w-full print:hidden">
-            <fwk-search #searchComponent [fields]="crudDef.forms.filter"
+            <fwk-search #searchComponent [compactFilterRow]="!!crudDef.compactFilterRow" [fields]="crudDef.forms.filter"
                 (onChangeSearchEntity)="filterSearchEntity($event)" [forceFirstSubmit]="true" [crudDef]="crudDef"
                 [columnsDef]="crudDef.grid?.columnsDef" [displayedColumns]="crudDef.grid?.displayedColumns"
                 (displayedColumnsChange)="onDisplayedColumnsChange($event)" [i18n]="i18nComponent">
@@ -101,11 +101,57 @@
         </div>
     </div>
 
-    <button *ngIf="canDownloadSelection()" mat-fab color="accent"
+    <aside *ngIf="crudDef.selectionPanel"
+        class="selection-panel flex flex-row items-end print:hidden">
+        <button type="button" class="mb-4 flex h-16 w-6 shrink-0 items-center justify-center rounded-l-md rounded-r-none bg-accent text-white"
+            [matTooltip]="crudDef.selectionPanel.title" [attr.aria-label]="crudDef.selectionPanel.title">
+            <mat-icon class="!h-4 !w-4" [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
+        </button>
+        <div class="selection-panel-content flex h-full min-w-0 flex-auto flex-col overflow-hidden rounded-l-xl border bg-card shadow-2xl">
+            <div class="flex items-center justify-between border-b px-4 py-3">
+                <div class="font-semibold">{{ crudDef.selectionPanel.title }} ({{ selectedReceipts.length }})</div>
+                <button mat-icon-button [disabled]="!selectedReceipts.length" [matTooltip]="crudDef.selectionPanel.removeAllLabel"
+                    (click)="clearSelectionPanel()" [attr.aria-label]="crudDef.selectionPanel.removeAllLabel">
+                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                </button>
+            </div>
+            <div class="min-h-0 flex-auto overflow-y-auto p-3">
+                <div *ngIf="!selectedReceipts.length" class="py-8 text-center text-secondary">No hay recibos agregados.</div>
+                <div *ngFor="let item of selectedReceipts" class="mb-2 flex items-start justify-between gap-2 rounded-lg border p-3">
+                    <div class="min-w-0 text-sm">
+                        <div class="font-medium">{{ item.receipt.empleado || 'Recibo' }}</div>
+                        <div class="text-secondary">{{ item.receipt.monthString }} {{ item.receipt.year }} · {{ item.receipt.tipo }}</div>
+                        <div class="truncate text-secondary">{{ item.receipt.descripcion }}</div>
+                    </div>
+                    <button mat-icon-button color="warn" matTooltip="Quitar recibo" (click)="removeFromSelection(item.key)"
+                        aria-label="Quitar recibo">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="border-t p-3">
+                <button mat-flat-button color="accent" class="w-full" [disabled]="!canDownloadSelection() || bulkDownloadLoading"
+                    (click)="downloadSelectedGroup()">
+                    <span *ngIf="bulkDownloadLoading" class="inline-flex items-center justify-center">
+                        <mat-progress-spinner [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                    </span>
+                    <ng-container *ngIf="!bulkDownloadLoading">
+                        <span class="inline-flex items-center justify-center gap-2 leading-none">
+                            <mat-icon class="!m-0 !h-5 !w-5" [svgIcon]="crudDef.bulkDownload?.icon || 'heroicons_outline:arrow-down-tray'"></mat-icon>
+                            <span>{{ crudDef.selectionPanel.generateLabel | translate:crudDef.i18n?.name }}</span>
+                        </span>
+                    </ng-container>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <button *ngIf="canDownloadSelection() && !crudDef.selectionPanel" mat-fab color="accent"
         class="fixed bottom-8 right-8 z-50 shadow-lg" [matTooltip]="crudDef.bulkDownload?.title"
         [attr.title]="crudDef.bulkDownload?.title" [attr.aria-label]="crudDef.bulkDownload?.title"
         [disabled]="bulkDownloadLoading" (click)="downloadSelectedGroup()">
         <mat-progress-spinner *ngIf="bulkDownloadLoading" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
         <mat-icon *ngIf="!bulkDownloadLoading" [svgIcon]="crudDef.bulkDownload?.icon || 'heroicons_outline:arrow-down-tray'"></mat-icon>
     </button>
+
 </div>

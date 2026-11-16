@@ -5,6 +5,7 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
         key: 'empleadosIds',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_empleado',
         controlType: 'select',
+        colSpan: 2,
         options: {
             fromWs: {
                 key: 'GRUPO_EMPLEADO_USUARIOS_URL',
@@ -18,12 +19,14 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
     {
         key: 'year',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_year',
-        controlType: 'number'
+        controlType: 'number',
+        colSpan: 1
     },
     {
         key: 'meses',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_month',
         controlType: 'select',
+        colSpan: 1,
         options: {
             handlerSourceData: false,
             elementLabel: 'label',
@@ -50,6 +53,7 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_tipo',
         label: 'Tipo de Recibo',
         controlType: 'select',
+        colSpan: 2,
         options: {
             handlerSourceData: false,
             elementLabel: 'label',
@@ -71,6 +75,7 @@ export const LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF: DynamicField<any>[] = [
         key: 'firmado',
         labelKey: 'LISTAR_RECIBOS_FILTER_FORM_FIELDS_DEF_FIELD_firmado',
         controlType: 'select',
+        colSpan: 1,
         options: {
             handlerSourceData: false,
             elementLabel: 'label',

@@ -40,9 +40,16 @@
                     </ng-container>
 
                     <ng-container *ngFor="let def of grid.columnsDef" [matColumnDef]="def.columnDef">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="isDisableSort(def.columnDef)"
+                        <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="isDisableSort(def.columnDef) || def.columnType === 'selection_add'"
                             [ngClass]="[def.headerClass || '', getColumnStyles(def)]" class="text-sm">
-                            {{ def.columnName }}
+                            <ng-container *ngIf="def.columnType === 'selection_add'; else regularHeader">
+                                <button mat-icon-button color="accent" matTooltip="Agregar todos" title="Agregar todos"
+                                    aria-label="Agregar todos" [disabled]="isLoading || !datasource?.data?.length"
+                                    (click)="$event.stopPropagation(); crud.addCurrentPageToSelection()">
+                                    <mat-icon [svgIcon]="'heroicons_outline:squares-plus'"></mat-icon>
+                                </button>
+                            </ng-container>
+                            <ng-template #regularHeader>{{ def.columnName }}</ng-template>
                         </mat-header-cell>
 
                         <mat-cell *matCellDef="let element"
@@ -59,6 +66,15 @@
                             </ng-container>
                             
                             <ng-template #nextCheck>
+                                <ng-container *ngIf="def.columnType === 'selection_add'; else nextSelectionCheck">
+                                    <button mat-icon-button color="accent" matTooltip="Agregar recibo" aria-label="Agregar recibo"
+                                        (click)="$event.stopPropagation(); crud.addToSelection(element)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                    </button>
+                                </ng-container>
+                            </ng-template>
+
+                            <ng-template #nextSelectionCheck>
                                 <ng-container *ngIf="def.columnType === 'button'; else regularCell">
                                     <div class="flex items-center gap-2">
                                         <ng-container *ngIf="getColumnActions(def, element) as colActions">

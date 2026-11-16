@@ -93,6 +93,7 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
     @Input() parentForm!: FormGroup;
     @Input() entity: any = {};
     @Input() isEdit: boolean = false;
+    @Input() compactFilterRow: boolean = false;
     @Input() handlerFieldSourceData?: (key: string, entity: any, injector: Injector) => Observable<any>;
 
     @Input() subFormName: string = DynamicFormComponent.subFormName;

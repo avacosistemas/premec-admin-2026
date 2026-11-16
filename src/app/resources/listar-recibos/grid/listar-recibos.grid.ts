@@ -3,8 +3,7 @@ import { PREFIX_DOMAIN_API } from "environments/environment";
 
 export const LISTAR_RECIBOS_GRID_DEF: GridDef = {
   actionCellClass: '',
-  selectRows: true,
-  selectionLimit: 0,
+  selectRows: false,
   groupActions: false,
   columnsDef: [
     {
@@ -50,12 +49,17 @@ export const LISTAR_RECIBOS_GRID_DEF: GridDef = {
     {
         columnDef: 'empleado',
         columnNameKey: 'listar_recibos_grid_def_column_empleado'
+    },
+    {
+        columnDef: 'agregar',
+        columnNameKey: 'listar_recibos_grid_def_column_agregar',
+        columnType: 'selection_add'
     }
 ],
   sortAllColumns: true,
   deleteAction: false,
   displayedColumns: [
-    '_general_action',
+    'agregar',
     'empleado',
     'monthString',
     'year',

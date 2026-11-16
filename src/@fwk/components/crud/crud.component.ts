@@ -91,6 +91,7 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   };
   selects: any[] = [];
   bulkDownloadLoading = false;
+  selectedReceipts: { key: string; receipt: any }[] = [];
   hasActiveFilters: boolean = false;
   actionLoadingStates = new Map<string, boolean>();
 
@@ -158,7 +159,47 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
 
   canDownloadSelection(): boolean {
     const action = this.crudDef?.bulkDownload;
-    return !!action && this.selects.length >= (action.minSelection ?? 1);
+    const count = this.crudDef?.selectionPanel ? this.selectedReceipts.length : this.selects.length;
+    return !!action && count >= (action.minSelection ?? 1);
+  }
+
+  addToSelection(receipt: any): void {
+    this.addReceiptsToSelection([receipt]);
+  }
+
+  addCurrentPageToSelection(): void {
+    this.addReceiptsToSelection(this.dataSource || []);
+  }
+
+  private addReceiptsToSelection(receipts: any[]): void {
+    const existing = new Set(this.selectedReceipts.map(item => item.key));
+    for (const receipt of receipts) {
+      const key = this.getStableObjectKey(receipt);
+      if (!existing.has(key)) {
+        this.selectedReceipts.push({ key, receipt: { ...receipt } });
+        existing.add(key);
+      }
+    }
+    this.selectedReceipts = [...this.selectedReceipts];
+    this._cdr.markForCheck();
+  }
+
+  removeFromSelection(key: string): void {
+    this.selectedReceipts = this.selectedReceipts.filter(item => item.key !== key);
+    this._cdr.markForCheck();
+  }
+
+  clearSelectionPanel(): void {
+    this.selectedReceipts = [];
+    this._cdr.markForCheck();
+  }
+
+  private getStableObjectKey(value: any): string {
+    if (Array.isArray(value)) return `[${value.map(item => this.getStableObjectKey(item)).join(',')}]`;
+    if (value && typeof value === 'object') {
+      return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${this.getStableObjectKey(value[key])}`).join(',')}}`;
+    }
+    return JSON.stringify(value) ?? 'undefined';
   }
 
   downloadSelectedGroup(): void {
@@ -166,7 +207,10 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     if (!action || !this.canDownloadSelection() || this.bulkDownloadLoading) return;
 
     this.bulkDownloadLoading = true;
-    this.genericHttpService.callWs(action.ws, this.selects).pipe(
+    const records = this.crudDef.selectionPanel
+      ? this.selectedReceipts.map(item => item.receipt)
+      : this.selects;
+    this.genericHttpService.callWs(action.ws, records).pipe(
       finalize(() => {
         this.bulkDownloadLoading = false;
         this._cdr.markForCheck();

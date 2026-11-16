@@ -40,6 +40,14 @@ export class CrudDef extends ComponentDef {
     icon?: string;
     minSelection?: number;
   };
+  selectionPanel?: {
+    title: string;
+    addAllLabel: string;
+    addLabel: string;
+    removeAllLabel: string;
+    generateLabel: string;
+  };
+  compactFilterRow?: boolean;
   // Deprecado
   searchFields?: any;
   initSearch?: boolean;

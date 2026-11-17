@@ -18,6 +18,7 @@ export class CrudDef extends ComponentDef {
   crudActions?: ActionDef[];
   displayGlobalActions?: DisplayActionsCondition[];
   filterInMemory?: boolean;
+  clearGridOnFilterClear?: boolean;
   readCondition?: DynamicFieldConditionIf;
   pagination?: {
     page: number,

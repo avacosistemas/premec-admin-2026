@@ -42,6 +42,7 @@ export const LISTAR_RECIBOS_DEF: CrudDef = {
     },
     
     filterInMemory: false,
+    clearGridOnFilterClear: true,
     serverPagination: true,
     pagination: {
         page: 0,

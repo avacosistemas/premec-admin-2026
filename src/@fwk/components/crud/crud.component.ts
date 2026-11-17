@@ -636,7 +636,20 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   override filterSearchEntity(filterEntity: any): void {
-    this.hasActiveFilters = Object.values(filterEntity).some(v => v !== null && v !== undefined && v !== '');
+    this.hasActiveFilters = Object.values(filterEntity).some(v =>
+      v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)
+    );
+
+    if (this.crudDef?.clearGridOnFilterClear && !this.hasActiveFilters) {
+      this.filterEntity = filterEntity;
+      this.entities = [];
+      this.dataSource = [];
+      this.searchPerformed = false;
+      this.appliedFilterEntity = {};
+      this._cdr.markForCheck();
+      return;
+    }
+
     super.filterSearchEntity(filterEntity);
   }
 
